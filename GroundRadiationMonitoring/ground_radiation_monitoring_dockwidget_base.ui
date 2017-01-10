@@ -18,14 +18,14 @@
     <item row="0" column="0">
      <layout class="QFormLayout" name="formLayout">
       <item row="0" column="0">
-       <widget class="QLabel" name="label_2">
+       <widget class="QLabel" name="raster_label">
         <property name="text">
          <string>Raster:</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QComboBox" name="comboBox">
+       <widget class="QComboBox" name="raster_box">
         <property name="minimumSize">
          <size>
           <width>181</width>
@@ -35,14 +35,14 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="label_3">
+       <widget class="QLabel" name="track_label">
         <property name="text">
          <string>Track:</string>
         </property>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QComboBox" name="comboBox_2">
+       <widget class="QComboBox" name="track_box">
         <property name="minimumSize">
          <size>
           <width>181</width>
