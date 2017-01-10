@@ -175,7 +175,7 @@ class GroundRadiationMonitoring:
         icon_path = ':/plugins/GroundRadiationMonitoring/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'Calculates the amount of received radiation'),
+            text=self.tr(u'Ground Radiation Monitoring'),
             callback=self.run,
             parent=self.iface.mainWindow())
 
