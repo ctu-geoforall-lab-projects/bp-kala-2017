@@ -21,7 +21,8 @@
  ***************************************************************************/
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt
-from PyQt4.QtGui import QAction, QIcon, QToolButton
+from PyQt4.QtGui import QComboBox, QAction, QIcon, QToolButton
+from qgis.core import QgsMapLayerRegistry
 # Initialize Qt resources from file resources.py
 import resources
 
@@ -235,4 +236,17 @@ class GroundRadiationMonitoring:
             # TODO: fix to allow choice of dock location
             self.iface.addDockWidget(Qt.LeftDockWidgetArea, self.dockwidget)
             self.dockwidget.show()
+
+        self.populateCombo()
+
+    def populateCombo(self):
+        """Populate comboboxes with layers."""
+        self.dockwidget.raster_box.clear()
+        self.dockwidget.track_box.clear()
+        self.layers = QgsMapLayerRegistry.instance().mapLayers()
+        for name, layer in self.layers.iteritems():
+            if layer.type() == 1:
+                self.dockwidget.raster_box.addItem(str(layer.name()))
+            elif layer.type() == 0:
+                    self.dockwidget.track_box.addItem(str(layer.name()))
 
