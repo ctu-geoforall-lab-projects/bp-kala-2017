@@ -239,6 +239,11 @@ class GroundRadiationMonitoring:
 
         self.populateCombo()
 
+        # Get the actual list of layers after removing or adding layer.
+        # TODO: Find signal that is emited when layer name is changed
+        QgsMapLayerRegistry.instance().layerRemoved.connect(self.populateCombo)
+        QgsMapLayerRegistry.instance().layersAdded.connect(self.populateCombo)
+
     def populateCombo(self):
         """Populate comboboxes with layers."""
         self.dockwidget.raster_box.clear()
