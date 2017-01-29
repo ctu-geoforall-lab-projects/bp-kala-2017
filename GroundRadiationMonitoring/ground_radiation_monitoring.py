@@ -249,6 +249,7 @@ class GroundRadiationMonitoring:
         self.dockwidget.raster_box.clear()
         self.dockwidget.track_box.clear()
         self.layers = QgsMapLayerRegistry.instance().mapLayers()
+        # Decide whether layer is vector or raster
         for name, layer in self.layers.iteritems():
             if layer.type() == 1:
                 self.dockwidget.raster_box.addItem(str(layer.name()))
