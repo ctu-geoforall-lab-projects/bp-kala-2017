@@ -23,3 +23,7 @@ TODO
 ## Text
 
 TODO
+
+## Testovací data
+
+http://www.mediafire.com/file/44l764s673nl6ji/podklady_ground_radiation_monitoring.7z
