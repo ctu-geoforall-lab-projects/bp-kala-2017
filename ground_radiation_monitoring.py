@@ -22,7 +22,7 @@
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt
 from PyQt4.QtGui import QComboBox, QAction, QIcon, QToolButton
-from qgis.core import QgsMapLayerRegistry
+from qgis.core import QgsMapLayerRegistry, QgsMapLayer
 # Initialize Qt resources from file resources.py
 import resources
 
@@ -251,8 +251,9 @@ class GroundRadiationMonitoring:
         self.layers = QgsMapLayerRegistry.instance().mapLayers()
         # Decide whether layer is vector or raster
         for name, layer in self.layers.iteritems():
-            if layer.type() == 1:
-                self.dockwidget.raster_box.addItem(str(layer.name()))
-            elif layer.type() == 0:
-                    self.dockwidget.track_box.addItem(str(layer.name()))
+            ltype = layer.type()
+            if ltype == QgsMapLayer.RasterLayer:
+                self.dockwidget.raster_box.addItem(layer.name())
+            elif ltype == QgsMapLayer.VectorLayer:
+                    self.dockwidget.track_box.addItem(layer.name())
 
