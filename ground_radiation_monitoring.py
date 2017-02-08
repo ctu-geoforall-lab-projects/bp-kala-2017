@@ -21,7 +21,7 @@
  ***************************************************************************/
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt
-from PyQt4.QtGui import QComboBox, QAction, QIcon, QToolButton
+from PyQt4.QtGui import QComboBox, QAction, QIcon, QToolButton, QFileDialog
 from qgis.core import QgsMapLayerRegistry, QgsMapLayer
 # Initialize Qt resources from file resources.py
 import resources
@@ -243,6 +243,17 @@ class GroundRadiationMonitoring:
         # TODO: Find signal that is emited when layer name is changed
         QgsMapLayerRegistry.instance().layerRemoved.connect(self.populateCombo)
         QgsMapLayerRegistry.instance().layersAdded.connect(self.populateCombo)
+
+        self.dockwidget.load_raster.clicked.connect(self.loadRaster)
+        self.dockwidget.load_track.clicked.connect(self.loadTrack)
+
+    def loadRaster(self):
+        """Open 'Add raster layer dialog'."""
+        fileName = QFileDialog.getOpenFileName(self.dockwidget,"Open raster", os.getcwd(), "*.tiff;;*.png")
+
+    def loadTrack(self):
+        """Open 'Add track layer dialog'."""
+        fileName = QFileDialog.getOpenFileName(self.dockwidget,"Open track", os.getcwd(), "*.shp")
 
     def populateCombo(self):
         """Populate comboboxes with layers."""
