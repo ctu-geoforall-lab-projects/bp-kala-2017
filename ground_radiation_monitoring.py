@@ -20,7 +20,7 @@
  *                                                                         *
  ***************************************************************************/
 """
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt
+from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt, QFileInfo
 from PyQt4.QtGui import QComboBox, QAction, QIcon, QToolButton, QFileDialog
 from qgis.core import QgsMapLayerRegistry, QgsMapLayer
 # Initialize Qt resources from file resources.py
@@ -29,7 +29,6 @@ import resources
 # Import the code for the DockWidget
 from ground_radiation_monitoring_dockwidget import GroundRadiationMonitoringDockWidget
 import os.path
-
 
 class GroundRadiationMonitoring:
     """QGIS Plugin Implementation."""
@@ -249,7 +248,9 @@ class GroundRadiationMonitoring:
 
     def loadRaster(self):
         """Open 'Add raster layer dialog'."""
-        fileName = QFileDialog.getOpenFileName(self.dockwidget,"Open raster", os.getcwd(), "*.tiff;;*.png")
+        fileName = QFileDialog.getOpenFileName(self.dockwidget,"Open raster",os.getcwd(), "*.*;;*.tiff;;*.png")
+        if fileName:
+            self.iface.addRasterLayer(fileName, QFileInfo(fileName).baseName())
 
     def loadTrack(self):
         """Open 'Add track layer dialog'."""
