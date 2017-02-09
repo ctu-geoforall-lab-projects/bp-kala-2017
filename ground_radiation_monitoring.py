@@ -26,6 +26,8 @@ from qgis.core import QgsMapLayerRegistry, QgsMapLayer
 from qgis.utils import QgsMessageBar
 # Initialize Qt resources from file resources.py
 import resources
+# TODO:insert a copyright notice (taken from QGIS source code)
+import GdalTools_utils as Utils
 
 # Import the code for the DockWidget
 from ground_radiation_monitoring_dockwidget import GroundRadiationMonitoringDockWidget
@@ -255,7 +257,7 @@ class GroundRadiationMonitoring:
 
     def loadRaster(self):
         """Open 'Add raster layer dialog'."""
-        fileName = QFileDialog.getOpenFileName(self.dockwidget,"Open raster", self.rasterAbsolutePath, "*.*;;*.tiff;;*.png")
+        fileName = QFileDialog.getOpenFileName(self.dockwidget,"Open raster", self.rasterAbsolutePath, Utils.FileFilter.allRastersFilter())
         if fileName:
             self.iface.addRasterLayer(fileName, QFileInfo(fileName).baseName())
             self.rasterAbsolutePath = QFileInfo(fileName).absolutePath()
