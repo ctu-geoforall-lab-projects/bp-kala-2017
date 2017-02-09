@@ -94,7 +94,6 @@ class GroundRadiationMonitoring:
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('GroundRadiationMonitoring', message)
 
-
     def add_action(
         self,
         icon_path,
@@ -171,7 +170,6 @@ class GroundRadiationMonitoring:
 
         return action
 
-
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
@@ -199,7 +197,6 @@ class GroundRadiationMonitoring:
         # self.dockwidget = None
 
         self.pluginIsActive = False
-
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
@@ -250,7 +247,6 @@ class GroundRadiationMonitoring:
         # and loadTrack methods for remembering a directory)
         self.rasterAbsolutePath = ''
         self.trackAbsolutePath = ''
-
 
         self.dockwidget.load_raster.clicked.connect(self.loadRaster)
         self.dockwidget.load_track.clicked.connect(self.loadTrack)
