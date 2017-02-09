@@ -248,13 +248,13 @@ class GroundRadiationMonitoring:
 
     def loadRaster(self):
         """Open 'Add raster layer dialog'."""
-        fileName = QFileDialog.getOpenFileName(self.dockwidget,"Open raster",os.getcwd(), "*.*;;*.tiff;;*.png")
+        fileName = QFileDialog.getOpenFileName(self.dockwidget,"Open raster",'', "*.*;;*.tiff;;*.png", QFileDialog.DontUseNativeDialog)
         if fileName:
             self.iface.addRasterLayer(fileName, QFileInfo(fileName).baseName())
 
     def loadTrack(self):
         """Open 'Add track layer dialog'."""
-        fileName = QFileDialog.getOpenFileName(self.dockwidget,"Open track", os.getcwd(), "*.shp")
+        fileName = QFileDialog.getOpenFileName(self.dockwidget,"Open track", '', "*.shp", QFileDialog.DontUseNativeDialog)
         if fileName:
             self.iface.addVectorLayer(fileName, QFileInfo(fileName).baseName(), "ogr")
 
