@@ -255,6 +255,8 @@ class GroundRadiationMonitoring:
     def loadTrack(self):
         """Open 'Add track layer dialog'."""
         fileName = QFileDialog.getOpenFileName(self.dockwidget,"Open track", os.getcwd(), "*.shp")
+        if fileName:
+            self.iface.addVectorLayer(fileName, QFileInfo(fileName).baseName(), "ogr")
 
     def populateCombo(self):
         """Populate comboboxes with layers."""
