@@ -23,6 +23,7 @@
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt, QFileInfo
 from PyQt4.QtGui import QComboBox, QAction, QIcon, QToolButton, QFileDialog
 from qgis.core import QgsMapLayerRegistry, QgsMapLayer
+from qgis.utils import QgsMessageBar
 # Initialize Qt resources from file resources.py
 import resources
 
@@ -243,20 +244,28 @@ class GroundRadiationMonitoring:
         QgsMapLayerRegistry.instance().layerRemoved.connect(self.populateCombo)
         QgsMapLayerRegistry.instance().layersAdded.connect(self.populateCombo)
 
+        # Declare absolute paths to directories, where raster and track layers are loaded from (for use in loadRaster
+        # and loadTrack methods for remembering a directory)
+        self.rasterAbsolutePath = ''
+        self.trackAbsolutePath = ''
+
+
         self.dockwidget.load_raster.clicked.connect(self.loadRaster)
         self.dockwidget.load_track.clicked.connect(self.loadTrack)
 
     def loadRaster(self):
         """Open 'Add raster layer dialog'."""
-        fileName = QFileDialog.getOpenFileName(self.dockwidget,"Open raster",'', "*.*;;*.tiff;;*.png", QFileDialog.DontUseNativeDialog)
+        fileName = QFileDialog.getOpenFileName(self.dockwidget,"Open raster", self.rasterAbsolutePath, "*.*;;*.tiff;;*.png")
         if fileName:
             self.iface.addRasterLayer(fileName, QFileInfo(fileName).baseName())
+            self.rasterAbsolutePath = QFileInfo(fileName).absolutePath()
 
     def loadTrack(self):
         """Open 'Add track layer dialog'."""
-        fileName = QFileDialog.getOpenFileName(self.dockwidget,"Open track", '', "*.shp", QFileDialog.DontUseNativeDialog)
+        fileName = QFileDialog.getOpenFileName(self.dockwidget,"Open track", self.trackAbsolutePath, "*.shp")
         if fileName:
             self.iface.addVectorLayer(fileName, QFileInfo(fileName).baseName(), "ogr")
+            self.trackAbsolutePath = QFileInfo(fileName).absolutePath()
 
     def populateCombo(self):
         """Populate comboboxes with layers."""
