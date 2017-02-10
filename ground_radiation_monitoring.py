@@ -260,7 +260,7 @@ class GroundRadiationMonitoring:
 
     def loadTrack(self):
         """Open 'Add track layer dialog'."""
-        fileName = QFileDialog.getOpenFileName(self.dockwidget,"Open track", self.trackAbsolutePath, "*.shp")
+        fileName = QFileDialog.getOpenFileName(self.dockwidget,"Open track", self.trackAbsolutePath, Utils.FileFilter.allVectorsFilter())
         if fileName:
             self.iface.addVectorLayer(fileName, QFileInfo(fileName).baseName(), "ogr")
             self.trackAbsolutePath = QFileInfo(fileName).absolutePath()
