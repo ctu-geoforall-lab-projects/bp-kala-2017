@@ -22,7 +22,7 @@
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt, QFileInfo
 from PyQt4.QtGui import QComboBox, QAction, QIcon, QToolButton, QFileDialog
-from qgis.core import QgsMapLayerRegistry, QgsMapLayer
+from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QGis
 from qgis.utils import QgsMessageBar
 from qgis.gui import QgsMapLayerComboBox,QgsMapLayerProxyModel
 # Initialize Qt resources from file resources.py
@@ -263,3 +263,9 @@ class GroundRadiationMonitoring:
             self.iface.addVectorLayer(fileName, QFileInfo(fileName).baseName(), "ogr")
             self.trackAbsolutePath = QFileInfo(fileName).absolutePath()
 
+            # TODO: make this work for multiple layer loading
+            if self.iface.activeLayer().geometryType() != QGis.Line:
+                self.iface.messageBar().pushMessage("Info",
+                                                     "Loaded layer "+QFileInfo(fileName).baseName()+" does not have lineString type.",
+                                                     level = QgsMessageBar.INFO, duration = 5)
+            
