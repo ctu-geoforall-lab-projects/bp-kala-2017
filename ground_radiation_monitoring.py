@@ -24,6 +24,7 @@ from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt,
 from PyQt4.QtGui import QComboBox, QAction, QIcon, QToolButton, QFileDialog
 from qgis.core import QgsMapLayerRegistry, QgsMapLayer
 from qgis.utils import QgsMessageBar
+from qgis.gui import QgsMapLayerComboBox,QgsMapLayerProxyModel
 # Initialize Qt resources from file resources.py
 import resources
 # TODO:insert a copyright notice (taken from QGIS source code)
@@ -236,14 +237,9 @@ class GroundRadiationMonitoring:
             self.iface.addDockWidget(Qt.LeftDockWidgetArea, self.dockwidget)
             self.dockwidget.show()
 
-        self.populateCombo()
-
-        # Get the actual list of layers after removing or adding layer.
-        # TODO: Find signal that is emited when layer name is changed
-        QgsMapLayerRegistry.instance().layerRemoved.connect(self.populateCombo)
-        QgsMapLayerRegistry.instance().layersAdded.connect(self.populateCombo)
-
-        # Declare absolute paths to directories, where raster and track layers are loaded from (for use in loadRaster
+        self.dockwidget.raster_box.setFilters( QgsMapLayerProxyModel.RasterLayer )
+        self.dockwidget.track_box.setFilters( QgsMapLayerProxyModel.LineLayer )
+         # Declare absolute paths to directories, where raster and track layers are loaded from (for use in loadRaster
         # and loadTrack methods for remembering a directory)
         self.rasterAbsolutePath = ''
         self.trackAbsolutePath = ''
@@ -264,17 +260,4 @@ class GroundRadiationMonitoring:
         if fileName:
             self.iface.addVectorLayer(fileName, QFileInfo(fileName).baseName(), "ogr")
             self.trackAbsolutePath = QFileInfo(fileName).absolutePath()
-
-    def populateCombo(self):
-        """Populate comboboxes with layers."""
-        self.dockwidget.raster_box.clear()
-        self.dockwidget.track_box.clear()
-        self.layers = QgsMapLayerRegistry.instance().mapLayers()
-        # Decide whether layer is vector or raster
-        for name, layer in self.layers.iteritems():
-            ltype = layer.type()
-            if ltype == QgsMapLayer.RasterLayer:
-                self.dockwidget.raster_box.addItem(layer.name())
-            elif ltype == QgsMapLayer.VectorLayer:
-                    self.dockwidget.track_box.addItem(layer.name())
 

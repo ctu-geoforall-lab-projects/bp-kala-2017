@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>362</width>
-    <height>90</height>
+    <width>212</width>
+    <height>94</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,59 +17,64 @@
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0">
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="0">
+      <item row="0" column="0">
+       <widget class="QLabel" name="raster_label">
+        <property name="maximumSize">
+         <size>
+          <width>36</width>
+          <height>23</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Raster:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
        <widget class="QLabel" name="track_label">
+        <property name="maximumSize">
+         <size>
+          <width>36</width>
+          <height>23</height>
+         </size>
+        </property>
         <property name="text">
          <string>Track:</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
+      <item row="0" column="4">
        <widget class="QPushButton" name="load_raster">
         <property name="text">
          <string>Load raster</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="raster_box">
-        <property name="minimumSize">
-         <size>
-          <width>181</width>
-          <height>22</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="track_box">
-        <property name="minimumSize">
-         <size>
-          <width>181</width>
-          <height>22</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
+      <item row="2" column="4">
        <widget class="QPushButton" name="load_track">
         <property name="text">
          <string>Load track</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="raster_label">
-        <property name="text">
-         <string>Raster:</string>
-        </property>
-       </widget>
+      <item row="0" column="1">
+       <widget class="QgsMapLayerComboBox" name="raster_box"/>
+      </item>
+      <item row="2" column="1">
+       <widget class="QgsMapLayerComboBox" name="track_box"/>
       </item>
      </layout>
     </item>
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QgsMapLayerComboBox</class>
+   <extends>QComboBox</extends>
+   <header>qgis.gui</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
