@@ -237,9 +237,11 @@ class GroundRadiationMonitoring:
             self.iface.addDockWidget(Qt.LeftDockWidgetArea, self.dockwidget)
             self.dockwidget.show()
 
+        # Set filters for QgsMapLayerComboBoxes
         self.dockwidget.raster_box.setFilters( QgsMapLayerProxyModel.RasterLayer )
         self.dockwidget.track_box.setFilters( QgsMapLayerProxyModel.LineLayer )
-         # Declare absolute paths to directories, where raster and track layers are loaded from (for use in loadRaster
+        
+        # Declare absolute paths to directories, where raster and track layers are loaded from (for use in loadRaster
         # and loadTrack methods for remembering a directory)
         self.rasterAbsolutePath = ''
         self.trackAbsolutePath = ''
