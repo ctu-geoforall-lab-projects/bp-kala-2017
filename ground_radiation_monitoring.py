@@ -266,6 +266,6 @@ class GroundRadiationMonitoring:
             # TODO: make this work for multiple layer loading
             if self.iface.activeLayer().geometryType() != QGis.Line:
                 self.iface.messageBar().pushMessage("Info",
-                                                     "Loaded layer "+QFileInfo(fileName).baseName()+" does not have lineString type.",
+                                                     "Loaded layer {} does not have lineString type.".format(QFileInfo(fileName).baseName()),
                                                      level = QgsMessageBar.INFO, duration = 5)
             
