@@ -29,13 +29,8 @@ __revision__ = '$Format:%H$'
 # setLastUsedDir( QString *file_or_dir path )
 # -------------------------------------------------
 
-import platform
-if platform.system() == 'Windows':
-    from qgis.PyQt.QtCore import QObject, QSettings, QFileInfo, QDir, QCoreApplication, pyqtSignal
-    from qgis.PyQt.QtWidgets import QFileDialog
-else:
-    from PyQt.QtCore import QObject, QSettings, QFileInfo, QDir, QCoreApplication, pyqtSignal
-    from PyQt.QtWidgets import QFileDialog
+from PyQt4.QtCore import QObject, QSettings, QFileInfo, QDir, QCoreApplication, pyqtSignal
+from PyQt4.QtGui import QFileDialog
 
 from qgis.core import QgsApplication, QgsMapLayerRegistry, QgsRectangle, QgsProviderRegistry, QgsLogger
 from qgis.gui import QgsEncodingFileDialog
