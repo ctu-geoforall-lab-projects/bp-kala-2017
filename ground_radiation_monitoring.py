@@ -287,10 +287,10 @@ class GroundRadiationMonitoring:
 
     def dirButton(self):
         """Get the destination file."""
-        fileName = QFileDialog.getSaveFileName(self.dockwidget, "Select destination file", self.saveAbsolutePath, filter ="csv (*.csv)")
-        self.dockwidget.save_file.setText(fileName)
-        if fileName:
-            self.saveAbsolutePath = QFileInfo(fileName).absolutePath()
+        self.saveFileName = QFileDialog.getSaveFileName(self.dockwidget, "Select destination file", self.saveAbsolutePath, filter ="csv (*.csv)")
+        self.dockwidget.save_file.setText(self.saveFileName)
+        if self.saveFileName:
+            self.saveAbsolutePath = QFileInfo(self.saveFileName).absolutePath()
         
          # Enable the saveButton if file is chosen
         if not self.dockwidget.save_file.text():
