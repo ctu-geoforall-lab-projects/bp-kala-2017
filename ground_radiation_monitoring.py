@@ -275,7 +275,12 @@ class GroundRadiationMonitoring:
                                                      level = QgsMessageBar.INFO, duration = 5)
 
     def exportRasterValues(self):
-        # TODO:check if layer is chosen
+        if not self.dockwidget.raster_box.currentLayer() or not self.dockwidget.track_box.currentLayer():
+            self.iface.messageBar().pushMessage("Error",
+                                                "No raster/track layer chosen.",
+                                                level=QgsMessageBar.CRITICAL, duration = 5)
+            return
+        
         try:
             csvfile = open(self.saveFileName, 'wb')
         except IOError as e:
