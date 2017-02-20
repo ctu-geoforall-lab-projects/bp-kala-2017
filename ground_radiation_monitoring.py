@@ -252,6 +252,7 @@ class GroundRadiationMonitoring:
         
         self.dockwidget.save_button.setEnabled(False)
         self.dockwidget.dir_button.clicked.connect(self.dirButton)
+        self.dockwidget.save_button.clicked.connect(self.exportRasterValues)
 
     def loadRaster(self):
         """Open 'Add raster layer dialog'."""
@@ -275,15 +276,26 @@ class GroundRadiationMonitoring:
 
     def exportRasterValues(self):
         # TODO:check if layer is chosen
+        try:
+            csvfile = open(self.saveFileName, 'wb')
+        except IOError as e:
+            self.iface.messageBar().pushMessage("Error",
+                                                "Unable open {} for writing. Reason: {}".format(fileName, e),
+                                                level=QgsMessageBar.CRITICAL, duration = 5)
+            return
+        
         lr = self.dockwidget.raster_box.currentLayer()
-        vlr = self.dockwidget.track_box.currentLayer()
-        with open("D:/Download/eggs.csv", 'wb') as csvfile:
-            spamwriter = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            for feature_index, feature in enumerate(vlr.getFeatures()):
-                polyline = feature.geometry().asPolyline()
-                for point in polyline:
-                    value = lr.dataProvider().identify(QgsPoint(point.x(),point.y()), QgsRaster.IdentifyFormatValue).results()
-                    spamwriter.writerow('{}'.format(value.values()))
+        vlr = self.dockwidget.track_box.currentLayer()    
+        spamwriter = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        for feature_index, feature in enumerate(vlr.getFeatures()):
+            polyline = feature.geometry().asPolyline()
+            for point in polyline:
+                value = lr.dataProvider().identify(QgsPoint(point.x(),point.y()), QgsRaster.IdentifyFormatValue).results()
+                spamwriter.writerow('{}'.format(value.values()))
+                
+        self.iface.messageBar().pushMessage("Info",
+                                            "File {} saved.".format(self.saveFileName),
+                                            level=QgsMessageBar.INFO, duration = 5)
 
     def dirButton(self):
         """Get the destination file."""
