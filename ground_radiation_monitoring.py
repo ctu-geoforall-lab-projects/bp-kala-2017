@@ -22,7 +22,7 @@
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt, QFileInfo
 from PyQt4.QtGui import QComboBox, QAction, QIcon, QToolButton, QFileDialog
-from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QGis, QgsPoint, QgsRaster
+from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QGis, QgsPoint, QgsRaster, QgsProject
 from qgis.utils import QgsMessageBar
 from qgis.gui import QgsMapLayerComboBox,QgsMapLayerProxyModel
 # Initialize Qt resources from file resources.py
@@ -242,13 +242,16 @@ class GroundRadiationMonitoring:
         self.dockwidget.raster_box.setFilters( QgsMapLayerProxyModel.RasterLayer )
         self.dockwidget.track_box.setFilters( QgsMapLayerProxyModel.LineLayer )
         
-        # Declare absolute paths to directories, where raster and track layers are loaded from (for use in loadRaster
-        # and loadTrack methods for remembering a directory)
+        # Declare absolute paths to directories
         self.rasterAbsolutePath = ''
         self.trackAbsolutePath = ''
-
+        self.saveAbsolutePath = ''
+        
         self.dockwidget.load_raster.clicked.connect(self.loadRaster)
         self.dockwidget.load_track.clicked.connect(self.loadTrack)
+        
+        self.dockwidget.save_button.setEnabled(False)
+        self.dockwidget.dir_button.clicked.connect(self.dirButton)
 
     def loadRaster(self):
         """Open 'Add raster layer dialog'."""
@@ -281,3 +284,17 @@ class GroundRadiationMonitoring:
                 for point in polyline:
                     value = lr.dataProvider().identify(QgsPoint(point.x(),point.y()), QgsRaster.IdentifyFormatValue).results()
                     spamwriter.writerow('{}'.format(value.values()))
+
+    def dirButton(self):
+        """Get the destination file."""
+        fileName = QFileDialog.getSaveFileName(self.dockwidget, "Select destination file", self.saveAbsolutePath, filter ="csv (*.csv)")
+        self.dockwidget.save_file.setText(fileName)
+        if fileName:
+            self.saveAbsolutePath = QFileInfo(fileName).absolutePath()
+        
+         # Enable the saveButton if file is chosen
+        if not self.dockwidget.save_file.text():
+            self.dockwidget.save_button.setEnabled(False)
+        else:
+            self.dockwidget.save_button.setEnabled(True)
+        
