@@ -22,11 +22,12 @@
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt, QFileInfo
 from PyQt4.QtGui import QComboBox, QAction, QIcon, QToolButton, QFileDialog
-from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QGis
+from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QGis, QgsPoint, QgsRaster
 from qgis.utils import QgsMessageBar
 from qgis.gui import QgsMapLayerComboBox,QgsMapLayerProxyModel
 # Initialize Qt resources from file resources.py
 import resources
+import csv
 # TODO:insert a copyright notice (taken from QGIS source code)
 import GdalTools_utils as Utils
 
@@ -268,4 +269,15 @@ class GroundRadiationMonitoring:
                 self.iface.messageBar().pushMessage("Info",
                                                      "Loaded layer {} does not have lineString type.".format(QFileInfo(fileName).baseName()),
                                                      level = QgsMessageBar.INFO, duration = 5)
-            
+
+    def exportRasterValues(self):
+        # TODO:check if layer is chosen
+        lr = self.dockwidget.raster_box.currentLayer()
+        vlr = self.dockwidget.track_box.currentLayer()
+        with open("D:/Download/eggs.csv", 'wb') as csvfile:
+            spamwriter = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            for feature_index, feature in enumerate(vlr.getFeatures()):
+                polyline = feature.geometry().asPolyline()
+                for point in polyline:
+                    value = lr.dataProvider().identify(QgsPoint(point.x(),point.y()), QgsRaster.IdentifyFormatValue).results()
+                    spamwriter.writerow('{}'.format(value.values()))
