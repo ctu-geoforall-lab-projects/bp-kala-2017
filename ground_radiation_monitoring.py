@@ -280,13 +280,12 @@ class GroundRadiationMonitoring:
                                                 "No raster/track layer chosen.",
                                                 level=QgsMessageBar.CRITICAL, duration = 5)
             return
-
-        fileName = self.dockwidget.save_file.text()
+        
         try:
-            csvfile = open(fileName, 'wb')
+            csvfile = open(self.saveFileName, 'wb')
         except IOError as e:
             self.iface.messageBar().pushMessage("Error",
-                                                "Unable open {} for writing. Reason: {}".format(self.fileName, e),
+                                                "Unable open {} for writing. Reason: {}".format(fileName, e),
                                                 level=QgsMessageBar.CRITICAL, duration = 5)
             return
         
@@ -300,15 +299,15 @@ class GroundRadiationMonitoring:
                 spamwriter.writerow('{}'.format(value.values()))
                 
         self.iface.messageBar().pushMessage("Info",
-                                            "File {} saved.".format(fileName),
+                                            "File {} saved.".format(self.saveFileName),
                                             level=QgsMessageBar.INFO, duration = 5)
 
     def dirButton(self):
         """Get the destination file."""
-        fileName = QFileDialog.getSaveFileName(self.dockwidget, "Select destination file", self.saveAbsolutePath,"csv (*.csv)")
-        self.dockwidget.save_file.setText(fileName+".csv")
-        if fileName:
-            self.saveAbsolutePath = QFileInfo(fileName).absolutePath()
+        self.saveFileName = QFileDialog.getSaveFileName(self.dockwidget, "Select destination file", self.saveAbsolutePath+".csv","csv (*.csv)")
+        self.dockwidget.save_file.setText(self.saveFileName)
+        if self.saveFileName:
+            self.saveAbsolutePath = QFileInfo(self.saveFileName).absolutePath()
         
          # Enable the saveButton if file is chosen
         if not self.dockwidget.save_file.text():
