@@ -285,7 +285,7 @@ class GroundRadiationMonitoring:
             csvfile = open(self.saveFileName, 'wb')
         except IOError as e:
             self.iface.messageBar().pushMessage("Error",
-                                                "Unable open {} for writing. Reason: {}".format(fileName, e),
+                                                "Unable open {} for writing. Reason: {}".format(self.saveFileName, e),
                                                 level=QgsMessageBar.CRITICAL, duration = 5)
             return
         
