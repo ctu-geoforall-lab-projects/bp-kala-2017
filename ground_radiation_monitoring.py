@@ -27,7 +27,6 @@ from qgis.utils import QgsMessageBar
 from qgis.gui import QgsMapLayerComboBox,QgsMapLayerProxyModel
 # Initialize Qt resources from file resources.py
 import resources
-import csv
 # TODO:insert a copyright notice (taken from QGIS source code)
 import GdalTools_utils as Utils
 
@@ -282,21 +281,21 @@ class GroundRadiationMonitoring:
             return
         
         try:
-            csvfile = open(self.saveFileName, 'wb')
+            csvFile = open(self.saveFileName, 'wb')
         except IOError as e:
             self.iface.messageBar().pushMessage("Error",
                                                 "Unable open {} for writing. Reason: {}".format(self.saveFileName, e),
                                                 level=QgsMessageBar.CRITICAL, duration = 5)
             return
         
-        lr = self.dockwidget.raster_box.currentLayer()
-        vlr = self.dockwidget.track_box.currentLayer()    
-        spamwriter = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        for feature_index, feature in enumerate(vlr.getFeatures()):
+        rasterLayer = self.dockwidget.raster_box.currentLayer()
+        trackLayer = self.dockwidget.track_box.currentLayer()    
+        for featureIndex, feature in enumerate(trackLayer.getFeatures()):
             polyline = feature.geometry().asPolyline()
             for point in polyline:
-                value = lr.dataProvider().identify(QgsPoint(point.x(),point.y()), QgsRaster.IdentifyFormatValue).results()
-                spamwriter.writerow('{}'.format(value.values()))
+                value = rasterLayer.dataProvider().identify(QgsPoint(point.x(),point.y()), QgsRaster.IdentifyFormatValue).results()
+                for n in value.values():
+                    csvFile.write('{}\n'.format(n))
                 
         self.iface.messageBar().pushMessage("Info",
                                             "File {} saved.".format(self.saveFileName),
