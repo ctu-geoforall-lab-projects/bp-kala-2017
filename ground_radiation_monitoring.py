@@ -255,36 +255,36 @@ class GroundRadiationMonitoring:
 
     def loadRaster(self):
         """Open 'Add raster layer dialog'."""
-        fileName = QFileDialog.getOpenFileName(self.dockwidget,"Open raster", self.rasterAbsolutePath, Utils.FileFilter.allRastersFilter())
+        fileName = QFileDialog.getOpenFileName(self.dockwidget,self.tr(u'Open raster'), self.rasterAbsolutePath, Utils.FileFilter.allRastersFilter())
         if fileName:
             self.iface.addRasterLayer(fileName, QFileInfo(fileName).baseName())
             self.rasterAbsolutePath = QFileInfo(fileName).absolutePath()
 
     def loadTrack(self):
         """Open 'Add track layer dialog'."""
-        fileName = QFileDialog.getOpenFileName(self.dockwidget,"Open track", self.trackAbsolutePath, Utils.FileFilter.allVectorsFilter())
+        fileName = QFileDialog.getOpenFileName(self.dockwidget,self.tr(u'Open track'), self.trackAbsolutePath, Utils.FileFilter.allVectorsFilter())
         if fileName:
             self.iface.addVectorLayer(fileName, QFileInfo(fileName).baseName(), "ogr")
             self.trackAbsolutePath = QFileInfo(fileName).absolutePath()
 
             # TODO: make this work for multiple layer loading
             if self.iface.activeLayer().geometryType() != QGis.Line:
-                self.iface.messageBar().pushMessage("Info",
-                                                     "Loaded layer {} does not have lineString type.".format(QFileInfo(fileName).baseName()),
+                self.iface.messageBar().pushMessage(self.tr(u'Info'),
+                                                     self.tr(u'Loaded layer {} does not have lineString type.').format(QFileInfo(fileName).baseName()),
                                                      level = QgsMessageBar.INFO, duration = 5)
 
     def exportRasterValues(self):
         if not self.dockwidget.raster_box.currentLayer() or not self.dockwidget.track_box.currentLayer():
-            self.iface.messageBar().pushMessage("Error",
-                                                "No raster/track layer chosen.",
+            self.iface.messageBar().pushMessage(self.tr(u'Error'),
+                                                self.tr(u'No raster/track layer chosen.'),
                                                 level=QgsMessageBar.CRITICAL, duration = 5)
             return
         
         try:
             csvFile = open(self.saveFileName, 'wb')
         except IOError as e:
-            self.iface.messageBar().pushMessage("Error",
-                                                "Unable open {} for writing. Reason: {}".format(self.saveFileName, e),
+            self.iface.messageBar().pushMessage(self.tr(u'Error'),
+                                                self.tr(u'Unable open {} for writing. Reason: {}').format(self.saveFileName, e),
                                                 level=QgsMessageBar.CRITICAL, duration = 5)
             return
         
@@ -297,13 +297,13 @@ class GroundRadiationMonitoring:
                 for n in value.values():
                     csvFile.write('{}\n'.format(n))
                 
-        self.iface.messageBar().pushMessage("Info",
-                                            "File {} saved.".format(self.saveFileName),
+        self.iface.messageBar().pushMessage(self.tr(u'Info'),
+                                            self.tr(u'File {} saved.').format(self.saveFileName),
                                             level=QgsMessageBar.INFO, duration = 5)
 
     def dirButton(self):
         """Get the destination file."""
-        self.saveFileName = QFileDialog.getSaveFileName(self.dockwidget, "Select destination file", self.saveAbsolutePath, filter ="csv (*.csv)")
+        self.saveFileName = QFileDialog.getSaveFileName(self.dockwidget, self.tr(u'Select destination file'), self.saveAbsolutePath, filter ="csv (*.csv)")
         self.dockwidget.save_file.setText(self.saveFileName)
         if self.saveFileName:
             self.saveAbsolutePath = QFileInfo(self.saveFileName).absolutePath()
