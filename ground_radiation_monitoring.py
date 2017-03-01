@@ -22,13 +22,12 @@
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt, QFileInfo
 from PyQt4.QtGui import QComboBox, QAction, QIcon, QToolButton, QFileDialog
-from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QGis, QgsPoint, QgsRaster, QgsProject
+from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QGis, QgsPoint, QgsRaster, QgsProject,  QgsProviderRegistry
 from qgis.utils import QgsMessageBar
 from qgis.gui import QgsMapLayerComboBox,QgsMapLayerProxyModel
+from osgeo import gdal, ogr
 # Initialize Qt resources from file resources.py
 import resources
-# TODO:insert a copyright notice (taken from QGIS source code)
-import GdalTools_utils as Utils
 
 # Import the code for the DockWidget
 from ground_radiation_monitoring_dockwidget import GroundRadiationMonitoringDockWidget
@@ -255,14 +254,14 @@ class GroundRadiationMonitoring:
 
     def loadRaster(self):
         """Open 'Add raster layer dialog'."""
-        fileName = QFileDialog.getOpenFileName(self.dockwidget,self.tr(u'Open raster'), self.rasterAbsolutePath, Utils.FileFilter.allRastersFilter())
+        fileName = QFileDialog.getOpenFileName(self.dockwidget,self.tr(u'Open raster'), self.rasterAbsolutePath, QgsProviderRegistry.instance().fileRasterFilters())
         if fileName:
             self.iface.addRasterLayer(fileName, QFileInfo(fileName).baseName())
             self.rasterAbsolutePath = QFileInfo(fileName).absolutePath()
 
     def loadTrack(self):
         """Open 'Add track layer dialog'."""
-        fileName = QFileDialog.getOpenFileName(self.dockwidget,self.tr(u'Open track'), self.trackAbsolutePath, Utils.FileFilter.allVectorsFilter())
+        fileName = QFileDialog.getOpenFileName(self.dockwidget,self.tr(u'Open track'), self.trackAbsolutePath, QgsProviderRegistry.instance().fileVectorFilters())
         if fileName:
             self.iface.addVectorLayer(fileName, QFileInfo(fileName).baseName(), "ogr")
             self.trackAbsolutePath = QFileInfo(fileName).absolutePath()
@@ -307,7 +306,7 @@ class GroundRadiationMonitoring:
         self.dockwidget.save_file.setText(self.saveFileName)
         if self.saveFileName:
             self.saveAbsolutePath = QFileInfo(self.saveFileName).absolutePath()
-        
+
          # Enable the saveButton if file is chosen
         if not self.dockwidget.save_file.text():
             self.dockwidget.save_button.setEnabled(False)
