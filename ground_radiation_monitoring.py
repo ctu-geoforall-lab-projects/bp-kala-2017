@@ -251,10 +251,7 @@ class GroundRadiationMonitoring:
         self.dockwidget.save_button.setEnabled(False)
         self.dockwidget.dir_button.clicked.connect(self.dirButton)
         self.dockwidget.save_button.clicked.connect(self.exportRasterValues)
-        
-        self.minimalDistanceBetweenVertices = 1
-        self.distance()
-        
+
     def loadRaster(self):
         """Open 'Add raster layer dialog'."""
         fileName = QFileDialog.getOpenFileName(self.dockwidget,self.tr(u'Open raster'), self.rasterAbsolutePath, QgsProviderRegistry.instance().fileRasterFilters())
@@ -291,7 +288,11 @@ class GroundRadiationMonitoring:
             return
         
         rasterLayer = self.dockwidget.raster_box.currentLayer()
-        trackLayer = self.dockwidget.track_box.currentLayer()  
+        trackLayer = self.dockwidget.track_box.currentLayer()
+
+        self.minimalDistanceBetweenVertices = 1
+        self.distance(trackLayer)
+
         for featureIndex, feature in enumerate(trackLayer.getFeatures()):
             polyline = feature.geometry().asPolyline()
             for point in polyline:
@@ -303,8 +304,7 @@ class GroundRadiationMonitoring:
                                             self.tr(u'File {} saved.').format(self.saveFileName),
                                             level=QgsMessageBar.INFO, duration = 5)
     
-    def distance(self):
-        trackLayer = self.dockwidget.track_box.currentLayer()  
+    def distance(self,trackLayer):
         distance = QgsDistanceArea()
         distance.setEllipsoid('WGS84')
         distance.setEllipsoidalMode(True)
