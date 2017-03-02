@@ -22,7 +22,7 @@
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt, QFileInfo
 from PyQt4.QtGui import QComboBox, QAction, QIcon, QToolButton, QFileDialog
-from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QGis, QgsPoint, QgsRaster, QgsProject,  QgsProviderRegistry
+from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QGis, QgsPoint, QgsRaster, QgsProject,  QgsProviderRegistry, QgsDistanceArea
 from qgis.utils import QgsMessageBar
 from qgis.gui import QgsMapLayerComboBox,QgsMapLayerProxyModel
 from osgeo import gdal, ogr
@@ -251,7 +251,7 @@ class GroundRadiationMonitoring:
         self.dockwidget.save_button.setEnabled(False)
         self.dockwidget.dir_button.clicked.connect(self.dirButton)
         self.dockwidget.save_button.clicked.connect(self.exportRasterValues)
-
+        
     def loadRaster(self):
         """Open 'Add raster layer dialog'."""
         fileName = QFileDialog.getOpenFileName(self.dockwidget,self.tr(u'Open raster'), self.rasterAbsolutePath, QgsProviderRegistry.instance().fileRasterFilters())
@@ -288,7 +288,7 @@ class GroundRadiationMonitoring:
             return
         
         rasterLayer = self.dockwidget.raster_box.currentLayer()
-        trackLayer = self.dockwidget.track_box.currentLayer()    
+        trackLayer = self.dockwidget.track_box.currentLayer()  
         for featureIndex, feature in enumerate(trackLayer.getFeatures()):
             polyline = feature.geometry().asPolyline()
             for point in polyline:
@@ -299,7 +299,19 @@ class GroundRadiationMonitoring:
         self.iface.messageBar().pushMessage(self.tr(u'Info'),
                                             self.tr(u'File {} saved.').format(self.saveFileName),
                                             level=QgsMessageBar.INFO, duration = 5)
-
+    
+    def distance(self):
+        trackLayer = self.dockwidget.track_box.currentLayer()  
+        distance = QgsDistanceArea()
+        distance.setEllipsoid('WGS84')
+        distance.setEllipsoidalMode(True)
+        for featureIndex, feature in enumerate(trackLayer.getFeatures()):
+            polyline = feature.geometry().asPolyline()
+            pointCounter = 0
+            while pointCounter < (len(polyline)-1):
+                d = distance.measureLine(QgsPoint(polyline[pointCounter]), QgsPoint(polyline[pointCounter+1]))
+                pointCounter = pointCounter + 1
+    
     def dirButton(self):
         """Get the destination file."""
         self.saveFileName = QFileDialog.getSaveFileName(self.dockwidget, self.tr(u'Select destination file'), self.saveAbsolutePath, filter ="csv (*.csv)")
