@@ -252,6 +252,9 @@ class GroundRadiationMonitoring:
         self.dockwidget.dir_button.clicked.connect(self.dirButton)
         self.dockwidget.save_button.clicked.connect(self.exportRasterValues)
         
+        self.minimalDistanceBetweenVertices = 1
+        self.distance()
+        
     def loadRaster(self):
         """Open 'Add raster layer dialog'."""
         fileName = QFileDialog.getOpenFileName(self.dockwidget,self.tr(u'Open raster'), self.rasterAbsolutePath, QgsProviderRegistry.instance().fileRasterFilters())
@@ -310,7 +313,13 @@ class GroundRadiationMonitoring:
             pointCounter = 0
             while pointCounter < (len(polyline)-1):
                 d = distance.measureLine(QgsPoint(polyline[pointCounter]), QgsPoint(polyline[pointCounter+1]))
+                if d > self.minimalDistanceBetweenVertices:
+                    self.sampleLine(QgsPoint(polyline[pointCounter]), QgsPoint(polyline[pointCounter+1]))
                 pointCounter = pointCounter + 1
+                
+    def sampleLine(self,point1, point2):
+        ahoj = 1
+
     
     def dirButton(self):
         """Get the destination file."""
