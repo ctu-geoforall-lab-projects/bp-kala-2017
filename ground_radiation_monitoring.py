@@ -250,7 +250,7 @@ class GroundRadiationMonitoring:
         
         self.dockwidget.save_button.setEnabled(False)
         self.dockwidget.dir_button.clicked.connect(self.dirButton)
-        self.dockwidget.save_button.clicked.connect(self.exportRasterValues)
+        self.dockwidget.save_button.clicked.connect(self.onExportRasterValues)
 
     def loadRaster(self):
         """Open 'Add raster layer dialog'."""
@@ -272,13 +272,23 @@ class GroundRadiationMonitoring:
                                                      self.tr(u'Loaded layer {} does not have lineString type.').format(QFileInfo(fileName).baseName()),
                                                      level = QgsMessageBar.INFO, duration = 5)
 
-    def exportRasterValues(self):
+
+    def onExportRasterValues(self):
+        """Export sampled raster values to output CSV file.
+
+        Prints error message when output file cannot be open for
+        writing.
+
+        When no raster or track vector layer given, than computation
+        is not performed.
+        """
         if not self.dockwidget.raster_box.currentLayer() or not self.dockwidget.track_box.currentLayer():
             self.iface.messageBar().pushMessage(self.tr(u'Error'),
                                                 self.tr(u'No raster/track layer chosen.'),
                                                 level=QgsMessageBar.CRITICAL, duration = 5)
             return
-        
+
+        # open output file for writing
         try:
             csvFile = open(self.saveFileName, 'wb')
         except IOError as e:
@@ -286,10 +296,21 @@ class GroundRadiationMonitoring:
                                                 self.tr(u'Unable open {} for writing. Reason: {}').format(self.saveFileName, e),
                                                 level=QgsMessageBar.CRITICAL, duration = 5)
             return
-        
-        rasterLayer = self.dockwidget.raster_box.currentLayer()
-        trackLayer = self.dockwidget.track_box.currentLayer()
 
+        # export values
+        self.exportRasterValues(self.dockwidget.raster_box.currentLayer(),
+                                self.dockwidget.track_box.currentLayer(),
+                                csvFile)
+        # close output file
+        csvFile.close()
+        
+    def exportRasterValues(self, rasterLayer, trackLayer, csvFile):
+        """Export sampled raster values to output CSV file.
+
+        :rasterLayer: input raster layer (QgsRasterLayer)
+        :trackLayer: linestring vector layer to be sampled (QgsVectorLayer)
+        :csvFile: file descriptor of output CVS file
+        """
         self.minimalDistanceBetweenVertices = 1
         self.distance(trackLayer)
 
@@ -298,7 +319,7 @@ class GroundRadiationMonitoring:
             for point in polyline:
                 value = rasterLayer.dataProvider().identify(QgsPoint(point.x(),point.y()), QgsRaster.IdentifyFormatValue).results()
                 for n in value.values():
-                    csvFile.write('{}\n'.format(n))
+                    csvFile.write('{val}{linesep}'.format(val=n, linesep=os.linesep))
                 
         self.iface.messageBar().pushMessage(self.tr(u'Info'),
                                             self.tr(u'File {} saved.').format(self.saveFileName),
@@ -333,4 +354,3 @@ class GroundRadiationMonitoring:
             self.dockwidget.save_button.setEnabled(False)
         else:
             self.dockwidget.save_button.setEnabled(True)
-        
