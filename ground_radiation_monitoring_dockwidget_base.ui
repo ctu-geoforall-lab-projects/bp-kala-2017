@@ -18,7 +18,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="main">
        <attribute name="title">
@@ -167,21 +167,6 @@
          </widget>
         </item>
        </layout>
-       <zorder>track_box</zorder>
-       <zorder>load_track</zorder>
-       <zorder>load_raster</zorder>
-       <zorder>save_file</zorder>
-       <zorder>track_label</zorder>
-       <zorder>line</zorder>
-       <zorder>file_label</zorder>
-       <zorder>save_button</zorder>
-       <zorder>dir_button</zorder>
-       <zorder>raster_label</zorder>
-       <zorder>raster_box</zorder>
-       <zorder>unit_box</zorder>
-       <zorder>label</zorder>
-       <zorder>vertex_dist</zorder>
-       <zorder>label_2</zorder>
       </widget>
      </widget>
     </item>
