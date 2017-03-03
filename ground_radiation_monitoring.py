@@ -364,7 +364,7 @@ class GroundRadiationMonitoring:
                 
                 # check whether the input distance between vertices is longer then the distance between points
                 if distance > distanceBetweenVertices:
-                    newX, newY = self.sampleLine(point1,point2, distance)
+                    newX, newY = self.sampleLine(point1,point2, distance, distanceBetweenVertices)
                     vertexX.extend(newX)
                     vertexY.extend(newY)
                 else:
@@ -389,38 +389,22 @@ class GroundRadiationMonitoring:
         d = distance.measureLine(QgsPoint(polyline[pointCounter]), QgsPoint(polyline[pointCounter+1]))
         return d
                 
-    def sampleLine(self,point1, point2, dist):
+    def sampleLine(self,point1, point2, dist, distBetweenVertices):
         """Sample line between two points to segments of user selected length.
          
-        Count coordinates of new vertices.
+        Compute coordinates of new vertices.
         
-        Prints error when user selected length of segment is not positive real number
-        and computation is not performed.
-
         :point1: first point of line
         :point2: last point of line
         :dist: length of line in metres
+        :distBetweenVertices: length of segment selected by user
         """
-        try:
-            distanceBetweenVertices = float(self.dockwidget.vertex_dist.text().replace(',', '.'))
-        except ValueError:
-            self.iface.messageBar().pushMessage(self.tr(u'Error'),
-                                                self.tr(u'{} is not a number.').format(self.dockwidget.vertex_dist.text()),
-                                                level=QgsMessageBar.CRITICAL, duration = 5)
-            return
-        
-        if distanceBetweenVertices <= 0:
-            self.iface.messageBar().pushMessage(self.tr(u'Error'),
-                                                self.tr(u'{} is not a positive number.').format(distanceBetweenVertices),
-                                                level=QgsMessageBar.CRITICAL, duration = 5)
-            return
-            
-        self.iface.messageBar().pushMessage(self.tr(u'Info'),
-                                            self.tr(u'File {} saved.').format(distanceBetweenVertices),
-                                            level=QgsMessageBar.INFO, duration = 5)        
 
+        # number of vertices, that should be added between 2 points
         vertexQuantity = ceil(dist / distanceBetweenVertices) - 1
         
+        # if modulo of division of line length and 1 segment length is not 0,
+        # point where last complete segment ends is computed
         if dist % distanceBetweenVertices != 0:
             shortestSegmentRel = (dist % distanceBetweenVertices) / dist
             lastPointX = point2[0] - vectorX * shortestSegmentRel
@@ -432,15 +416,21 @@ class GroundRadiationMonitoring:
             lastPointY = point2[1]
             vectorX = point2[0] - point1[0]
             vectorY = point2[1] - point1[1]
-            
+        
+        # compute addition to coordinates with size of 1 segment    
         addX = vectorX / vertexQuantity
         addY = vectorY / vertexQuantity
         
-        newX = array('i',[])
-        newY = array('i',[])
+        # declare arrays for newly computed points
+        newX = array('i',[point1[0]])
+        newY = array('i',[point1[1]])
+        
+        # compute new points
         for n in range(1,vertexQuantity):
             newX.append((point1[0]+n*addX))
             newY.append((point1[1]+n*addY))
+        newX.append(lastPointX)
+        newY.append(lastPointY)
         
         return newX, newY
                         
