@@ -348,9 +348,12 @@ class GroundRadiationMonitoring:
                                                 self.tr(u'{} is not a positive number.').format(distanceBetweenVertices),
                                                 level=QgsMessageBar.CRITICAL, duration = 5)
             return
-
+        
+        # declare arrays of coordinates of vertices
         vertexX = array('i',[])
         vertexY = array('i',[])
+        
+        # get coordinates of vertices of uploaded track layer
         for featureIndex, feature in enumerate(trackLayer.getFeatures()):
             polyline = feature.geometry().asPolyline()
             pointCounter = 0
@@ -358,6 +361,8 @@ class GroundRadiationMonitoring:
                 point1 = polyline[pointCounter]
                 point2 = polyline[pointCounter+1]
                 distance = self.distance(trackLayer,point1,point2)
+                
+                # check whether the input distance between vertices is longer then the distance between points
                 if distance > distanceBetweenVertices:
                     newX, newY = self.sampleLine(point1,point2, distance)
                     vertexX.extend(newX)
