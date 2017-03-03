@@ -314,13 +314,14 @@ class GroundRadiationMonitoring:
         :csvFile: file descriptor of output CVS file
         """
         
-        for featureIndex, feature in enumerate(trackLayer.getFeatures()):
-            polyline = feature.geometry().asPolyline()
-            for point in polyline:
-                value = rasterLayer.dataProvider().identify(QgsPoint(point.x(),point.y()), QgsRaster.IdentifyFormatValue).results()
-                for n in value.values():
-                    csvFile.write('{val}{linesep}'.format(val=n, linesep=os.linesep))
-                
+        # get coordinates of vertices based on user defined sample segment length
+        vectorX, vectorY = self.getCoor(rasterLayer, trackLayer)
+        
+        for X,Y in zip(vectorX,vectorY):
+            value = rasterLayer.dataProvider().identify(QgsPoint(X,Y),QgsRaster.IdentifyFormatValue).results()
+            for n in value.values():
+                csvFile.write('{val}{linesep}'.format(val=n, linesep=os.linesep))
+                    
         self.iface.messageBar().pushMessage(self.tr(u'Info'),
                                             self.tr(u'File {} saved.').format(self.saveFileName),
                                             level=QgsMessageBar.INFO, duration = 5)
