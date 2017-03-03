@@ -360,7 +360,7 @@ class GroundRadiationMonitoring:
             while pointCounter < (len(polyline)-1):
                 point1 = polyline[pointCounter]
                 point2 = polyline[pointCounter+1]
-                distance = self.distance(trackLayer,point1,point2)
+                distance = self.distance(point1,point2)
                 
                 # check whether the input distance between vertices is longer then the distance between points
                 if distance > distanceBetweenVertices:
@@ -376,18 +376,18 @@ class GroundRadiationMonitoring:
 
         return vertexX, vertexY        
 
-    def distance(self,trackLayer, point1, point2):
+    def distance(self, point1, point2):
+        """Compute distance between points in metres.
+        
+        :point1: first point
+        :point2: secound point
+        """
+        
         distance = QgsDistanceArea()
         distance.setEllipsoid('WGS84')
         distance.setEllipsoidalMode(True)
-        for featureIndex, feature in enumerate(trackLayer.getFeatures()):
-            polyline = feature.geometry().asPolyline()
-            pointCounter = 0
-            while pointCounter < (len(polyline)-1):
-                d = distance.measureLine(QgsPoint(polyline[pointCounter]), QgsPoint(polyline[pointCounter+1]))
-                if d > self.dockwidget.vertex_dist.text().replace(',', '.'):
-                    self.sampleLine(polyline[pointCounter], polyline[pointCounter+1],d)
-                pointCounter = pointCounter + 1
+        d = distance.measureLine(QgsPoint(polyline[pointCounter]), QgsPoint(polyline[pointCounter+1]))
+        return d
                 
     def sampleLine(self,point1, point2, dist):
         """Sample line between two points to segments of user selected length.
