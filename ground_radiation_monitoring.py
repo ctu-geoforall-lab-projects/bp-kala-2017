@@ -388,7 +388,7 @@ class GroundRadiationMonitoring:
         distance = QgsDistanceArea()
         distance.setEllipsoid('WGS84')
         distance.setEllipsoidalMode(True)
-        d = distance.measureLine(QgsPoint(polyline[pointCounter]), QgsPoint(polyline[pointCounter+1]))
+        d = distance.measureLine(QgsPoint(point1), QgsPoint(point2))
         return d
                 
     def sampleLine(self,point1, point2, dist, distBetweenVertices):
