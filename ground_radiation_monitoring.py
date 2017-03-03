@@ -313,8 +313,7 @@ class GroundRadiationMonitoring:
         :trackLayer: linestring vector layer to be sampled (QgsVectorLayer)
         :csvFile: file descriptor of output CVS file
         """
-        self.distance(trackLayer)
-
+        
         for featureIndex, feature in enumerate(trackLayer.getFeatures()):
             polyline = feature.geometry().asPolyline()
             for point in polyline:
@@ -325,8 +324,54 @@ class GroundRadiationMonitoring:
         self.iface.messageBar().pushMessage(self.tr(u'Info'),
                                             self.tr(u'File {} saved.').format(self.saveFileName),
                                             level=QgsMessageBar.INFO, duration = 5)
-    
-    def distance(self,trackLayer):
+
+    def getCoor(self, rasterLayer, trackLayer):
+        """Get coordinates of vertices of sampled track.
+
+        Prints error when user selected length of segment is not positive real number
+        and computation is not performed.
+
+        :rasterLayer: input raster layer (QgsRasterLayer)
+        :trackLayer: linestring vector layer to be sampled (QgsVectorLayer)
+        """
+
+        try:
+            distanceBetweenVertices = float(self.dockwidget.vertex_dist.text().replace(',', '.'))
+        except ValueError:
+            self.iface.messageBar().pushMessage(self.tr(u'Error'),
+                                                self.tr(u'{} is not a number.').format(self.dockwidget.vertex_dist.text()),
+                                                level=QgsMessageBar.CRITICAL, duration = 5)
+            return
+
+        if distanceBetweenVertices <= 0:
+            self.iface.messageBar().pushMessage(self.tr(u'Error'),
+                                                self.tr(u'{} is not a positive number.').format(distanceBetweenVertices),
+                                                level=QgsMessageBar.CRITICAL, duration = 5)
+            return
+
+        vertexX = array('i',[])
+        vertexY = array('i',[])
+        for featureIndex, feature in enumerate(trackLayer.getFeatures()):
+            polyline = feature.geometry().asPolyline()
+            pointCounter = 0
+            while pointCounter < (len(polyline)-1):
+                point1 = polyline[pointCounter]
+                point2 = polyline[pointCounter+1]
+                distance = self.distance(trackLayer,point1,point2)
+                if distance > distanceBetweenVertices:
+                    newX, newY = self.sampleLine(point1,point2, distance)
+                    vertexX.extend(newX)
+                    vertexY.extend(newY)
+                else:
+                    vertexX.append(point1[0])
+                    vertexX.append(point2[0])
+                    vertexY.append(point1[1])
+                    vertexY.append(point2[1])
+                pointCounter = pointCounter + 1
+
+        return vertexX, vertexY        
+
+    def distance(self,trackLayer, point1, point2):
         distance = QgsDistanceArea()
         distance.setEllipsoid('WGS84')
         distance.setEllipsoidalMode(True)
