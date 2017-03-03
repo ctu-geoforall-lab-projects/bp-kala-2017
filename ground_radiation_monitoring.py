@@ -26,6 +26,8 @@ from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QGis, QgsPoint, QgsRaste
 from qgis.utils import QgsMessageBar
 from qgis.gui import QgsMapLayerComboBox,QgsMapLayerProxyModel
 from osgeo import gdal, ogr
+from math import ceil
+from array import array
 # Initialize Qt resources from file resources.py
 import resources
 
@@ -311,7 +313,6 @@ class GroundRadiationMonitoring:
         :trackLayer: linestring vector layer to be sampled (QgsVectorLayer)
         :csvFile: file descriptor of output CVS file
         """
-        self.minimalDistanceBetweenVertices = 1
         self.distance(trackLayer)
 
         for featureIndex, feature in enumerate(trackLayer.getFeatures()):
@@ -334,14 +335,65 @@ class GroundRadiationMonitoring:
             pointCounter = 0
             while pointCounter < (len(polyline)-1):
                 d = distance.measureLine(QgsPoint(polyline[pointCounter]), QgsPoint(polyline[pointCounter+1]))
-                if d > self.minimalDistanceBetweenVertices:
-                    self.sampleLine(QgsPoint(polyline[pointCounter]), QgsPoint(polyline[pointCounter+1]))
+                if d > self.dockwidget.vertex_dist.text().replace(',', '.'):
+                    self.sampleLine(polyline[pointCounter], polyline[pointCounter+1],d)
                 pointCounter = pointCounter + 1
                 
-    def sampleLine(self,point1, point2):
-        ahoj = 1
+    def sampleLine(self,point1, point2, dist):
+        """Sample line between two points to segments of user selected length.
+         
+        Count coordinates of new vertices.
+        
+        Prints error when user selected length of segment is not positive real number
+        and computation is not performed.
 
-    
+        :point1: first point of line
+        :point2: last point of line
+        :dist: length of line in metres
+        """
+        try:
+            distanceBetweenVertices = float(self.dockwidget.vertex_dist.text().replace(',', '.'))
+        except ValueError:
+            self.iface.messageBar().pushMessage(self.tr(u'Error'),
+                                                self.tr(u'{} is not a number.').format(self.dockwidget.vertex_dist.text()),
+                                                level=QgsMessageBar.CRITICAL, duration = 5)
+            return
+        
+        if distanceBetweenVertices <= 0:
+            self.iface.messageBar().pushMessage(self.tr(u'Error'),
+                                                self.tr(u'{} is not a positive number.').format(distanceBetweenVertices),
+                                                level=QgsMessageBar.CRITICAL, duration = 5)
+            return
+            
+        self.iface.messageBar().pushMessage(self.tr(u'Info'),
+                                            self.tr(u'File {} saved.').format(distanceBetweenVertices),
+                                            level=QgsMessageBar.INFO, duration = 5)        
+
+        vertexQuantity = ceil(dist / distanceBetweenVertices) - 1
+        
+        if dist % distanceBetweenVertices != 0:
+            shortestSegmentRel = (dist % distanceBetweenVertices) / dist
+            lastPointX = point2[0] - vectorX * shortestSegmentRel
+            lastPointY = point2[1] - vectorY * shortestSegmentRel
+            vectorX = lastPointX - point1[0]
+            vectorY = lastPointY - point1[1] 
+        else:
+            lastPointX = point2[0]
+            lastPointY = point2[1]
+            vectorX = point2[0] - point1[0]
+            vectorY = point2[1] - point1[1]
+            
+        addX = vectorX / vertexQuantity
+        addY = vectorY / vertexQuantity
+        
+        newX = array('i',[])
+        newY = array('i',[])
+        for n in range(1,vertexQuantity):
+            newX.append((point1[0]+n*addX))
+            newY.append((point1[1]+n*addY))
+        
+        return newX, newY
+                        
     def dirButton(self):
         """Get the destination file."""
         self.saveFileName = QFileDialog.getSaveFileName(self.dockwidget, self.tr(u'Select destination file'), self.saveAbsolutePath, filter ="csv (*.csv)")
