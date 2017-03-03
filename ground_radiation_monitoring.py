@@ -373,7 +373,8 @@ class GroundRadiationMonitoring:
                     vertexY.append(point1[1])
                     vertexY.append(point2[1])
                 pointCounter = pointCounter + 1
-
+                
+        # returns coordinates of all vertices of track       
         return vertexX, vertexY        
 
     def distance(self, point1, point2):
