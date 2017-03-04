@@ -351,8 +351,8 @@ class GroundRadiationMonitoring:
             return
         
         # declare arrays of coordinates of vertices
-        vertexX = array('i',[])
-        vertexY = array('i',[])
+        vertexX = array('f',[])
+        vertexY = array('f',[])
         
         # get coordinates of vertices of uploaded track layer
         for featureIndex, feature in enumerate(trackLayer.getFeatures()):
@@ -403,14 +403,14 @@ class GroundRadiationMonitoring:
         """
 
         # number of vertices, that should be added between 2 points
-        vertexQuantity = ceil(dist / distanceBetweenVertices) - 1
+        vertexQuantity = ceil(dist / distBetweenVertices) - 1
         
         # if modulo of division of line length and 1 segment length is not 0,
         # point where last complete segment ends is computed
-        if dist % distanceBetweenVertices != 0:
-            shortestSegmentRel = (dist % distanceBetweenVertices) / dist
-            lastPointX = point2[0] - vectorX * shortestSegmentRel
-            lastPointY = point2[1] - vectorY * shortestSegmentRel
+        if dist % distBetweenVertices != 0:
+            shortestSegmentRel = (dist % distBetweenVertices) / dist
+            lastPointX = point2[0] - (point2[0] - point1[0]) * shortestSegmentRel
+            lastPointY = point2[1] - (point2[1] - point1[1]) * shortestSegmentRel
             vectorX = lastPointX - point1[0]
             vectorY = lastPointY - point1[1] 
         else:
@@ -424,8 +424,8 @@ class GroundRadiationMonitoring:
         addY = vectorY / vertexQuantity
         
         # declare arrays for newly computed points
-        newX = array('i',[point1[0]])
-        newY = array('i',[point1[1]])
+        newX = array('f',[point1[0]])
+        newY = array('f',[point1[1]])
         
         # compute new points
         for n in range(1,vertexQuantity):
