@@ -428,7 +428,7 @@ class GroundRadiationMonitoring:
         newY = array('f',[point1[1]])
         
         # compute new points
-        for n in range(1,vertexQuantity):
+        for n in range(1,int(vertexQuantity)):
             newX.append((point1[0]+n*addX))
             newY.append((point1[1]+n*addY))
         newX.append(lastPointX)
