@@ -358,6 +358,8 @@ class GroundRadiationMonitoring:
         for featureIndex, feature in enumerate(trackLayer.getFeatures()):
             polyline = feature.geometry().asPolyline()
             pointCounter = 0
+            vertexX.append(polyline[0][0])
+            vertexY.append(polyline[0][1])
             while pointCounter < (len(polyline)-1):
                 point1 = polyline[pointCounter]
                 point2 = polyline[pointCounter+1]
@@ -369,9 +371,7 @@ class GroundRadiationMonitoring:
                     vertexX.extend(newX)
                     vertexY.extend(newY)
                 else:
-                    vertexX.append(point1[0])
                     vertexX.append(point2[0])
-                    vertexY.append(point1[1])
                     vertexY.append(point2[1])
                 pointCounter = pointCounter + 1
                 
@@ -424,8 +424,8 @@ class GroundRadiationMonitoring:
         addY = vectorY / vertexQuantity
         
         # declare arrays for newly computed points
-        newX = array('f',[point1[0]])
-        newY = array('f',[point1[1]])
+        newX = array('f',[])
+        newY = array('f',[])
         
         # compute new points
         for n in range(1,int(vertexQuantity)):
