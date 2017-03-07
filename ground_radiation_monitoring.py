@@ -247,21 +247,21 @@ class GroundRadiationMonitoring:
         self.trackAbsolutePath = ''
         self.saveAbsolutePath = ''
         
-        self.dockwidget.load_raster.clicked.connect(self.loadRaster)
-        self.dockwidget.load_track.clicked.connect(self.loadTrack)
+        self.dockwidget.load_raster.clicked.connect(self.onLoadRaster)
+        self.dockwidget.load_track.clicked.connect(self.onLoadTrack)
         
         self.dockwidget.save_button.setEnabled(False)
-        self.dockwidget.dir_button.clicked.connect(self.dirButton)
+        self.dockwidget.dir_button.clicked.connect(self.onDirButton)
         self.dockwidget.save_button.clicked.connect(self.onExportRasterValues)
 
-    def loadRaster(self):
+    def onLoadRaster(self):
         """Open 'Add raster layer dialog'."""
         fileName = QFileDialog.getOpenFileName(self.dockwidget,self.tr(u'Open raster'), self.rasterAbsolutePath, QgsProviderRegistry.instance().fileRasterFilters())
         if fileName:
             self.iface.addRasterLayer(fileName, QFileInfo(fileName).baseName())
             self.rasterAbsolutePath = QFileInfo(fileName).absolutePath()
 
-    def loadTrack(self):
+    def onLoadTrack(self):
         """Open 'Add track layer dialog'."""
         fileName = QFileDialog.getOpenFileName(self.dockwidget,self.tr(u'Open track'), self.trackAbsolutePath, QgsProviderRegistry.instance().fileVectorFilters())
         if fileName:
@@ -436,7 +436,7 @@ class GroundRadiationMonitoring:
         
         return newX, newY
                         
-    def dirButton(self):
+    def onDirButton(self):
         """Get the destination file."""
         self.saveFileName = QFileDialog.getSaveFileName(self.dockwidget, self.tr(u'Select destination file'), self.saveAbsolutePath, filter ="csv (*.csv)")
         self.dockwidget.save_file.setText(self.saveFileName)
