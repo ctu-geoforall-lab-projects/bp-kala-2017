@@ -48,6 +48,8 @@ class GroundRadiationMonitoring:
         """
         # Save reference to the QGIS interface
         self.iface = iface
+        
+        self.settings = QSettings()
 
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
@@ -434,16 +436,15 @@ class GroundRadiationMonitoring:
                         
     def onDirButton(self):
         """Get the destination file."""
-        settings = QSettings()
-        if not settings.value('lastUsedFilePath'):
-            settings.setValue('lastUsedFilePath', '')
-        rememberPath = settings.value('lastUsedFilePath')
+        if not self.settings.value('lastUsedFilePath'):
+            self.settings.setValue('lastUsedFilePath', '')
+        rememberPath = self.settings.value('lastUsedFilePath')
         
         self.saveFileName = QFileDialog.getSaveFileName(self.dockwidget, self.tr(u'Select destination file'), '{}{}.csv'.format(rememberPath,os.path.sep), filter ="csv (*.csv)")
         self.dockwidget.save_file.setText(self.saveFileName)
         
         if self.saveFileName:
-            settings.setValue('lastUsedFilePath', os.path.dirname(self.saveFileName))
+            self.settings.setValue('lastUsedFilePath', os.path.dirname(self.saveFileName))
 
          # Enable the saveButton if file is chosen
         if not self.dockwidget.save_file.text():
