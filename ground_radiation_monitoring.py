@@ -242,11 +242,6 @@ class GroundRadiationMonitoring:
         self.dockwidget.raster_box.setFilters( QgsMapLayerProxyModel.RasterLayer )
         self.dockwidget.track_box.setFilters( QgsMapLayerProxyModel.LineLayer )
         
-        # Declare absolute paths to directories
-        self.rasterAbsolutePath = ''
-        self.trackAbsolutePath = ''
-        self.saveAbsolutePath = ''
-        
         self.dockwidget.load_raster.clicked.connect(self.onLoadRaster)
         self.dockwidget.load_track.clicked.connect(self.onLoadTrack)
         
@@ -256,17 +251,15 @@ class GroundRadiationMonitoring:
 
     def onLoadRaster(self):
         """Open 'Add raster layer dialog'."""
-        fileName = QFileDialog.getOpenFileName(self.dockwidget,self.tr(u'Open raster'), self.rasterAbsolutePath, QgsProviderRegistry.instance().fileRasterFilters())
+        fileName = QFileDialog.getOpenFileName(self.dockwidget,self.tr(u'Open raster'), ' ', QgsProviderRegistry.instance().fileRasterFilters())
         if fileName:
             self.iface.addRasterLayer(fileName, QFileInfo(fileName).baseName())
-            self.rasterAbsolutePath = QFileInfo(fileName).absolutePath()
 
     def onLoadTrack(self):
         """Open 'Add track layer dialog'."""
-        fileName = QFileDialog.getOpenFileName(self.dockwidget,self.tr(u'Open track'), self.trackAbsolutePath, QgsProviderRegistry.instance().fileVectorFilters())
+        fileName = QFileDialog.getOpenFileName(self.dockwidget,self.tr(u'Open track'),' ', QgsProviderRegistry.instance().fileVectorFilters())
         if fileName:
             self.iface.addVectorLayer(fileName, QFileInfo(fileName).baseName(), "ogr")
-            self.trackAbsolutePath = QFileInfo(fileName).absolutePath()
 
             # TODO: make this work for multiple layer loading
             if self.iface.activeLayer().geometryType() != QGis.Line:
@@ -314,8 +307,11 @@ class GroundRadiationMonitoring:
         :csvFile: file descriptor of output CVS file
         """
         
-        # get coordinates of vertices based on user defined sample segment length
-        vectorX, vectorY = self.getCoor(rasterLayer, trackLayer)
+        try:
+            # get coordinates of vertices based on user defined sample segment length
+            vectorX, vectorY = self.getCoor(rasterLayer, trackLayer)
+        except:
+            return
         
         for X,Y in zip(vectorX,vectorY):
             value = rasterLayer.dataProvider().identify(QgsPoint(X,Y),QgsRaster.IdentifyFormatValue).results()
@@ -438,10 +434,8 @@ class GroundRadiationMonitoring:
                         
     def onDirButton(self):
         """Get the destination file."""
-        self.saveFileName = QFileDialog.getSaveFileName(self.dockwidget, self.tr(u'Select destination file'), self.saveAbsolutePath, filter ="csv (*.csv)")
+        self.saveFileName = QFileDialog.getSaveFileName(self.dockwidget, self.tr(u'Select destination file'), '{}.csv'.format(os.path.sep), filter ="csv (*.csv)")
         self.dockwidget.save_file.setText(self.saveFileName)
-        if self.saveFileName:
-            self.saveAbsolutePath = QFileInfo(self.saveFileName).absolutePath()
 
          # Enable the saveButton if file is chosen
         if not self.dockwidget.save_file.text():
