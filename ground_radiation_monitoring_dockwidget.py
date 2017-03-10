@@ -55,7 +55,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
 
-        self.settings = QSettings()
+        self.settings = QSettings("CTU","GRMplugin")
 
         self.iface = iface
 
@@ -76,19 +76,28 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
 
     def onLoadRaster(self):
         """Open 'Add raster layer dialog'."""
+        sender = '{}-lastUserFilePath'.format(self.sender().objectName())
+        lastUsedFilePath = self.settings.value(sender, '')
+
         fileName = QFileDialog.getOpenFileName(self,self.tr(u'Open raster'), 
-                                               ' ',
+                                               self.tr(u'{}').format(lastUsedFilePath),
                                                QgsProviderRegistry.instance().fileRasterFilters())
         if fileName:
             self.iface.addRasterLayer(fileName, QFileInfo(fileName).baseName())
+            self.settings.setValue(sender, os.path.dirname(fileName))
+
 
     def onLoadTrack(self):
         """Open 'Add track layer dialog'."""
+        sender = '{}-lastUserFilePath'.format(self.sender().objectName())
+        lastUsedFilePath = self.settings.value(sender, '')
+        
         fileName = QFileDialog.getOpenFileName(self,self.tr(u'Open track'),
-                                               ' ', 
+                                               self.tr(u'{}').format(lastUsedFilePath), 
                                                QgsProviderRegistry.instance().fileVectorFilters())
         if fileName:
             self.iface.addVectorLayer(fileName, QFileInfo(fileName).baseName(), "ogr")
+            self.settings.setValue(sender, os.path.dirname(fileName))
 
             # TODO: make this work for multiple layer loading
             if self.iface.activeLayer().geometryType() != QGis.Line:
@@ -99,17 +108,16 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
 
     def onDirButton(self):
         """Get the destination file."""
-        if not self.settings.value('lastUsedFilePath'):
-            self.settings.setValue('lastUsedFilePath', '')
-        rememberPath = self.settings.value('lastUsedFilePath')
+        sender = '{}-lastUserFilePath'.format(self.sender().objectName())
+        lastUsedFilePath = self.settings.value(sender, '')
 
         self.saveFileName = QFileDialog.getSaveFileName(self, self.tr(u'Select destination file'), 
-                                                        self.tr(u'{}{}.csv').format(rememberPath,os.path.sep), 
+                                                        self.tr(u'{}{}.csv').format(lastUsedFilePath,os.path.sep), 
                                                         filter ="CSV (*.csv)")
         self.save_file.setText(self.saveFileName)
 
         if self.saveFileName:
-            self.settings.setValue('lastUsedFilePath', os.path.dirname(self.saveFileName))
+            self.settings.setValue(sender, os.path.dirname(self.saveFileName))
 
          # Enable the saveButton if file is chosen
         if not self.save_file.text():
