@@ -10,8 +10,12 @@ from osgeo import gdal, ogr
 from math import ceil
 from array import array
 
-from PyQt4 import QtGui, uic
-from PyQt4.QtCore import pyqtSignal
+from qgis.core import QgsVectorLayer, QgsField, QgsFeature, QgsGeometry, QgsVectorFileWriter
+from PyQt4.QtCore import QVariant  
+
+import osgeo.ogr as ogr
+import osgeo.osr as osr
+import csv
 
 class GroundRadiationMonitoringComputation:
     def exportRasterValues(self, rasterLayerId, trackLayerId, fileName, vertexDist):
@@ -39,6 +43,7 @@ class GroundRadiationMonitoringComputation:
 
         # close output file
         csvFile.close()
+        self.createShp(vectorX, vectorY, trackLayer, fileName)
         return None
 
     def getCoor(self, rasterLayer, trackLayer, vertexDist):
@@ -75,7 +80,7 @@ class GroundRadiationMonitoringComputation:
                     vertexY.append(point2[1])
                 pointCounter = pointCounter + 1
  
-        # returns coordinates of all vertices of track       
+        # returns coordinates of all vertices of track   
         return vertexX, vertexY        
 
     def distance(self, point1, point2):
@@ -135,3 +140,63 @@ class GroundRadiationMonitoringComputation:
         newY.append(lastPointY)
 
         return newX, newY
+
+    def createShp(self, vectorX, vectorY, trackLayer, fileName):
+        """Create ESRI shapefile and write new points. 
+
+        :vectorX: X coordinates of points
+        :vectorY: Y coordinates of points
+        :trackLayer: layer to get coordinate system from
+        :fileName: destination to save shapefile and coordinates of new points
+        """
+        # save csv with coordinates of new points
+        csvFile = open('{f}_sour.csv'.format(f=fileName.split('.')[0]), 'wb')
+        csvFile.write('X\tY{linesep}'.format(linesep=os.linesep))
+        for X,Y in zip(vectorX,vectorY):
+            csvFile.write('{X}\t{Y}{linesep}'.format(X=X, Y = Y,linesep=os.linesep))
+        csvFile.close()
+
+        reader = csv.DictReader(open('{f}_sour.csv'.format(f=fileName.split('.')[0]),"rb"),
+                                delimiter='\t',
+                                quoting=csv.QUOTE_NONE)
+
+        # set up the shapefile driver
+        driver = ogr.GetDriverByName("ESRI Shapefile")
+        
+        # create the data source
+        data_source = driver.CreateDataSource('{f}_shp.shp'.format(f=fileName.split('.')[0]))
+
+        # create the spatial reference
+        srs = osr.SpatialReference()
+        srs.ImportFromEPSG(int(trackLayer.crs().authid()[5:]))
+
+        # create the layer
+        layer = data_source.CreateLayer("shp", srs, ogr.wkbPoint)
+
+        # Add the fields we're interested in
+        layer.CreateField(ogr.FieldDefn("X", ogr.OFTReal))
+        layer.CreateField(ogr.FieldDefn("Y", ogr.OFTReal))
+
+        # Process the text file and add the attributes and features to the shapefile
+        for row in reader:
+            # create the feature
+            feature = ogr.Feature(layer.GetLayerDefn())
+            # Set the attributes using the values from the delimited text file
+            feature.SetField("X", row["X"])
+            feature.SetField("Y", row["Y"])
+
+            # create the WKT for the feature using Python string formatting
+            wkt = "POINT(%f %f)" %  (float(row['X']) , float(row['Y']))
+
+            # Create the point from the Well Known Txt
+            point = ogr.CreateGeometryFromWkt(wkt)
+
+            # Set the feature geometry using the point
+            feature.SetGeometry(point)
+            # Create the feature in the layer (shapefile)
+            layer.CreateFeature(feature)
+            # Dereference the feature
+            feature = None
+
+        # Save and close the data source
+        data_source = None
