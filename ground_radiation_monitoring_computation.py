@@ -56,8 +56,8 @@ class GroundRadiationMonitoringComputation:
         distanceBetweenVertices = float(vertexDist.replace(',', '.'))
 
         # declare arrays of coordinates of vertices
-        vertexX = array('f',[])
-        vertexY = array('f',[])
+        vertexX = array('d',[])
+        vertexY = array('d',[])
 
         # get coordinates of vertices of uploaded track layer
         for featureIndex, feature in enumerate(trackLayer.getFeatures()):
@@ -119,8 +119,6 @@ class GroundRadiationMonitoringComputation:
             vectorX = lastPointX - point1[0]
             vectorY = lastPointY - point1[1] 
         else:
-            lastPointX = point2[0]
-            lastPointY = point2[1]
             vectorX = point2[0] - point1[0]
             vectorY = point2[1] - point1[1]
 
@@ -129,15 +127,18 @@ class GroundRadiationMonitoringComputation:
         addY = vectorY / vertexQuantity
 
         # declare arrays for newly computed points
-        newX = array('f',[])
-        newY = array('f',[])
+        newX = array('d',[])
+        newY = array('d',[])
 
         # compute new points
         for n in range(1,int(vertexQuantity)):
             newX.append((point1[0]+n*addX))
             newY.append((point1[1]+n*addY))
-        newX.append(lastPointX)
-        newY.append(lastPointY)
+        if lastPointX:
+            newX.append(lastPointX)
+            newY.append(lastPointY)
+        newX.append(point2[0])
+        newY.append(point2[1])
 
         return newX, newY
 
