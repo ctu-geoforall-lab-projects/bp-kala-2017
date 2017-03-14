@@ -94,3 +94,4 @@ ENV/
 
 # QT autosafe
 .ui.autosave
+*.autosave
