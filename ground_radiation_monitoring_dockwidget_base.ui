@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>377</width>
-    <height>218</height>
+    <width>345</width>
+    <height>201</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -115,7 +115,11 @@
          </widget>
         </item>
         <item row="4" column="1">
-         <widget class="QLineEdit" name="shp_file"/>
+         <widget class="QLineEdit" name="shp_file">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
         <item row="4" column="2">
          <widget class="QToolButton" name="shp_button">
