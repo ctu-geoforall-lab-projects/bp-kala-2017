@@ -150,14 +150,17 @@ class GroundRadiationMonitoringComputation:
         :trackLayer: layer to get coordinate system from
         :fileName: destination to save shapefile and coordinates of new points
         """
+        shpFileName = '{}_shp.shp'.format(fileName.split('.')[0])
+        coorFileName = '{}_coor.csv'.format(fileName.split('.')[0])
+
         # save csv with coordinates of new points
-        csvFile = open('{f}_sour.csv'.format(f=fileName.split('.')[0]), 'wb')
+        csvFile = open('{f}'.format(f=coorFileName), 'wb')
         csvFile.write('X\tY{linesep}'.format(linesep=os.linesep))
         for X,Y in zip(vectorX,vectorY):
             csvFile.write('{X}\t{Y}{linesep}'.format(X=X, Y = Y,linesep=os.linesep))
         csvFile.close()
 
-        reader = csv.DictReader(open('{f}_sour.csv'.format(f=fileName.split('.')[0]),"rb"),
+        reader = csv.DictReader(open('{f}'.format(f=coorFileName),"rb"),
                                 delimiter='\t',
                                 quoting=csv.QUOTE_NONE)
 
@@ -165,14 +168,14 @@ class GroundRadiationMonitoringComputation:
         driver = ogr.GetDriverByName("ESRI Shapefile")
         
         # create the data source
-        data_source = driver.CreateDataSource('{f}_shp.shp'.format(f=fileName.split('.')[0]))
+        data_source = driver.CreateDataSource('{f}'.format(f=shpFileName))
 
         # create the spatial reference
         srs = osr.SpatialReference()
         srs.ImportFromEPSG(int(trackLayer.crs().authid()[5:]))
 
         # create the layer
-        layer = data_source.CreateLayer("{}".format(fileName.split('.')[0]), srs, ogr.wkbPoint)
+        layer = data_source.CreateLayer("{}".format(fileName), srs, ogr.wkbPoint)
 
         # Add the fields we're interested in
         layer.CreateField(ogr.FieldDefn("X", ogr.OFTReal))
