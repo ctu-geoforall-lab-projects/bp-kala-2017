@@ -24,7 +24,7 @@
 import os
 
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt, QFileInfo
-from PyQt4.QtGui import QComboBox, QAction, QIcon, QToolButton, QFileDialog
+from PyQt4.QtGui import QComboBox, QAction, QIcon, QToolButton, QFileDialog, QMessageBox
 from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QGis, QgsPoint, QgsRaster, QgsProject,  QgsProviderRegistry, QgsDistanceArea
 from qgis.utils import QgsMessageBar, iface
 from qgis.gui import QgsMapLayerComboBox,QgsMapLayerProxyModel
@@ -164,6 +164,10 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         
         # check if export returns no error
         if not export:
+            self.iface.messageBar().pushMessage(self.tr(u'Info'),
+                                            self.tr(u'File {} saved.').format(self.saveFileName),
+                                            level=QgsMessageBar.INFO, duration = 5)
+            self.addNewLayer()
             pass
         else:
             self.iface.messageBar().pushMessage(self.tr(u'Error'),
@@ -172,6 +176,17 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
                                                 level=QgsMessageBar.CRITICAL, duration = 5)
             return
 
-        self.iface.messageBar().pushMessage(self.tr(u'Info'),
-                                            self.tr(u'File {} saved.').format(self.saveFileName),
-                                            level=QgsMessageBar.INFO, duration = 5)
+    def addNewLayer(self):
+        """Ask to add new layer of computed points to map canvas. """
+        # Message box    
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Question)
+        msg.setText(self.tr(u"Add new layer to map canvas?"))
+        msg.setWindowTitle(self.tr(u"Add Layer"))
+        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        result = msg.exec_()
+
+        # add map layer to map canvas
+        if result == QMessageBox.Yes:
+            newLayer = iface.addVectorLayer("{f}_shp.shp".format(f=self.saveFileName.split('.')[0]),
+                                             "{f}_shp".format(f=QFileInfo(self.saveFileName).baseName()), "ogr")        
