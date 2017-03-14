@@ -18,12 +18,13 @@ import osgeo.osr as osr
 import csv
 
 class GroundRadiationMonitoringComputation:
-    def exportRasterValues(self, rasterLayerId, trackLayerId, fileName, vertexDist):
+    def exportRasterValues(self, rasterLayerId, trackLayerId, fileName, shpFileName, vertexDist):
         """Export sampled raster values to output CSV file.
 
         :rasterLayerId: input raster layer (QgsRasterLayer)
         :trackLayerId: linestring vector layer to be sampled (QgsVectorLayer)
         :fileName: file descriptor of output CVS file
+        :shpFileName: file descriptor of output shp file
         :vertexDist: user defined distance between new vertices
         """
         try:
@@ -43,8 +44,7 @@ class GroundRadiationMonitoringComputation:
 
         # close output file
         csvFile.close()
-        self.createShp(vectorX, vectorY, trackLayer, fileName)
-        return None
+        self.createShp(vectorX, vectorY, trackLayer, shpFileName)
 
     def getCoor(self, rasterLayer, trackLayer, vertexDist):
         """Get coordinates of vertices of sampled track.
@@ -142,16 +142,16 @@ class GroundRadiationMonitoringComputation:
 
         return newX, newY
 
-    def createShp(self, vectorX, vectorY, trackLayer, fileName):
+    def createShp(self, vectorX, vectorY, trackLayer, shpFileName):
         """Create ESRI shapefile and write new points. 
 
         :vectorX: X coordinates of points
         :vectorY: Y coordinates of points
         :trackLayer: layer to get coordinate system from
-        :fileName: destination to save shapefile and coordinates of new points
+        :shpFileName: destination to save shapefile and csv file of coordinates of new points
+ 
         """
-        shpFileName = '{}_shp.shp'.format(fileName.split('.')[0])
-        coorFileName = '{}_coor.csv'.format(fileName.split('.')[0])
+        coorFileName = '{}_coor.csv'.format(shpFileName.split('.')[0])
 
         # save csv with coordinates of new points
         csvFile = open('{f}'.format(f=coorFileName), 'wb')
@@ -175,7 +175,7 @@ class GroundRadiationMonitoringComputation:
         srs.ImportFromEPSG(int(trackLayer.crs().authid()[5:]))
 
         # create the layer
-        layer = data_source.CreateLayer("{}".format(fileName), srs, ogr.wkbPoint)
+        layer = data_source.CreateLayer("{}".format(shpFileName), srs, ogr.wkbPoint)
 
         # Add the fields we're interested in
         layer.CreateField(ogr.FieldDefn("X", ogr.OFTReal))

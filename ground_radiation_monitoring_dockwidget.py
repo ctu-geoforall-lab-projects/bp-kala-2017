@@ -69,6 +69,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         self.save_button.setEnabled(False)
         self.dir_button.clicked.connect(self.onDirButton)
         self.save_button.clicked.connect(self.onExportRasterValues)
+        self.shp_button.clicked.connect(self.onShpButton)
 
     def closeEvent(self, event):
         self.closingPlugin.emit()
@@ -107,23 +108,48 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
                                                      level = QgsMessageBar.INFO, duration = 5)
 
     def onDirButton(self):
-        """Get the destination file."""
+        """Get destination csv and shape file.
+        
+        Set path and name for shape file by default as file path for csv file."""
+        
         sender = '{}-lastUserFilePath'.format(self.sender().objectName())
         lastUsedFilePath = self.settings.value(sender, '')
 
         self.saveFileName = QFileDialog.getSaveFileName(self, self.tr(u'Select destination file'), 
                                                         self.tr(u'{}{}.csv').format(lastUsedFilePath,os.path.sep), 
                                                         filter ="CSV (*.csv)")
-        self.save_file.setText(self.saveFileName)
+        self.saveShpName = '{}_shp.shp'.format(self.saveFileName.split('.')[0])
+
+        self.save_file.setText('{}'.format(self.saveFileName))
 
         if self.saveFileName:
+            self.shp_file.setText('{}'.format(self.saveShpName))
             self.settings.setValue(sender, os.path.dirname(self.saveFileName))
+            
 
          # Enable the saveButton if file is chosen
         if not self.save_file.text():
             self.save_button.setEnabled(False)
         else:
             self.save_button.setEnabled(True)
+            
+    def onShpButton(self):
+        """Get destination shp file."""
+        
+        sender = '{}-lastUserFilePath'.format(self.sender().objectName())
+        lastUsedFilePath = self.settings.value(sender, '')
+        self.saveShpName = QFileDialog.getSaveFileName(self, self.tr(u'Select destination file'), 
+                                                       self.tr(u'{}{}.shp').format(lastUsedFilePath,os.path.sep), 
+                                                       filter ="ESRI Shapefile (*.shp)")
+
+        self.shp_file.setText('{}'.format(self.saveShpName))
+        if self.saveShpName:
+            self.settings.setValue(sender, os.path.dirname(self.saveShpName))
+            
+        if not self.save_file.text():
+            self.save_button.setEnabled(False)
+        else:
+            self.save_button.setEnabled(True)        
 
     def onExportRasterValues(self):
         """Export sampled raster values to output CSV file.
@@ -160,6 +186,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         export = GroundRadiationMonitoringComputation().exportRasterValues(self.raster_box.currentLayer().id(),
                                                                            self.track_box.currentLayer().id(),
                                                                            self.saveFileName,
+                                                                           self.saveShpName,
                                                                            self.vertex_dist.text())
         
         # check if export returns no error
@@ -188,5 +215,5 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
 
         # add map layer to map canvas
         if result == QMessageBox.Yes:
-            newLayer = iface.addVectorLayer("{f}_shp.shp".format(f=self.saveFileName.split('.')[0]),
-                                             "{f}_shp".format(f=QFileInfo(self.saveFileName).baseName()), "ogr")        
+            newLayer = iface.addVectorLayer("{f}".format(f=self.saveShpName),
+                                             "{f}".format(f=QFileInfo(self.saveShpName).baseName()), "ogr")        
