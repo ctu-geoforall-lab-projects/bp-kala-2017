@@ -172,7 +172,7 @@ class GroundRadiationMonitoringComputation:
         srs.ImportFromEPSG(int(trackLayer.crs().authid()[5:]))
 
         # create the layer
-        layer = data_source.CreateLayer("shp", srs, ogr.wkbPoint)
+        layer = data_source.CreateLayer("{}".format(fileName.split('.')[0]), srs, ogr.wkbPoint)
 
         # Add the fields we're interested in
         layer.CreateField(ogr.FieldDefn("X", ogr.OFTReal))
