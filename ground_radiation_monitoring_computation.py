@@ -112,6 +112,7 @@ class GroundRadiationMonitoringComputation:
 
         # if modulo of division of line length and 1 segment length is not 0,
         # point where last complete segment ends is computed
+        lastPointX = lastPointY = None
         if dist % distBetweenVertices != 0:
             shortestSegmentRel = (dist % distBetweenVertices) / dist
             lastPointX = point2[0] - (point2[0] - point1[0]) * shortestSegmentRel
