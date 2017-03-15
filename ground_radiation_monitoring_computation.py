@@ -189,11 +189,9 @@ class GroundRadiationMonitoringComputation:
             feature.SetField("X", row["X"])
             feature.SetField("Y", row["Y"])
 
-            # create the WKT for the feature using Python string formatting
-            wkt = "POINT(%f %f)" %  (float(row['X']) , float(row['Y']))
-
-            # Create the point from the Well Known Txt
-            point = ogr.CreateGeometryFromWkt(wkt)
+            # Create the point geometry
+            point = ogr.Geometry(ogr.wkbPoint)
+            point.AddPoint(float(row["X"]), float(row["Y"]))
 
             # Set the feature geometry using the point
             feature.SetGeometry(point)
