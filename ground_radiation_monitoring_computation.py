@@ -18,6 +18,11 @@ import osgeo.osr as osr
 import csv
 
 class GroundRadiationMonitoringComputation:
+    # set length measurement
+    length = QgsDistanceArea()
+    length.setEllipsoid('WGS84')
+    length.setEllipsoidalMode(True)
+
     def exportRasterValues(self, rasterLayerId, trackLayerId, fileName, shpFileName, vertexDist):
         """Export sampled raster values to output CSV file.
 
@@ -68,7 +73,7 @@ class GroundRadiationMonitoringComputation:
             while pointCounter < (len(polyline)-1):
                 point1 = polyline[pointCounter]
                 point2 = polyline[pointCounter+1]
-                distance = self.distance(point1,point2)
+                distance = GroundRadiationMonitoringComputation.length.measureLine(QgsPoint(point1), QgsPoint(point2))
 
                 # check whether the input distance between vertices is longer then the distance between points
                 if distance > distanceBetweenVertices:
@@ -82,19 +87,6 @@ class GroundRadiationMonitoringComputation:
  
         # returns coordinates of all vertices of track   
         return vertexX, vertexY        
-
-    def distance(self, point1, point2):
-        """Compute distance between points in metres.
-
-        :point1: first point
-        :point2: secound point
-        """
-
-        distance = QgsDistanceArea()
-        distance.setEllipsoid('WGS84')
-        distance.setEllipsoidalMode(True)
-        d = distance.measureLine(QgsPoint(point1), QgsPoint(point2))
-        return d
 
     def sampleLine(self,point1, point2, dist, distBetweenVertices):
         """Sample line between two points to segments of user selected length.
