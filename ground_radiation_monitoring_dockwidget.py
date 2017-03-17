@@ -109,9 +109,9 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
 
     def onDirButton(self):
         """Get destination csv and shape file.
-        
+
         Set path and name for shape file by default as file path for csv file."""
-        
+
         sender = '{}-lastUserFilePath'.format(self.sender().objectName())
         lastUsedFilePath = self.settings.value(sender, '')
 
@@ -125,17 +125,16 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         if self.saveFileName:
             self.shp_file.setText('{}'.format(self.saveShpName))
             self.settings.setValue(sender, os.path.dirname(self.saveFileName))
-            
 
          # Enable the saveButton if file is chosen
         if not self.save_file.text():
             self.save_button.setEnabled(False)
         else:
             self.save_button.setEnabled(True)
-            
+
     def onShpButton(self):
         """Get destination shp file."""
-        
+
         sender = '{}-lastUserFilePath'.format(self.sender().objectName())
         lastUsedFilePath = self.settings.value(sender, '')
         self.saveShpName = QFileDialog.getSaveFileName(self, self.tr(u'Select destination file'), 
@@ -145,7 +144,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         self.shp_file.setText('{}'.format(self.saveShpName))
         if self.saveShpName:
             self.settings.setValue(sender, os.path.dirname(self.saveShpName))
-            
+
         if not self.save_file.text():
             self.save_button.setEnabled(False)
         else:
@@ -162,6 +161,9 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
 
         When no raster or track vector layer given, than computation
         is not performed.
+        
+        If shapefile that will be created has the same name as one of the layers in
+        map canvas, that layer will be removed from map layer registry.
         """
         try:
             distanceBetweenVertices = float(self.vertex_dist.text().replace(',', '.'))
@@ -181,6 +183,11 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
                                                 self.tr(u'No raster/track layer chosen.'),
                                                 level=QgsMessageBar.CRITICAL, duration = 5)
             return
+
+        # remove layers with same name as newly created layer
+        for lyr in QgsMapLayerRegistry.instance().mapLayers().values():
+            if lyr.source() == self.saveShpName:
+                QgsMapLayerRegistry.instance().removeMapLayer(lyr.id())
 
         # export values
         export = GroundRadiationMonitoringComputation().exportRasterValues(self.raster_box.currentLayer().id(),
@@ -211,6 +218,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         msg.setText(self.tr(u"Add new layer to map canvas?"))
         msg.setWindowTitle(self.tr(u"Add Layer"))
         msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        msg.setDefaultButton(QMessageBox.Yes)
         result = msg.exec_()
 
         # add map layer to map canvas
