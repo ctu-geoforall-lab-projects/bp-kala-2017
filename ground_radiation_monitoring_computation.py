@@ -156,8 +156,6 @@ class GroundRadiationMonitoringComputation:
                 coorFileName = '{}_coor({}).csv'.format(shpFileName.split('.')[0],i)
                 i = i + 1
 
-        csvFile = open('{f}'.format(f=coorFileName), 'wb')
-
         csvFile.write('X\tY{linesep}'.format(linesep=os.linesep))
         for X,Y in zip(vectorX,vectorY):
             csvFile.write('{X}\t{Y}{linesep}'.format(X=X, Y = Y,linesep=os.linesep))
