@@ -23,8 +23,8 @@
 
 import os
 
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt, QFileInfo
-from PyQt4.QtGui import QComboBox, QAction, QIcon, QToolButton, QFileDialog, QMessageBox
+from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt, QFileInfo, QThread, pyqtSignal
+from PyQt4.QtGui import QComboBox, QAction, QIcon, QToolButton, QFileDialog, QMessageBox, QProgressBar
 from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QGis, QgsPoint, QgsRaster, QgsProject,  QgsProviderRegistry, QgsDistanceArea
 from qgis.utils import QgsMessageBar, iface
 from qgis.gui import QgsMapLayerComboBox,QgsMapLayerProxyModel
@@ -32,8 +32,9 @@ from osgeo import gdal, ogr
 from math import ceil
 from array import array
 
+import time
+
 from PyQt4 import QtGui, uic
-from PyQt4.QtCore import pyqtSignal
 
 from ground_radiation_monitoring_computation import GroundRadiationMonitoringComputation
 
@@ -188,30 +189,65 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         for lyr in QgsMapLayerRegistry.instance().mapLayers().values():
             if lyr.source() == self.saveShpName:
                 QgsMapLayerRegistry.instance().removeMapLayer(lyr.id())
-
+        
+        # progress        
+        self.progressMessageBar = iface.messageBar().createMessage("Computing...")
+        self.progress = QProgressBar()
+        self.progress.setMaximum(100)
+        self.progress.setAlignment(Qt.AlignLeft|Qt.AlignVCenter)
+        self.cancelButton = QtGui.QPushButton()
+        self.cancelButton.setText('Cancel')
+        self.progressMessageBar.layout().addWidget(self.cancelButton)
+        self.progressMessageBar.layout().addWidget(self.progress)
+        iface.messageBar().pushWidget(self.progressMessageBar, iface.messageBar().INFO)
+        
+        
+        
+        
+        self.computeThread = GroundRadiationMonitoringComputation(self.raster_box.currentLayer().id(),
+                                                                  self.track_box.currentLayer().id(),
+                                                                  self.saveFileName,
+                                                                  self.saveShpName,
+                                                                  self.vertex_dist.text())
+        self.computeThread.computeEnd.connect(self.addNewLayer)
+        self.computeThread.computeStat.connect(self.setStatus)
+        if not self.computeThread.isRunning():
+            self.computeThread.start()
+            
         # export values
-        export = GroundRadiationMonitoringComputation().exportRasterValues(self.raster_box.currentLayer().id(),
-                                                                           self.track_box.currentLayer().id(),
-                                                                           self.saveFileName,
-                                                                           self.saveShpName,
-                                                                           self.vertex_dist.text())
+        #export = GroundRadiationMonitoringComputation().exportRasterValues(self.raster_box.currentLayer().id(),
+        #                                                                   self.track_box.currentLayer().id(),
+        #                                                                   self.saveFileName,
+        #                                                                   self.saveShpName,
+        #                                                                   self.vertex_dist.text())
         
         # check if export returns no error
-        if not export:
-            self.iface.messageBar().pushMessage(self.tr(u'Info'),
-                                            self.tr(u'File {} saved.').format(self.saveFileName),
-                                            level=QgsMessageBar.INFO, duration = 5)
-            self.addNewLayer()
-            pass
-        else:
-            self.iface.messageBar().pushMessage(self.tr(u'Error'),
-                                                self.tr(u'Unable open {} for writing. Reason: {}')
-                                                .format(self.saveFileName, export),
-                                                level=QgsMessageBar.CRITICAL, duration = 5)
-            return
+        #if not export:
+        #    self.iface.messageBar().pushMessage(self.tr(u'Info'),
+        #                                    self.tr(u'File {} saved.').format(self.saveFileName),
+        #                                    level=QgsMessageBar.INFO, duration = 5)
+        #    self.addNewLayer()
+        #    pass
+        #else:
+        #    self.iface.messageBar().pushMessage(self.tr(u'Error'),
+        #                                        self.tr(u'Unable open {} for writing. Reason: {}')
+        #                                        .format(self.saveFileName, export),
+        #                                        level=QgsMessageBar.CRITICAL, duration = 5)
+        #    return
+
+    def setStatus(self, num):
+        """Update progress status.
+        """
+        self.progress.setValue(num)
 
     def addNewLayer(self):
-        """Ask to add new layer of computed points to map canvas. """
+        """End computeThread.
+        
+        Ask to add new layer of computed points to map canvas. """
+        self.iface.messageBar().popWidget(self.progressMessageBar)
+        #if self.computeThread.aborted:
+        #    return
+
         # Message box    
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Question)

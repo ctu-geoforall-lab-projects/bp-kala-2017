@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt, QFileInfo
+from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt, QFileInfo, pyqtSignal, QThread
 from PyQt4.QtGui import QComboBox, QAction, QIcon, QToolButton, QFileDialog
 from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QGis, QgsPoint, QgsRaster, QgsProject,  QgsProviderRegistry, QgsDistanceArea
 from qgis.utils import QgsMessageBar, iface
@@ -17,11 +17,31 @@ import osgeo.ogr as ogr
 import osgeo.osr as osr
 import csv
 
-class GroundRadiationMonitoringComputation:
+class GroundRadiationMonitoringComputation(QThread):
     # set length measurement
     length = QgsDistanceArea()
     length.setEllipsoid('WGS84')
     length.setEllipsoidalMode(True)
+    
+    # set signals
+    computeEnd = pyqtSignal()
+    computeStat = pyqtSignal(int)
+
+    def __init__(self,  rasterLayerId, trackLayerId, fileName, shpFileName, vertexDist):
+        QThread.__init__(self)
+        self.rasterLayerId = rasterLayerId
+        self.trackLayerId = trackLayerId
+        self.fileName = fileName
+        self.shpFileName = shpFileName
+        self.vertexDist = vertexDist
+        
+    def run(self):
+        """Run compute thread."""
+        self.exportRasterValues(self.rasterLayerId, 
+                                self.trackLayerId, 
+                                self.fileName, 
+                                self.shpFileName, 
+                                self.vertexDist)
 
     def exportRasterValues(self, rasterLayerId, trackLayerId, fileName, shpFileName, vertexDist):
         """Export sampled raster values to output CSV file.
@@ -49,8 +69,12 @@ class GroundRadiationMonitoringComputation:
 
         # close output file
         csvFile.close()
+        self.computeStat.emit(50)
         self.createShp(vectorX, vectorY, trackLayer, shpFileName)
+        self.computeStat.emit(100)
 
+        self.computeEnd.emit()
+        
     def getCoor(self, rasterLayer, trackLayer, vertexDist):
         """Get coordinates of vertices of sampled track.
 
@@ -86,7 +110,8 @@ class GroundRadiationMonitoringComputation:
                 pointCounter = pointCounter + 1
  
         # returns coordinates of all vertices of track   
-        return vertexX, vertexY        
+        return vertexX, vertexY     
+           
 
     def sampleLine(self,point1, point2, dist, distBetweenVertices):
         """Sample line between two points to segments of user selected length.
