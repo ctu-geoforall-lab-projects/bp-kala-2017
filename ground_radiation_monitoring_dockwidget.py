@@ -118,7 +118,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         self.saveFileName = QFileDialog.getSaveFileName(self, self.tr(u'Select destination file'), 
                                                         self.tr(u'{}{}.csv').format(lastUsedFilePath,os.path.sep), 
                                                         filter ="CSV (*.csv)")
-        self.saveShpName = '{}_shp.shp'.format(self.saveFileName.split('.')[0])
+        self.saveShpName = '{}.shp'.format(self.saveFileName.split('.')[0])
 
         self.save_file.setText('{}'.format(self.saveFileName))
 

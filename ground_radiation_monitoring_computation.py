@@ -144,10 +144,20 @@ class GroundRadiationMonitoringComputation:
         :shpFileName: destination to save shapefile and csv file of coordinates of new points
  
         """
-        coorFileName = '{}_coor.csv'.format(shpFileName.split('.')[0])
-
         # save csv with coordinates of new points
+        cannotWrite = True
+        i = 1
+        coorFileName = '{}_coor.csv'.format(shpFileName.split('.')[0])
+        while cannotWrite == True:
+            try:
+                csvFile = open('{f}'.format(f=coorFileName), 'wb')
+                cannotWrite = False
+            except IOError:
+                coorFileName = '{}_coor({}).csv'.format(shpFileName.split('.')[0],i)
+                i = i + 1
+
         csvFile = open('{f}'.format(f=coorFileName), 'wb')
+
         csvFile.write('X\tY{linesep}'.format(linesep=os.linesep))
         for X,Y in zip(vectorX,vectorY):
             csvFile.write('{X}\t{Y}{linesep}'.format(X=X, Y = Y,linesep=os.linesep))
