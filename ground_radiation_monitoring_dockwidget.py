@@ -190,20 +190,6 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
             if lyr.source() == self.saveShpName:
                 QgsMapLayerRegistry.instance().removeMapLayer(lyr.id())
         
-        # progress        
-        self.progressMessageBar = iface.messageBar().createMessage("Computing...")
-        self.progress = QProgressBar()
-        self.progress.setMaximum(100)
-        self.progress.setAlignment(Qt.AlignLeft|Qt.AlignVCenter)
-        self.cancelButton = QtGui.QPushButton()
-        self.cancelButton.setText('Cancel')
-        self.progressMessageBar.layout().addWidget(self.cancelButton)
-        self.progressMessageBar.layout().addWidget(self.progress)
-        iface.messageBar().pushWidget(self.progressMessageBar, iface.messageBar().INFO)
-        
-        
-        
-        
         self.computeThread = GroundRadiationMonitoringComputation(self.raster_box.currentLayer().id(),
                                                                   self.track_box.currentLayer().id(),
                                                                   self.saveFileName,
@@ -211,6 +197,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
                                                                   self.vertex_dist.text())
         self.computeThread.computeEnd.connect(self.addNewLayer)
         self.computeThread.computeStat.connect(self.setStatus)
+        self.computeThread.computeProgress.connect(self.progressBar)
         if not self.computeThread.isRunning():
             self.computeThread.start()
             
@@ -234,17 +221,38 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         #                                        .format(self.saveFileName, export),
         #                                        level=QgsMessageBar.CRITICAL, duration = 5)
         #    return
-
+        
+    def progressBar(self, text):
+        """Initializing progress bar.
+        
+        :text: message to indicate what operation is currently on
+        """
+        try:
+            self.iface.messageBar().popWidget(self.progressMessageBar)
+        except:
+            pass
+        self.progressMessageBar = iface.messageBar().createMessage(u"Ground Radiation Monitoring: ", u"{}".format(text))
+        self.progress = QProgressBar()
+        self.progress.setMaximum(100)
+        self.progress.setAlignment(Qt.AlignLeft|Qt.AlignVCenter)
+        self.cancelButton = QtGui.QPushButton()
+        self.cancelButton.setText('Cancel')
+        self.progressMessageBar.layout().addWidget(self.cancelButton)
+        self.progressMessageBar.layout().addWidget(self.progress)
+        iface.messageBar().pushWidget(self.progressMessageBar, iface.messageBar().INFO)
+        
     def setStatus(self, num):
         """Update progress status.
+        
+        :num: progress percent
         """
+
         self.progress.setValue(num)
 
     def addNewLayer(self):
         """End computeThread.
         
         Ask to add new layer of computed points to map canvas. """
-        self.iface.messageBar().popWidget(self.progressMessageBar)
         #if self.computeThread.aborted:
         #    return
 
@@ -260,4 +268,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         # add map layer to map canvas
         if result == QMessageBox.Yes:
             newLayer = iface.addVectorLayer("{f}".format(f=self.saveShpName),
-                                             "{f}".format(f=QFileInfo(self.saveShpName).baseName()), "ogr")        
+                                             "{f}".format(f=QFileInfo(self.saveShpName).baseName()), "ogr")  
+        
+        self.iface.messageBar().popWidget(self.progressMessageBar)
+      

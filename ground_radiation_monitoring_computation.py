@@ -26,6 +26,7 @@ class GroundRadiationMonitoringComputation(QThread):
     # set signals
     computeEnd = pyqtSignal()
     computeStat = pyqtSignal(int)
+    computeProgress = pyqtSignal(str)
 
     def __init__(self,  rasterLayerId, trackLayerId, fileName, shpFileName, vertexDist):
         QThread.__init__(self)
@@ -63,16 +64,19 @@ class GroundRadiationMonitoringComputation(QThread):
         # get coordinates of vertices based on user defined sample segment length
         vectorX, vectorY = self.getCoor(rasterLayer, trackLayer, vertexDist)
         
+        self.computeProgress.emit(u'Getting raster values...')
+        i = 0
+        rows = len(vectorX)
         for X,Y in zip(vectorX,vectorY):
+            i = i + 1
+            self.computeStat.emit(float(i)/rows * 100)
+
             value = rasterLayer.dataProvider().identify(QgsPoint(X,Y),QgsRaster.IdentifyFormatValue).results()
             csvFile.write('{val}{linesep}'.format(val=value.values()[0], linesep=os.linesep))
 
         # close output file
         csvFile.close()
-        self.computeStat.emit(50)
         self.createShp(vectorX, vectorY, trackLayer, shpFileName)
-        self.computeStat.emit(100)
-
         self.computeEnd.emit()
         
     def getCoor(self, rasterLayer, trackLayer, vertexDist):
@@ -82,6 +86,7 @@ class GroundRadiationMonitoringComputation(QThread):
         :trackLayer: linestring vector layer to be sampled (QgsVectorLayer)
         :vertexDist: user defined distance between new vertices
         """
+
         distanceBetweenVertices = float(vertexDist.replace(',', '.'))
 
         # declare arrays of coordinates of vertices
@@ -89,12 +94,20 @@ class GroundRadiationMonitoringComputation(QThread):
         vertexY = array('d',[])
 
         # get coordinates of vertices of uploaded track layer
+        i = 1
         for featureIndex, feature in enumerate(trackLayer.getFeatures()):
+            self.computeProgress.emit(u'Sampling track ({})...'.format(i))
+            i = i + 1
+
             polyline = feature.geometry().asPolyline()
             pointCounter = 0
             vertexX.append(polyline[0][0])
             vertexY.append(polyline[0][1])
-            while pointCounter < (len(polyline)-1):
+            amount = len(polyline)
+            while pointCounter < (amount-1):
+                
+                self.computeStat.emit(float(pointCounter)/amount * 100)
+                
                 point1 = polyline[pointCounter]
                 point2 = polyline[pointCounter+1]
                 distance = GroundRadiationMonitoringComputation.length.measureLine(QgsPoint(point1), QgsPoint(point2))
@@ -169,6 +182,8 @@ class GroundRadiationMonitoringComputation(QThread):
         :shpFileName: destination to save shapefile and csv file of coordinates of new points
  
         """
+        
+        self.computeProgress.emit(u'Creating shapefile...')
         # save csv with coordinates of new points
         cannotWrite = True
         i = 1
@@ -208,7 +223,11 @@ class GroundRadiationMonitoringComputation(QThread):
         layer.CreateField(ogr.FieldDefn("Y", ogr.OFTReal))
 
         # Process the text file and add the attributes and features to the shapefile
+        i = 0
+        rows = len(vectorX)
         for row in reader:
+            i = i + 1
+            self.computeStat.emit(float(i)/rows * 100)
             # create the feature
             feature = ogr.Feature(layer.GetLayerDefn())
             # Set the attributes using the values from the delimited text file
