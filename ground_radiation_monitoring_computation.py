@@ -209,14 +209,14 @@ class GroundRadiationMonitoringComputation(QThread):
         driver = ogr.GetDriverByName("ESRI Shapefile")
         
         # create the data source
-        data_source = driver.CreateDataSource('{f}'.format(f=shpFileName))
+        dataSource = driver.CreateDataSource('{f}'.format(f=shpFileName))
 
         # create the spatial reference
         srs = osr.SpatialReference()
         srs.ImportFromEPSG(int(trackLayer.crs().authid()[5:]))
 
         # create the layer
-        layer = data_source.CreateLayer("{}".format(shpFileName), srs, ogr.wkbPoint)
+        layer = dataSource.CreateLayer("{}".format(shpFileName), srs, ogr.wkbPoint)
 
         # Add the fields we're interested in
         layer.CreateField(ogr.FieldDefn("X", ogr.OFTReal))
