@@ -67,16 +67,20 @@ class GroundRadiationMonitoringComputation(QThread):
         self.computeProgress.emit(u'Getting raster values...')
         i = 0
         rows = len(vectorX)
+        csvFile.write(self.tr(u'X\tY\tdosage{linesep}'.format(linesep = os.linesep)))
         for X,Y in zip(vectorX,vectorY):
             i = i + 1
             self.computeStat.emit(float(i)/rows * 100)
 
             value = rasterLayer.dataProvider().identify(QgsPoint(X,Y),QgsRaster.IdentifyFormatValue).results()
-            csvFile.write('{val}{linesep}'.format(val=value.values()[0], linesep=os.linesep))
+            csvFile.write(self.tr(u'{valX}\t{valY}\t{val}{linesep}'.format(valX = X,
+                                                                  valY = Y,
+                                                                  val = value.values()[0], 
+                                                                  linesep=os.linesep)))
 
         # close output file
         csvFile.close()
-        self.createShp(vectorX, vectorY, trackLayer, shpFileName)
+        self.createShp(vectorX, vectorY, trackLayer, shpFileName, fileName)
         self.computeEnd.emit()
         
     def getCoor(self, rasterLayer, trackLayer, vertexDist):
@@ -173,35 +177,20 @@ class GroundRadiationMonitoringComputation(QThread):
 
         return newX, newY
 
-    def createShp(self, vectorX, vectorY, trackLayer, shpFileName):
+    def createShp(self, vectorX, vectorY, trackLayer, shpFileName, fileName):
         """Create ESRI shapefile and write new points. 
 
         :vectorX: X coordinates of points
         :vectorY: Y coordinates of points
         :trackLayer: layer to get coordinate system from
-        :shpFileName: destination to save shapefile and csv file of coordinates of new points
+        :shpFileName: destination to save shapefile
+        :fileName: csvFile containing coordinates of points and their raster values
  
         """
         
         self.computeProgress.emit(u'Creating shapefile...')
-        # save csv with coordinates of new points
-        cannotWrite = True
-        i = 1
-        coorFileName = '{}_coor.csv'.format(shpFileName.split('.')[0])
-        while cannotWrite == True:
-            try:
-                csvFile = open('{f}'.format(f=coorFileName), 'wb')
-                cannotWrite = False
-            except IOError:
-                coorFileName = '{}_coor({}).csv'.format(shpFileName.split('.')[0],i)
-                i = i + 1
 
-        csvFile.write('X\tY{linesep}'.format(linesep=os.linesep))
-        for X,Y in zip(vectorX,vectorY):
-            csvFile.write('{X}\t{Y}{linesep}'.format(X=X, Y = Y,linesep=os.linesep))
-        csvFile.close()
-
-        reader = csv.DictReader(open('{f}'.format(f=coorFileName),"rb"),
+        reader = csv.DictReader(open('{f}'.format(f = fileName),"rb"),
                                 delimiter='\t',
                                 quoting=csv.QUOTE_NONE)
 
@@ -221,6 +210,7 @@ class GroundRadiationMonitoringComputation(QThread):
         # Add the fields we're interested in
         layer.CreateField(ogr.FieldDefn("X", ogr.OFTReal))
         layer.CreateField(ogr.FieldDefn("Y", ogr.OFTReal))
+        layer.CreateField(ogr.FieldDefn("dose rate", ogr.OFTString))
 
         # Process the text file and add the attributes and features to the shapefile
         i = 0
@@ -233,6 +223,7 @@ class GroundRadiationMonitoringComputation(QThread):
             # Set the attributes using the values from the delimited text file
             feature.SetField("X", row["X"])
             feature.SetField("Y", row["Y"])
+            feature.SetField("dose rate", row["dosage"])
 
             # Create the point geometry
             point = ogr.Geometry(ogr.wkbPoint)
