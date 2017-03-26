@@ -68,9 +68,10 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         self.load_track.clicked.connect(self.onLoadTrack)
 
         self.save_button.setEnabled(False)
-        self.dir_button.clicked.connect(self.onDirButton)
-        self.save_button.clicked.connect(self.onExportRasterValues)
+        self.report_button.clicked.connect(self.onReportButton)
+        self.dir_button.clicked.connect(self.onCsvButton)
         self.shp_button.clicked.connect(self.onShpButton)
+        self.save_button.clicked.connect(self.onExportRasterValues)
 
     def closeEvent(self, event):
         self.closingPlugin.emit()
@@ -108,33 +109,55 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
                                                      .format(QFileInfo(fileName).baseName()),
                                                      level = QgsMessageBar.INFO, duration = 5)
 
-    def onDirButton(self):
-        """Get destination csv and shape file.
+    def onReportButton(self):
+        """Get destination of report, csv and shape file.
 
-        Set path and name for shape file by default as file path for csv file."""
+        Set path and name for csv and shape file by default as file path for report file.
+        
+        Set default name for report file same as track layer name"""
 
         sender = '{}-lastUserFilePath'.format(self.sender().objectName())
         lastUsedFilePath = self.settings.value(sender, '')
 
-        self.saveFileName = QFileDialog.getSaveFileName(self, self.tr(u'Select destination file'), 
-                                                        self.tr(u'{}{}.csv').format(lastUsedFilePath,os.path.sep), 
-                                                        filter ="CSV (*.csv)")
-        self.saveShpName = '{}.shp'.format(self.saveFileName.split('.')[0])
+        self.saveReportName = QFileDialog.getSaveFileName(self, self.tr(u'Select destination file'), 
+                                                          self.tr(u'{}{}.txt').format(lastUsedFilePath,os.path.sep), 
+                                                          filter ="TXT (*.txt)")
+        self.saveCsvName = self.tr(u'{}.csv').format(self.saveReportName.split('.')[0])
+        self.saveShpName = self.tr(u'{}.shp').format(self.saveReportName.split('.')[0])
 
-        self.save_file.setText('{}'.format(self.saveFileName))
+        self.report_file.setText(self.tr(u'{}').format(self.saveReportName))
 
-        if self.saveFileName:
-            self.shp_file.setText('{}'.format(self.saveShpName))
-            self.settings.setValue(sender, os.path.dirname(self.saveFileName))
+        if self.saveReportName:
+            self.csv_file.setText(self.tr(u'{}').format(self.saveCsvName))
+            self.shp_file.setText(self.tr(u'{}').format(self.saveShpName))
+            self.settings.setValue(sender, os.path.dirname(self.saveReportName))
 
          # Enable the saveButton if file is chosen
-        if not self.save_file.text():
+        if not self.report_file.text():
             self.save_button.setEnabled(False)
         else:
             self.save_button.setEnabled(True)
+            
+    def onCsvButton(self):
+        """Get destination of csv file."""
+        
+        sender = '{}-lastUserFilePath'.format(self.sender().objectName())
+        lastUsedFilePath = self.settings.value(sender, '')
+        self.saveCsvName = QFileDialog.getSaveFileName(self, self.tr(u'Select destination file'), 
+                                                       self.tr(u'{}{}.csv').format(lastUsedFilePath,os.path.sep), 
+                                                       filter ="CSV (*.csv)")
+
+        self.csv_file.setText('{}'.format(self.saveCsvName))
+        if self.saveCsvName:
+            self.settings.setValue(sender, os.path.dirname(self.saveCsvName))
+
+        if not (self.report_file.text() and self.csv_file.text() and self.shp_file.text()):
+            self.save_button.setEnabled(False)
+        else:
+            self.save_button.setEnabled(True)        
 
     def onShpButton(self):
-        """Get destination shp file."""
+        """Get destination of shp file."""
 
         sender = '{}-lastUserFilePath'.format(self.sender().objectName())
         lastUsedFilePath = self.settings.value(sender, '')
@@ -146,7 +169,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         if self.saveShpName:
             self.settings.setValue(sender, os.path.dirname(self.saveShpName))
 
-        if not self.save_file.text():
+        if not (self.report_file.text() and self.csv_file.text() and self.shp_file.text()):
             self.save_button.setEnabled(False)
         else:
             self.save_button.setEnabled(True)        
@@ -192,7 +215,8 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         
         self.computeThread = GroundRadiationMonitoringComputation(self.raster_box.currentLayer().id(),
                                                                   self.track_box.currentLayer().id(),
-                                                                  self.saveFileName,
+                                                                  self.saveReportName,
+                                                                  self.saveCsvName,
                                                                   self.saveShpName,
                                                                   self.vertex_dist.text())
         self.computeThread.computeEnd.connect(self.addNewLayer)

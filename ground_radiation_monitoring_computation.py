@@ -28,11 +28,12 @@ class GroundRadiationMonitoringComputation(QThread):
     computeStat = pyqtSignal(int)
     computeProgress = pyqtSignal(str)
 
-    def __init__(self,  rasterLayerId, trackLayerId, fileName, shpFileName, vertexDist):
+    def __init__(self,  rasterLayerId, trackLayerId, reportFileName, csvFileName, shpFileName, vertexDist):
         QThread.__init__(self)
         self.rasterLayerId = rasterLayerId
         self.trackLayerId = trackLayerId
-        self.fileName = fileName
+        self.reportFileName = reportFileName
+        self.csvFileName = csvFileName
         self.shpFileName = shpFileName
         self.vertexDist = vertexDist
         
@@ -40,21 +41,23 @@ class GroundRadiationMonitoringComputation(QThread):
         """Run compute thread."""
         self.exportRasterValues(self.rasterLayerId, 
                                 self.trackLayerId, 
-                                self.fileName, 
+                                self.reportFileName, 
+                                self.csvFileName,
                                 self.shpFileName, 
                                 self.vertexDist)
 
-    def exportRasterValues(self, rasterLayerId, trackLayerId, fileName, shpFileName, vertexDist):
+    def exportRasterValues(self, rasterLayerId, trackLayerId, reportFileName, csvFileName, shpFileName, vertexDist):
         """Export sampled raster values to output CSV file.
 
         :rasterLayerId: input raster layer (QgsRasterLayer)
         :trackLayerId: linestring vector layer to be sampled (QgsVectorLayer)
-        :fileName: file descriptor of output CVS file
+        :reportFileName: file descriptor for output report file
+        :csvFileName: file descriptor of output CVS file
         :shpFileName: file descriptor of output shp file
         :vertexDist: user defined distance between new vertices
         """
         try:
-            csvFile = open(fileName, 'wb')
+            csvFile = open(csvFileName, 'wb')
         except IOError as e:
             return e
 
@@ -80,7 +83,7 @@ class GroundRadiationMonitoringComputation(QThread):
 
         # close output file
         csvFile.close()
-        self.createShp(vectorX, vectorY, trackLayer, shpFileName, fileName)
+        self.createShp(vectorX, vectorY, trackLayer, shpFileName, csvFileName)
         self.computeEnd.emit()
         
     def getCoor(self, rasterLayer, trackLayer, vertexDist):
@@ -177,20 +180,20 @@ class GroundRadiationMonitoringComputation(QThread):
 
         return newX, newY
 
-    def createShp(self, vectorX, vectorY, trackLayer, shpFileName, fileName):
+    def createShp(self, vectorX, vectorY, trackLayer, shpFileName, csvFileName):
         """Create ESRI shapefile and write new points. 
 
         :vectorX: X coordinates of points
         :vectorY: Y coordinates of points
         :trackLayer: layer to get coordinate system from
         :shpFileName: destination to save shapefile
-        :fileName: csvFile containing coordinates of points and their raster values
+        :csvFileName: csvFile containing coordinates of points and their raster values
  
         """
         
         self.computeProgress.emit(u'Creating shapefile...')
 
-        reader = csv.DictReader(open('{f}'.format(f = fileName),"rb"),
+        reader = csv.DictReader(open(self.tr(u'{f}').format(f = csvFileName),"rb"),
                                 delimiter='\t',
                                 quoting=csv.QUOTE_NONE)
 
@@ -198,14 +201,14 @@ class GroundRadiationMonitoringComputation(QThread):
         driver = ogr.GetDriverByName("ESRI Shapefile")
         
         # create the data source
-        dataSource = driver.CreateDataSource('{f}'.format(f=shpFileName))
+        dataSource = driver.CreateDataSource(self.tr(u'{f}').format(f=shpFileName))
 
         # create the spatial reference
         srs = osr.SpatialReference()
         srs.ImportFromEPSG(int(trackLayer.crs().authid()[5:]))
 
         # create the layer
-        layer = dataSource.CreateLayer("{}".format(shpFileName), srs, ogr.wkbPoint)
+        layer = dataSource.CreateLayer('{}'.format(shpFileName), srs, ogr.wkbPoint)
 
         # Add the fields we're interested in
         layer.CreateField(ogr.FieldDefn("X", ogr.OFTReal))
@@ -237,4 +240,4 @@ class GroundRadiationMonitoringComputation(QThread):
             feature = None
 
         # Save and close the data source
-        data_source = None
+        dataSource = None
