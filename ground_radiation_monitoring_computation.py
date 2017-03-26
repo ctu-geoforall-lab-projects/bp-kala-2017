@@ -138,7 +138,7 @@ class GroundRadiationMonitoringComputation(QThread):
         """
 
         # number of vertices, that should be added between 2 points
-        vertexQuantity = ceil(dist / distBetweenVertices) - 1
+        vertexQuantity = ceil(dist / float(distBetweenVertices)) - 1
 
         # if modulo of division of line length and 1 segment length is not 0,
         # point where last complete segment ends is computed
