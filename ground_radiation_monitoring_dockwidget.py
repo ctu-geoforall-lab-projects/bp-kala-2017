@@ -218,7 +218,9 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
                                                                   self.saveReportName,
                                                                   self.saveCsvName,
                                                                   self.saveShpName,
-                                                                  self.vertex_dist.text())
+                                                                  self.vertex_dist.text(),
+                                                                  self.speed.text(),
+                                                                  self.unit_box.currentText())
         self.computeThread.computeEnd.connect(self.addNewLayer)
         self.computeThread.computeStat.connect(self.setStatus)
         self.computeThread.computeProgress.connect(self.progressBar)
