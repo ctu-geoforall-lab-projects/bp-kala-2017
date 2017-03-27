@@ -53,6 +53,8 @@ class GroundRadiationMonitoringComputation(QThread):
 
     def exportRasterValues(self, rasterLayerId, trackLayerId, reportFileName, csvFileName, shpFileName, vertexDist, speed, units):
         """Export sampled raster values to output CSV file.
+        
+        Prints error when CSV file cannot be opened for writing.
 
         :rasterLayerId: input raster layer (QgsRasterLayer)
         :trackLayerId: linestring vector layer to be sampled (QgsVectorLayer)
@@ -205,6 +207,8 @@ class GroundRadiationMonitoringComputation(QThread):
     
     def createReport(self, reportFileName, trackLayer, vertexX, vertexY, dose, distances, speed, units):
         """Create report file.
+        
+        Prints error when report txt file cannot be opened for writing.
 
         :reportFileName: destination to save report file
         :trackLayer: name of track layer

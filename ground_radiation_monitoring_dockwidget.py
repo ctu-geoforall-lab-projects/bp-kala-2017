@@ -176,10 +176,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
     def onExportRasterValues(self):
         """Export sampled raster values to output CSV file.
 
-        Prints error message when output file cannot be open for
-        writing.
-
-        Prints error when user selected length of segment is not positive real number
+        Prints error when user selected length of segment or speed is not positive real number
         and computation is not performed.
 
         When no raster or track vector layer given, than computation
