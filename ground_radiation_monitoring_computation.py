@@ -129,7 +129,7 @@ class GroundRadiationMonitoringComputation(QThread):
                 
                 point1 = polyline[pointCounter]
                 point2 = polyline[pointCounter+1]
-                distance = GroundRadiationMonitoringComputation.length.measureLine(QgsPoint(point1), QgsPoint(point2))
+                distance = self.distance(point1, point2)
                 distances.append(distance)
 
                 # check whether the input distance between vertices is longer then the distance between points
@@ -144,7 +144,15 @@ class GroundRadiationMonitoringComputation(QThread):
  
         # returns coordinates of all vertices of track   
         return vertexX, vertexY, distances     
-           
+
+    def distance(self, point1, point2):
+        """Compute length between 2 QgsPoints.
+        
+        :point1: 1st point
+        :point2: 2nd point
+        """
+        distance = GroundRadiationMonitoringComputation.length.measureLine(QgsPoint(point1[0],point1[1]), QgsPoint(point2[0],point2[1]))
+        return distance
 
     def sampleLine(self,point1, point2, dist, distBetweenVertices):
         """Sample line between two points to segments of user selected length.
@@ -273,13 +281,15 @@ total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitorin
         # total dose
         i = 0
         for rate in dose:
-
             if i < len(dose):
-                dist = GroundRadiationMonitoringComputation.length.measureLine(QgsPoint(vectorX[i],vectorY[i]), 
-                                                                               QgsPoint(vectorX[i+1],vectorY[i+1]))
+                point1 = [vectorX[i], vectorY[i]]
+                point2 = [vectorX[i+1], vectorY[i+1]]
+
             elif i == len(dose):
-                dist = GroundRadiationMonitoringComputation.length.measureLine(QgsPoint(vectorX[i-1],vectorY[i-1]), 
-                                                                               QgsPoint(vectorX[i],vectorY[i]))
+                point1 = [vectorX[i-1], vectorY[i-1]]
+                point2 = [vectorX[i], vectorY[i]]
+
+            dist = self.distance(point1,point2)
             interval = (dist/1000)/float(speed)
             estimate.append(interval * rate)
 
