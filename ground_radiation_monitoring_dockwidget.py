@@ -88,6 +88,8 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         if fileName:
             self.iface.addRasterLayer(fileName, QFileInfo(fileName).baseName())
             self.settings.setValue(sender, os.path.dirname(fileName))
+        
+        SendMessage('ahoj','ahoj','ahoj')
 
 
     def onLoadTrack(self):
@@ -104,10 +106,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
 
             # TODO: make this work for multiple layer loading
             if self.iface.activeLayer().geometryType() != QGis.Line:
-                self.iface.messageBar().pushMessage(self.tr(u'Info'),
-                                                     self.tr(u'Loaded layer {} does not have lineString type.')
-                                                     .format(QFileInfo(fileName).baseName()),
-                                                     level = QgsMessageBar.INFO, duration = 5)
+                self.sendMessage(u'Info', u'Loaded layer {} does not have lineString type.'.format(QFileInfo(fileName).baseName()), 'INFO')
 
     def onReportButton(self):
         """Get destination of report, csv and shape file.
@@ -189,23 +188,34 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         If shapefile that will be created has the same name as one of the layers in
         map canvas, that layer will be removed from map layer registry.
         """
+        if not self.vertex_dist.text():
+            self.sendMessage(u'Error', u'No distance between vertices given.', 'CRITICAL')
+            return
         try:
             distanceBetweenVertices = float(self.vertex_dist.text().replace(',', '.'))
         except ValueError:
-            self.iface.messageBar().pushMessage(self.tr(u'Error'),
-                                                self.tr(u'{} is not a number.').format(self.vertex_dist.text()),
-                                                level=QgsMessageBar.CRITICAL, duration = 5)
+            self.sendMessage(u'Error', u'{} is not a number. (distance between vertices)'.format(self.vertex_dist.text()), 'CRITICAL')
             return
 
         if distanceBetweenVertices <= 0:
-            self.iface.messageBar().pushMessage(self.tr(u'Error'),
-                                                self.tr(u'{} is not a positive number.').format(distanceBetweenVertices),
-                                                level=QgsMessageBar.CRITICAL, duration = 5)
+            self.sendMessage(u'Error', u'{} is not a positive number. (distance between vertices)'.format(distanceBetweenVertices), 'CRITICAL')
             return
+
+        if not self.speed.text():
+            self.sendMessage(u'Error', u'No speed given.', 'CRITICAL')
+            return   
+        try:
+            speed = float(self.speed.text().replace(',', '.'))
+        except ValueError:
+            self.sendMessage(u'Error', u'{} is not a number. (speed)'.format(self.speed.text()), 'CRITICAL')
+            return
+
+        if speed <= 0:
+            self.sendMessage(u'Error', u'{} is not a positive number. (speed)'.format(speed), 'CRITICAL')
+            return
+
         if not self.raster_box.currentLayer() or not self.track_box.currentLayer():
-            self.iface.messageBar().pushMessage(self.tr(u'Error'),
-                                                self.tr(u'No raster/track layer chosen.'),
-                                                level=QgsMessageBar.CRITICAL, duration = 5)
+            self.sendMessage(u'Error', u'No raster/track layer chosen.', 'CRITICAL')
             return
 
         # remove layers with same name as newly created layer
@@ -224,30 +234,10 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         self.computeThread.computeEnd.connect(self.addNewLayer)
         self.computeThread.computeStat.connect(self.setStatus)
         self.computeThread.computeProgress.connect(self.progressBar)
+        self.computeThread.computeMessage.connect(self.sendMessage)
         if not self.computeThread.isRunning():
             self.computeThread.start()
-            
-        # export values
-        #export = GroundRadiationMonitoringComputation().exportRasterValues(self.raster_box.currentLayer().id(),
-        #                                                                   self.track_box.currentLayer().id(),
-        #                                                                   self.saveFileName,
-        #                                                                   self.saveShpName,
-        #                                                                   self.vertex_dist.text())
-        
-        # check if export returns no error
-        #if not export:
-        #    self.iface.messageBar().pushMessage(self.tr(u'Info'),
-        #                                    self.tr(u'File {} saved.').format(self.saveFileName),
-        #                                    level=QgsMessageBar.INFO, duration = 5)
-        #    self.addNewLayer()
-        #    pass
-        #else:
-        #    self.iface.messageBar().pushMessage(self.tr(u'Error'),
-        #                                        self.tr(u'Unable open {} for writing. Reason: {}')
-        #                                        .format(self.saveFileName, export),
-        #                                        level=QgsMessageBar.CRITICAL, duration = 5)
-        #    return
-        
+
     def progressBar(self, text):
         """Initializing progress bar.
         
@@ -294,3 +284,12 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         
         self.iface.messageBar().popWidget(self.progressMessageBar)
       
+    def sendMessage(self, caption, message, type):
+        if type == 'CRITICAL':
+            self.iface.messageBar().pushMessage(self.tr(u'{}').format(caption),
+                                                self.tr(u'{}').format(message),
+                                                level = QgsMessageBar.CRITICAL, duration = 5)
+        elif type == 'INFO':
+            self.iface.messageBar().pushMessage(self.tr(u'{}').format(caption),
+                                                self.tr(u'{}').format(message),
+                                                level = QgsMessageBar.INFO, duration = 5)

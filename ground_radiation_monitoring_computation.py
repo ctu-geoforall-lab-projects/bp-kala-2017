@@ -27,6 +27,7 @@ class GroundRadiationMonitoringComputation(QThread):
     computeEnd = pyqtSignal()
     computeStat = pyqtSignal(int)
     computeProgress = pyqtSignal(str)
+    computeMessage = pyqtSignal(str,str,str)
 
     def __init__(self,  rasterLayerId, trackLayerId, reportFileName, csvFileName, shpFileName, vertexDist, speed, units):
         QThread.__init__(self)
@@ -65,7 +66,8 @@ class GroundRadiationMonitoringComputation(QThread):
         try:
             csvFile = open(csvFileName, 'wb')
         except IOError as e:
-            return e
+            self.computeMessage.emit(u'Error', u'Unable open {} for writing. Reason: {}'.format(csvFileName, e),'CRITICAL')
+            return
 
         rasterLayer = QgsMapLayerRegistry.instance().mapLayer(rasterLayerId)
         trackLayer = QgsMapLayerRegistry.instance().mapLayer(trackLayerId)
@@ -218,8 +220,14 @@ class GroundRadiationMonitoringComputation(QThread):
 
         speed = float(speed.replace(',', '.'))
 
+        try:
+            report = open(reportFileName, 'w')
+        except IOError as e:
+            self.computeMessage.emit(u'Error', u'Unable open {} for writing. Reason: {}'.format(reportFileName, e),'CRITICAL')
+            return
+        
         distance, time, maxDose, avgDose, totalDose = self.computeReport(vectorX, vectorY, dose, distances, speed, units)
-        report = open(reportFileName, 'w')
+        
         report.write('''{title}
 
 Route information
