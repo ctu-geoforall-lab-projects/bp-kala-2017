@@ -40,7 +40,7 @@ class GroundRadiationMonitoringComputation(QThread):
     def run(self):
         """Run compute thread."""
         self.exportRasterValues(self.rasterLayerId, 
-                                self.trackLayerId, 
+                                self.trackLayerId,
                                 self.reportFileName, 
                                 self.csvFileName,
                                 self.shpFileName, 
@@ -83,6 +83,7 @@ class GroundRadiationMonitoringComputation(QThread):
 
         # close output file
         csvFile.close()
+        self.createReport(reportFileName, trackLayer)
         self.createShp(vectorX, vectorY, trackLayer, shpFileName, csvFileName)
         self.computeEnd.emit()
         
@@ -179,6 +180,36 @@ class GroundRadiationMonitoringComputation(QThread):
         newY.append(point2[1])
 
         return newX, newY
+    
+    def createReport(self, reportFileName, trackLayer):
+        """Create report file.
+
+        :reportFileName: destination to save report file
+
+        """
+
+        report = open(reportFileName, 'w')
+        report.write('''{title}
+
+Route information
+------------------------
+route: {route}
+monitoring speed (km/h): {speed}
+total monitoring time: {time}
+total distance (km): {distance}
+
+Radiation values
+------------------------
+maximum dose rate (nSv/h): {maxDose}
+average dose rate (nSv/h): {avgDose}
+total dose (Sv): {totalDose}'''.format(title = 'QGIS ground radiation monitoring plugin report',
+                                       speed = '',
+                                       time = '',
+                                       distance = '',
+                                       maxDose = '',
+                                       avgDose = '',
+                                       totalDose = ''))
+        report.close()
 
     def createShp(self, vectorX, vectorY, trackLayer, shpFileName, csvFileName):
         """Create ESRI shapefile and write new points. 
