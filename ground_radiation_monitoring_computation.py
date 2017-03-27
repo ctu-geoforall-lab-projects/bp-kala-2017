@@ -73,15 +73,15 @@ class GroundRadiationMonitoringComputation(QThread):
         trackLayer = QgsMapLayerRegistry.instance().mapLayer(trackLayerId)
 
         # get coordinates of vertices based on user defined sample segment length
-        vectorX, vectorY, distances = self.getCoor(rasterLayer, trackLayer, vertexDist)
+        vertexX, vertexY, distances = self.getCoor(rasterLayer, trackLayer, vertexDist)
         
         dose = array('d',[])
 
         self.computeProgress.emit(u'Getting raster values...')
         i = 0
-        rows = len(vectorX)
+        rows = len(vertexX)
         csvFile.write(self.tr(u'X\tY\tdosage{linesep}'.format(linesep = os.linesep)))
-        for X,Y in zip(vectorX,vectorY):
+        for X,Y in zip(vertexX,vertexY):
             i = i + 1
             self.computeStat.emit(float(i)/rows * 100)
 
@@ -95,8 +95,8 @@ class GroundRadiationMonitoringComputation(QThread):
 
         # close output file
         csvFile.close()
-        self.createReport(reportFileName, trackLayer, vectorX, vectorY, dose, distances, speed, units)
-        self.createShp(vectorX, vectorY, trackLayer, shpFileName, csvFileName)
+        self.createReport(reportFileName, trackLayer, vertexX, vertexY, dose, distances, speed, units)
+        self.createShp(vertexX, vertexY, trackLayer, shpFileName, csvFileName)
         self.computeEnd.emit()
         
     def getCoor(self, rasterLayer, trackLayer, vertexDist):
@@ -203,13 +203,13 @@ class GroundRadiationMonitoringComputation(QThread):
 
         return newX, newY
     
-    def createReport(self, reportFileName, trackLayer, vectorX, vectorY, dose, distances, speed, units):
+    def createReport(self, reportFileName, trackLayer, vertexX, vertexY, dose, distances, speed, units):
         """Create report file.
 
         :reportFileName: destination to save report file
         :trackLayer: name of track layer
-        :vectorX: X coordinates of points
-        :vectorY: Y coordinates of points
+        :vertexX: X coordinates of points
+        :vertexY: Y coordinates of points
         :dose: list of dose rates on points
         :distances: list of distances between vertices of non-sampled track
         :speed: user input speed
@@ -226,7 +226,7 @@ class GroundRadiationMonitoringComputation(QThread):
             self.computeMessage.emit(u'Error', u'Unable open {} for writing. Reason: {}'.format(reportFileName, e),'CRITICAL')
             return
         
-        distance, time, maxDose, avgDose, totalDose = self.computeReport(vectorX, vectorY, dose, distances, speed, units)
+        distance, time, maxDose, avgDose, totalDose = self.computeReport(vertexX, vertexY, dose, distances, speed, units)
         
         report.write('''{title}
 
@@ -253,13 +253,13 @@ total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitorin
                                         totalDose = totalDose))
         report.close()
 
-    def computeReport(self, vectorX, vectorY, dose, distances, speed, units):
+    def computeReport(self, vertexX, vertexY, dose, distances, speed, units):
         """Compute statistics (main output of plugin).
         
         COEFICIENT for Gy/Sv ratio
         
-        :vectorX: X coordinates of points
-        :vectorY: Y coordinates of points
+        :vertexX: X coordinates of points
+        :vertexY: Y coordinates of points
         :dose: list of dose rates on points
         :distances: list of distances between vertices of non-sampled track
         :speed: user input speed
@@ -290,12 +290,12 @@ total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitorin
         i = 0
         for rate in dose:
             if i < len(dose):
-                point1 = [vectorX[i], vectorY[i]]
-                point2 = [vectorX[i+1], vectorY[i+1]]
+                point1 = [vertexX[i], vertexY[i]]
+                point2 = [vertexX[i+1], vertexY[i+1]]
 
             elif i == len(dose):
-                point1 = [vectorX[i-1], vectorY[i-1]]
-                point2 = [vectorX[i], vectorY[i]]
+                point1 = [vertexX[i-1], vertexY[i-1]]
+                point2 = [vertexX[i], vertexY[i]]
 
             dist = self.distance(point1,point2)
             interval = (dist/1000)/float(speed)
@@ -320,11 +320,11 @@ total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitorin
         totalDose = round(totalDose,3)
         return distance, time, maxDose, avgDose, totalDose
 
-    def createShp(self, vectorX, vectorY, trackLayer, shpFileName, csvFileName):
+    def createShp(self, vertexX, vertexY, trackLayer, shpFileName, csvFileName):
         """Create ESRI shapefile and write new points. 
 
-        :vectorX: X coordinates of points
-        :vectorY: Y coordinates of points
+        :vertexX: X coordinates of points
+        :vertexY: Y coordinates of points
         :trackLayer: layer to get coordinate system from
         :shpFileName: destination to save shapefile
         :csvFileName: csvFile containing coordinates of points and their raster values
@@ -357,7 +357,7 @@ total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitorin
 
         # Process the text file and add the attributes and features to the shapefile
         i = 0
-        rows = len(vectorX)
+        rows = len(vertexX)
         for row in reader:
             i = i + 1
             self.computeStat.emit(float(i)/rows * 100)
