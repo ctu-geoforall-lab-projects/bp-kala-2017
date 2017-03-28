@@ -88,10 +88,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         if fileName:
             self.iface.addRasterLayer(fileName, QFileInfo(fileName).baseName())
             self.settings.setValue(sender, os.path.dirname(fileName))
-        
-        SendMessage('ahoj','ahoj','ahoj')
-
-
+            
     def onLoadTrack(self):
         """Open 'Add track layer dialog'."""
         sender = '{}-lastUserFilePath'.format(self.sender().objectName())
