@@ -360,7 +360,7 @@ total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitorin
         srs.ImportFromEPSG(int(trackLayer.crs().authid()[5:]))
 
         # create the layer
-        layer = dataSource.CreateLayer('{}'.format(shpFileName), srs, ogr.wkbPoint)
+        layer = dataSource.CreateLayer('{}'.format(shpFileName.encode('utf8')), srs, ogr.wkbPoint)
 
         # Add the fields we're interested in
         layer.CreateField(ogr.FieldDefn("X", ogr.OFTReal))

@@ -273,8 +273,8 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
                                             QtGui.QMessageBox.Yes)
         # add map layer to map canvas
         if reply == QMessageBox.Yes:
-            newLayer = iface.addVectorLayer("{f}".format(f=self.saveShpName),
-                                             "{f}".format(f=QFileInfo(self.saveShpName).baseName()), "ogr")  
+            newLayer = iface.addVectorLayer(u'{f}'.format(f=self.saveShpName),
+                                             u'{f}'.format(f=QFileInfo(self.saveShpName).baseName()), "ogr")  
         
         self.iface.messageBar().popWidget(self.progressMessageBar)
       
