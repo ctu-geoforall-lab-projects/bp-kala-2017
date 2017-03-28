@@ -301,6 +301,10 @@ total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitorin
         # total dose
         i = 0
         for rate in dose:
+
+            if len(dose) == 0:
+                return
+
             if i < len(dose):
                 point1 = [vertexX[i], vertexY[i]]
                 point2 = [vertexX[i+1], vertexY[i+1]]
@@ -315,7 +319,6 @@ total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitorin
 
             i = i + 1
             self.computeStat.emit(float(i)/len(dose) * 100)
-
 
         if str(units) == 'nanoSv/h':
             totalDose = sum(estimate)

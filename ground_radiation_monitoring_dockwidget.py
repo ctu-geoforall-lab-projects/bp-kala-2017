@@ -103,7 +103,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
 
             # TODO: make this work for multiple layer loading
             if self.iface.activeLayer().geometryType() != QGis.Line:
-                self.sendMessage(u'Info', u'Loaded layer {} does not have lineString type.'.format(QFileInfo(fileName).baseName()), 'INFO')
+                self.sendMessage(u'Info', u'{} does not have lineString type.'.format(QFileInfo(fileName).baseName()), 'INFO')
 
     def onReportButton(self):
         """Get destination of report, csv and shape file.
