@@ -16,6 +16,7 @@ from PyQt4.QtCore import QVariant
 import osgeo.ogr as ogr
 import osgeo.osr as osr
 import csv
+import codecs
 
 class GroundRadiationMonitoringComputation(QThread):
     # set length measurement
@@ -49,9 +50,10 @@ class GroundRadiationMonitoringComputation(QThread):
                                 self.shpFileName, 
                                 self.vertexDist,
                                 self.speed,
-                                self.units)
+                                self.units,
+                                QgsMapLayerRegistry.instance().mapLayer(self.trackLayerId).name())
 
-    def exportRasterValues(self, rasterLayerId, trackLayerId, reportFileName, csvFileName, shpFileName, vertexDist, speed, units):
+    def exportRasterValues(self, rasterLayerId, trackLayerId, reportFileName, csvFileName, shpFileName, vertexDist, speed, units, trackName):
         """Export sampled raster values to output CSV file.
         
         Prints error when CSV file cannot be opened for writing.
@@ -97,7 +99,7 @@ class GroundRadiationMonitoringComputation(QThread):
 
         # close output file
         csvFile.close()
-        self.createReport(reportFileName, trackLayer, vertexX, vertexY, dose, distances, speed, units)
+        self.createReport(reportFileName, trackName, vertexX, vertexY, dose, distances, speed, units)
         self.createShp(vertexX, vertexY, trackLayer, shpFileName, csvFileName)
         self.computeEnd.emit()
         
@@ -205,7 +207,7 @@ class GroundRadiationMonitoringComputation(QThread):
 
         return newX, newY
     
-    def createReport(self, reportFileName, trackLayer, vertexX, vertexY, dose, distances, speed, units):
+    def createReport(self, reportFileName, trackName, vertexX, vertexY, dose, distances, speed, units):
         """Create report file.
         
         Prints error when report txt file cannot be opened for writing.
@@ -225,28 +227,33 @@ class GroundRadiationMonitoringComputation(QThread):
         speed = float(speed.replace(',', '.'))
 
         try:
-            report = open(reportFileName, 'w')
+            try:
+                # python 3.x
+                report = open(reportFileName, 'w', encoding='utf-8')
+            except:
+                # python 2.x
+                report = codecs.open(reportFileName, 'w', encoding='utf-8')
         except IOError as e:
             self.computeMessage.emit(u'Error', u'Unable open {} for writing. Reason: {}'.format(reportFileName, e),'CRITICAL')
             return
         
         distance, time, maxDose, avgDose, totalDose = self.computeReport(vertexX, vertexY, dose, distances, speed, units)
         
-        report.write('''{title}
-
-Route information
-------------------------
-route: {route}
-monitoring speed (km/h): {speed}
-total monitoring time: {hours}:{minutes}:{seconds}
-total distance (km): {distance}
-
-Radiation values (estimated)
-------------------------
-maximum dose rate (nSv/h): {maxDose}
-average dose rate (nSv/h): {avgDose}
+        report.write(u'''{title}{ls}
+{ls}
+Route information{ls}
+------------------------{ls}
+route: {route}{ls}
+monitoring speed (km/h): {speed}{ls}
+total monitoring time: {hours}:{minutes}:{seconds}{ls}
+total distance (km): {distance}{ls}
+{ls}
+Radiation values (estimated){ls}
+------------------------{ls}
+maximum dose rate (nSv/h): {maxDose}{ls}
+average dose rate (nSv/h): {avgDose}{ls}
 total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitoring plugin report',
-                                        route = '',
+                                        route = trackName,
                                         speed = speed,
                                         hours = time[0],
                                         minutes = time[1],
@@ -254,7 +261,8 @@ total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitorin
                                         distance = distance,
                                         maxDose = maxDose,
                                         avgDose = avgDose,
-                                        totalDose = totalDose))
+                                        totalDose = totalDose,
+                                        ls = os.linesep))
         report.close()
 
     def computeReport(self, vertexX, vertexY, dose, distances, speed, units):
