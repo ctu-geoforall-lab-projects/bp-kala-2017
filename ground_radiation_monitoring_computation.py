@@ -79,7 +79,9 @@ class GroundRadiationMonitoringComputation(QThread):
         # get coordinates of vertices based on user defined sample segment length
         vertexX, vertexY, distances = self.getCoor(rasterLayer, trackLayer, vertexDist)
         
+        # declare arrays for non-None dose rates and their indexes for use in total dosage computation
         dose = array('d',[])
+        index = []
 
         self.computeProgress.emit(u'Getting raster values...')
         i = 0
@@ -96,10 +98,11 @@ class GroundRadiationMonitoringComputation(QThread):
                                                                   linesep=os.linesep)))
             if value.values()[0]:
                 dose.append(value.values()[0])
+                index.append(i-1)
 
         # close output file
         csvFile.close()
-        self.createReport(reportFileName, trackName, vertexX, vertexY, dose, distances, speed, units)
+        self.createReport(reportFileName, trackName, vertexX, vertexY, dose, index, distances, speed, units)
         self.createShp(vertexX, vertexY, trackLayer, shpFileName, csvFileName)
         self.computeEnd.emit()
         
@@ -207,7 +210,7 @@ class GroundRadiationMonitoringComputation(QThread):
 
         return newX, newY
     
-    def createReport(self, reportFileName, trackName, vertexX, vertexY, dose, distances, speed, units):
+    def createReport(self, reportFileName, trackName, vertexX, vertexY, dose, index, distances, speed, units):
         """Create report file.
         
         Prints error when report txt file cannot be opened for writing.
@@ -217,6 +220,7 @@ class GroundRadiationMonitoringComputation(QThread):
         :vertexX: X coordinates of points
         :vertexY: Y coordinates of points
         :dose: list of dose rates on points
+        :index: list of indexes indicating on what coordinates are raster values avaiable
         :distances: list of distances between vertices of non-sampled track
         :speed: user input speed
         :units: user chosen units
@@ -237,7 +241,7 @@ class GroundRadiationMonitoringComputation(QThread):
             self.computeMessage.emit(u'Error', u'Unable open {} for writing. Reason: {}'.format(reportFileName, e),'CRITICAL')
             return
         
-        distance, time, maxDose, avgDose, totalDose = self.computeReport(vertexX, vertexY, dose, distances, speed, units)
+        distance, time, maxDose, avgDose, totalDose = self.computeReport(vertexX, vertexY, dose, index, distances, speed, units)
         
         report.write(u'''{title}{ls}
 {ls}
@@ -265,7 +269,7 @@ total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitorin
                                         ls = os.linesep))
         report.close()
 
-    def computeReport(self, vertexX, vertexY, dose, distances, speed, units):
+    def computeReport(self, vertexX, vertexY, dose, index, distances, speed, units):
         """Compute statistics (main output of plugin).
         
         COEFICIENT for Gy/Sv ratio
@@ -273,12 +277,16 @@ total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitorin
         :vertexX: X coordinates of points
         :vertexY: Y coordinates of points
         :dose: list of dose rates on points
+        :index: list of indexes indicating on what coordinates are raster values avaiable
         :distances: list of distances between vertices of non-sampled track
         :speed: user input speed
         :units: user chosen units
         """
         # COEFICIENT Gy/Sv
         COEFICIENT = 1
+        
+        # initialize variables
+        distance = time = maxDose = avgDose = totalDose = None
         
         # total distance
         distance = round(sum(distances)/1000,3)
@@ -290,6 +298,9 @@ total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitorin
         seconds = int(round(((decTime-hours)*60-minutes)*60))
         time = [hours, minutes, seconds]
 
+        
+        if not dose:
+            return distance, time, maxDose, avgDose, totalDose
         # max dose
         maxDose = round(max(dose),3)
 
@@ -305,13 +316,13 @@ total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitorin
             if len(dose) == 0:
                 return
 
-            if i < len(dose):
-                point1 = [vertexX[i], vertexY[i]]
-                point2 = [vertexX[i+1], vertexY[i+1]]
+            if (i+1) < len(dose):
+                point1 = [vertexX[index[i]], vertexY[index[i]]]
+                point2 = [vertexX[index[i+1]], vertexY[index[i+1]]]
 
-            elif i == len(dose):
-                point1 = [vertexX[i-1], vertexY[i-1]]
-                point2 = [vertexX[i], vertexY[i]]
+            elif (i+1) == len(dose):
+                point1 = [vertexX[index[i-1]], vertexY[index[i-1]]]
+                point2 = [vertexX[index[i]], vertexY[index[i]]]
 
             dist = self.distance(point1,point2)
             interval = (dist/1000)/float(speed)
