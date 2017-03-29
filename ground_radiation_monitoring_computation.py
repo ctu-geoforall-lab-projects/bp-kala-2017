@@ -43,78 +43,32 @@ class GroundRadiationMonitoringComputation(QThread):
         
     def run(self):
         """Run compute thread."""
-        self.exportRasterValues(self.rasterLayerId, 
-                                self.trackLayerId,
-                                self.reportFileName, 
-                                self.csvFileName,
-                                self.shpFileName, 
-                                self.vertexDist,
-                                self.speed,
-                                self.units,
-                                QgsMapLayerRegistry.instance().mapLayer(self.trackLayerId).name())
-
-    def exportRasterValues(self, rasterLayerId, trackLayerId, reportFileName, csvFileName, shpFileName, vertexDist, speed, units, trackName):
-        """Export sampled raster values to output CSV file.
         
-        Prints error when CSV file cannot be opened for writing.
-
-        :rasterLayerId: input raster layer (QgsRasterLayer)
-        :trackLayerId: linestring vector layer to be sampled (QgsVectorLayer)
-        :reportFileName: file descriptor for output report file
-        :csvFileName: file descriptor of output CVS file
-        :shpFileName: file descriptor of output shp file
-        :vertexDist: user defined distance between new vertices
-        :speed: user input speed
-        :units: user chosen units
-        """
-        try:
-            csvFile = open(csvFileName, 'wb')
-        except IOError as e:
-            self.computeMessage.emit(u'Error', u'Unable open {} for writing. Reason: {}'.format(csvFileName, e),'CRITICAL')
-            return
-
-        rasterLayer = QgsMapLayerRegistry.instance().mapLayer(rasterLayerId)
-        trackLayer = QgsMapLayerRegistry.instance().mapLayer(trackLayerId)
-
+        rasterLayer = QgsMapLayerRegistry.instance().mapLayer(self.rasterLayerId)
+        trackLayer = QgsMapLayerRegistry.instance().mapLayer(self.trackLayerId)
+        trackName = QgsMapLayerRegistry.instance().mapLayer(self.trackLayerId).name()
+        
         # get coordinates of vertices based on user defined sample segment length
-        vertexX, vertexY, distances = self.getCoor(rasterLayer, trackLayer, vertexDist)
+        vertexX, vertexY, distances = self.getCoor(rasterLayer, trackLayer)
         
-        # declare arrays for non-None dose rates and their indexes for use in total dosage computation
-        dose = array('d',[])
-        index = []
+        dose, index = self.exportRasterValues(vertexX, vertexY, rasterLayer)
+        
+        distance, time, maxDose, avgDose, totalDose = self.computeReport(vertexX, vertexY, dose, index, distances)
+        
+        self.createReport(trackName, time, distance, maxDose, avgDose, totalDose)
 
-        self.computeProgress.emit(u'Getting raster values...')
-        i = 0
-        rows = len(vertexX)
-        csvFile.write(self.tr(u'X\tY\tdosage{linesep}'.format(linesep = os.linesep)))
-        for X,Y in zip(vertexX,vertexY):
-            i = i + 1
-            self.computeStat.emit(float(i)/rows * 100)
+        self.createShp(vertexX, vertexY, trackLayer)
 
-            value = rasterLayer.dataProvider().identify(QgsPoint(X,Y),QgsRaster.IdentifyFormatValue).results()
-            csvFile.write(self.tr(u'{valX}\t{valY}\t{val}{linesep}'.format(valX = X,
-                                                                  valY = Y,
-                                                                  val = value.values()[0], 
-                                                                  linesep=os.linesep)))
-            if value.values()[0]:
-                dose.append(value.values()[0])
-                index.append(i-1)
-
-        # close output file
-        csvFile.close()
-        self.createReport(reportFileName, trackName, vertexX, vertexY, dose, index, distances, speed, units)
-        self.createShp(vertexX, vertexY, trackLayer, shpFileName, csvFileName)
         self.computeEnd.emit()
-        
-    def getCoor(self, rasterLayer, trackLayer, vertexDist):
+
+    def getCoor(self, rasterLayer, trackLayer):
         """Get coordinates of vertices of sampled track.
 
         :rasterLayer: input raster layer (QgsRasterLayer)
         :trackLayer: linestring vector layer to be sampled (QgsVectorLayer)
-        :vertexDist: user defined distance between new vertices
         """
 
-        distanceBetweenVertices = float(vertexDist.replace(',', '.'))
+        distanceBetweenVertices = float(self.vertexDist.replace(',', '.'))
 
         # declare arrays of coordinates of vertices and of distance between them
         vertexX = array('d',[])
@@ -152,16 +106,7 @@ class GroundRadiationMonitoringComputation(QThread):
                 pointCounter = pointCounter + 1
  
         # returns coordinates of all vertices of track   
-        return vertexX, vertexY, distances     
-
-    def distance(self, point1, point2):
-        """Compute length between 2 QgsPoints.
-        
-        :point1: 1st point
-        :point2: 2nd point
-        """
-        distance = GroundRadiationMonitoringComputation.length.measureLine(QgsPoint(point1[0],point1[1]), QgsPoint(point2[0],point2[1]))
-        return distance
+        return vertexX, vertexY, distances
 
     def sampleLine(self,point1, point2, dist, distBetweenVertices):
         """Sample line between two points to segments of user selected length.
@@ -209,67 +154,62 @@ class GroundRadiationMonitoringComputation(QThread):
         newY.append(point2[1])
 
         return newX, newY
-    
-    def createReport(self, reportFileName, trackName, vertexX, vertexY, dose, index, distances, speed, units):
-        """Create report file.
-        
-        Prints error when report txt file cannot be opened for writing.
 
-        :reportFileName: destination to save report file
-        :trackLayer: name of track layer
+    def exportRasterValues(self, vertexX, vertexY, rasterLayer):
+        """Export sampled raster values to output CSV file.
+        
+        Prints error when CSV file cannot be opened for writing.
+
         :vertexX: X coordinates of points
         :vertexY: Y coordinates of points
-        :dose: list of dose rates on points
-        :index: list of indexes indicating on what coordinates are raster values avaiable
-        :distances: list of distances between vertices of non-sampled track
-        :speed: user input speed
-        :units: user chosen units
+        :rasterLayer: raster layer dose rate is exctracted from
         """
-
-        self.computeProgress.emit(u'Creating report file...')
-
-        speed = float(speed.replace(',', '.'))
-
         try:
-            try:
-                # python 3.x
-                report = open(reportFileName, 'w', encoding='utf-8')
-            except:
-                # python 2.x
-                report = codecs.open(reportFileName, 'w', encoding='utf-8')
+            csvFile = open(self.csvFileName, 'wb')
         except IOError as e:
-            self.computeMessage.emit(u'Error', u'Unable open {} for writing. Reason: {}'.format(reportFileName, e),'CRITICAL')
+            self.computeMessage.emit(u'Error', u'Unable open {} for writing. Reason: {}'.format(self.csvFileName, e),'CRITICAL')
             return
-        
-        distance, time, maxDose, avgDose, totalDose = self.computeReport(vertexX, vertexY, dose, index, distances, speed, units)
-        
-        report.write(u'''{title}{ls}
-{ls}
-Route information{ls}
-------------------------{ls}
-route: {route}{ls}
-monitoring speed (km/h): {speed}{ls}
-total monitoring time: {hours}:{minutes}:{seconds}{ls}
-total distance (km): {distance}{ls}
-{ls}
-Radiation values (estimated){ls}
-------------------------{ls}
-maximum dose rate (nSv/h): {maxDose}{ls}
-average dose rate (nSv/h): {avgDose}{ls}
-total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitoring plugin report',
-                                        route = trackName,
-                                        speed = speed,
-                                        hours = time[0],
-                                        minutes = time[1],
-                                        seconds = time[2],
-                                        distance = distance,
-                                        maxDose = maxDose,
-                                        avgDose = avgDose,
-                                        totalDose = totalDose,
-                                        ls = os.linesep))
-        report.close()
 
-    def computeReport(self, vertexX, vertexY, dose, index, distances, speed, units):
+        csvFile.write(self.tr(u'X\tY\tdosage{linesep}'.format(linesep = os.linesep)))
+
+        self.computeProgress.emit(u'Getting raster values...')
+
+        rows = len(vertexX)
+        
+        # declare arrays for non-None dose rates and their indexes for use in total dosage computation
+        dose = array('d',[])
+        index = []
+        
+        i = 0
+        for X,Y in zip(vertexX,vertexY):
+            i = i + 1
+            self.computeStat.emit(float(i)/rows * 100)
+
+            value = rasterLayer.dataProvider().identify(QgsPoint(X,Y),QgsRaster.IdentifyFormatValue).results()
+            csvFile.write(self.tr(u'{valX}\t{valY}\t{val}{linesep}'.format(valX = X,
+                                                                           valY = Y,
+                                                                           val = value.values()[0], 
+                                                                           linesep=os.linesep)))
+            # get non-None dose rate values and their indexes
+            if value.values()[0]:
+                dose.append(value.values()[0])
+                index.append(i-1)
+
+        # close output file
+        csvFile.close()
+        
+        return dose, index
+
+    def distance(self, point1, point2):
+        """Compute length between 2 QgsPoints.
+        
+        :point1: 1st point
+        :point2: 2nd point
+        """
+        distance = GroundRadiationMonitoringComputation.length.measureLine(QgsPoint(point1[0],point1[1]), QgsPoint(point2[0],point2[1]))
+        return distance
+
+    def computeReport(self, vertexX, vertexY, dose, index, distances):
         """Compute statistics (main output of plugin).
         
         COEFICIENT for Gy/Sv ratio
@@ -279,8 +219,6 @@ total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitorin
         :dose: list of dose rates on points
         :index: list of indexes indicating on what coordinates are raster values avaiable
         :distances: list of distances between vertices of non-sampled track
-        :speed: user input speed
-        :units: user chosen units
         """
         # COEFICIENT Gy/Sv
         COEFICIENT = 1
@@ -292,7 +230,7 @@ total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitorin
         distance = round(sum(distances)/1000,3)
 
         # total time
-        decTime = distance/float(speed)
+        decTime = distance/float(self.speed)
         hours = int(decTime)
         minutes = int((decTime-hours)*60)
         seconds = int(round(((decTime-hours)*60-minutes)*60))
@@ -325,41 +263,92 @@ total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitorin
                 point2 = [vertexX[index[i]], vertexY[index[i]]]
 
             dist = self.distance(point1,point2)
-            interval = (dist/1000)/float(speed)
+            interval = (dist/1000)/float(self.speed)
             estimate.append(interval * rate)
 
             i = i + 1
             self.computeStat.emit(float(i)/len(dose) * 100)
 
-        if str(units) == 'nanoSv/h':
+        if str(self.units) == 'nanoSv/h':
             totalDose = sum(estimate)
             
-        elif str(units) == 'microSv/h':
+        elif str(self.units) == 'microSv/h':
             totalDose = sum(estimate)*1000
             
-        elif str(units) == 'nanoGy/h':
+        elif str(self.units) == 'nanoGy/h':
             totalDose = COEFICIENT * sum(estimate)
             
-        elif str(units) == 'microGy/h':
+        elif str(self.units) == 'microGy/h':
             totalDose = COEFICIENT * sum(estimate) * 1000
 
         totalDose = round(totalDose,3)
         return distance, time, maxDose, avgDose, totalDose
 
-    def createShp(self, vertexX, vertexY, trackLayer, shpFileName, csvFileName):
+    def createReport(self, trackName, time, distance, maxDose, avgDose, totalDose):
+        """Create report file.
+        
+        Prints error when report txt file cannot be opened for writing.
+
+        :trackLayer: name of track layer
+        :time: monitoring time
+        :distance: length of route
+        :maxDose: maximal dose rate on route
+        :avgDose: average dose rate on route
+        :totalDose: total dose rate on route
+        """
+
+        self.computeProgress.emit(u'Creating report file...')
+
+        self.speed = float(self.speed.replace(',', '.'))
+
+        try:
+            try:
+                # python 3.x
+                report = open(self.reportFileName, 'w', encoding='utf-8')
+            except:
+                # python 2.x
+                report = codecs.open(self.reportFileName, 'w', encoding='utf-8')
+        except IOError as e:
+            self.computeMessage.emit(u'Error', u'Unable open {} for writing. Reason: {}'.format(self.reportFileName, e),'CRITICAL')
+            return
+
+        report.write(u'''{title}{ls}
+{ls}
+Route information{ls}
+------------------------{ls}
+route: {route}{ls}
+monitoring speed (km/h): {speed}{ls}
+total monitoring time: {hours}:{minutes}:{seconds}{ls}
+total distance (km): {distance}{ls}
+{ls}
+Radiation values (estimated){ls}
+------------------------{ls}
+maximum dose rate (nSv/h): {maxDose}{ls}
+average dose rate (nSv/h): {avgDose}{ls}
+total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitoring plugin report',
+                                        route = trackName,
+                                        speed = self.speed,
+                                        hours = time[0],
+                                        minutes = time[1],
+                                        seconds = time[2],
+                                        distance = distance,
+                                        maxDose = maxDose,
+                                        avgDose = avgDose,
+                                        totalDose = totalDose,
+                                        ls = os.linesep))
+        report.close()
+
+    def createShp(self, vertexX, vertexY, trackLayer):
         """Create ESRI shapefile and write new points. 
 
         :vertexX: X coordinates of points
         :vertexY: Y coordinates of points
         :trackLayer: layer to get coordinate system from
-        :shpFileName: destination to save shapefile
-        :csvFileName: csvFile containing coordinates of points and their raster values
- 
         """
         
         self.computeProgress.emit(u'Creating shapefile...')
 
-        reader = csv.DictReader(open(self.tr(u'{f}').format(f = csvFileName),"rb"),
+        reader = csv.DictReader(open(self.tr(u'{f}').format(f = self.csvFileName),"rb"),
                                 delimiter='\t',
                                 quoting=csv.QUOTE_NONE)
 
@@ -367,14 +356,14 @@ total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitorin
         driver = ogr.GetDriverByName("ESRI Shapefile")
         
         # create the data source
-        dataSource = driver.CreateDataSource(self.tr(u'{f}').format(f=shpFileName))
+        dataSource = driver.CreateDataSource(self.tr(u'{f}').format(f=self.shpFileName))
 
         # create the spatial reference
         srs = osr.SpatialReference()
         srs.ImportFromEPSG(int(trackLayer.crs().authid()[5:]))
 
         # create the layer
-        layer = dataSource.CreateLayer('{}'.format(shpFileName.encode('utf8')), srs, ogr.wkbPoint)
+        layer = dataSource.CreateLayer('{}'.format(self.shpFileName.encode('utf8')), srs, ogr.wkbPoint)
 
         # Add the fields we're interested in
         layer.CreateField(ogr.FieldDefn("X", ogr.OFTReal))
