@@ -243,6 +243,8 @@ class GroundRadiationMonitoringComputation(QThread):
         # COEFICIENT Gy/Sv
         COEFICIENT = 1
         
+        self.computeProgress.emit(u'Computing and creating report file...')
+        
         # initialize variables
         distance = time = maxDose = avgDose = totalDose = None
         
@@ -316,9 +318,6 @@ class GroundRadiationMonitoringComputation(QThread):
         :avgDose: average dose rate on route
         :totalDose: total dose rate on route
         """
-
-        self.computeProgress.emit(u'Creating report file...')
-
         self.speed = float(self.speed.replace(',', '.'))
 
         try:
