@@ -232,6 +232,19 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         if not self.computeThread.isRunning():
             self.computeThread.start()
 
+    def onCancelButton(self):
+        reply  = QMessageBox.question(self, u'Ground Radiation Monitoring',
+                                            u"Cancel computation?",
+                                            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+                                            QtGui.QMessageBox.Yes)
+        if reply == QMessageBox.Yes:
+            GroundRadiationMonitoringComputation.abortThread(self.computeThread)
+            
+            # kill progress bar
+            self.progress.setParent(None)
+            self.iface.messageBar().popWidget(self.progressMessageBar)
+            
+
     def progressBar(self, text):
         """Initializing progress bar.
         
@@ -250,7 +263,9 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         self.progressMessageBar.layout().addWidget(self.cancelButton)
         self.progressMessageBar.layout().addWidget(self.progress)
         iface.messageBar().pushWidget(self.progressMessageBar, iface.messageBar().INFO)
-        
+
+        self.cancelButton.clicked.connect(self.onCancelButton)
+
     def setStatus(self, num):
         """Update progress status.
         
@@ -263,8 +278,6 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         """End computeThread.
         
         Ask to add new layer of computed points to map canvas. """
-        #if self.computeThread.aborted:
-        #    return
 
         # Message box    
         reply  = QMessageBox.question(self, u'Ground Radiation Monitoring',

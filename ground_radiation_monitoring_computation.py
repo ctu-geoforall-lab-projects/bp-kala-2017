@@ -40,27 +40,47 @@ class GroundRadiationMonitoringComputation(QThread):
         self.vertexDist = vertexDist
         self.speed = speed
         self.units = units
-        
+
     def run(self):
         """Run compute thread."""
-        
+
+        self.abort = False
+
         rasterLayer = QgsMapLayerRegistry.instance().mapLayer(self.rasterLayerId)
         trackLayer = QgsMapLayerRegistry.instance().mapLayer(self.trackLayerId)
         trackName = QgsMapLayerRegistry.instance().mapLayer(self.trackLayerId).name()
-        
+
         # get coordinates of vertices based on user defined sample segment length
         vertexX, vertexY, distances = self.getCoor(rasterLayer, trackLayer)
-        
+
+        if self.abort == True:
+            return
+
         dose, index = self.exportRasterValues(vertexX, vertexY, rasterLayer)
-        
+
+        if self.abort == True:
+            return
+
         distance, time, maxDose, avgDose, totalDose = self.computeReport(vertexX, vertexY, dose, index, distances)
-        
+
+        if self.abort == True:
+            return
+
         self.createReport(trackName, time, distance, maxDose, avgDose, totalDose)
+
+        if self.abort == True:
+            return
 
         self.createShp(vertexX, vertexY, trackLayer)
 
-        self.computeEnd.emit()
+        if self.abort == True:
+            return
 
+        self.computeEnd.emit()
+    
+    def abortThread(self):
+        self.abort = True
+      
     def getCoor(self, rasterLayer, trackLayer):
         """Get coordinates of vertices of sampled track.
 
