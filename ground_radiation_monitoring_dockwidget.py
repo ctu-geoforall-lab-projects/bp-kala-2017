@@ -240,10 +240,12 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         if reply == QMessageBox.Yes:
             GroundRadiationMonitoringComputation.abortThread(self.computeThread)
             
-            # kill progress bar
-            self.progress.setParent(None)
-            self.iface.messageBar().popWidget(self.progressMessageBar)
-            
+            # kill progress bar if it is still on (if computation is still on)
+            try:
+                self.progress.setParent(None)
+                self.iface.messageBar().popWidget(self.progressMessageBar)
+            except:
+                pass            
 
     def progressBar(self, text):
         """Initializing progress bar.
