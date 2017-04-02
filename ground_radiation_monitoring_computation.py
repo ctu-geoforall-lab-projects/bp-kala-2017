@@ -197,7 +197,7 @@ class GroundRadiationMonitoringComputation(QThread):
             self.computeMessage.emit(u'Error', u'Unable open {} for writing. Reason: {}'.format(self.csvFileName, e),'CRITICAL')
             return
 
-        csvFile.write(self.tr(u'X\tY\tdosage{linesep}'.format(linesep = os.linesep)))
+        csvFile.write(self.tr(u'X,Y,dosage{linesep}'.format(linesep = os.linesep)))
 
         self.computeProgress.emit(u'Getting raster values...')
 
@@ -218,10 +218,10 @@ class GroundRadiationMonitoringComputation(QThread):
             self.computeStat.emit(float(i)/rows * 100)
 
             value = rasterLayer.dataProvider().identify(QgsPoint(X,Y),QgsRaster.IdentifyFormatValue).results()
-            csvFile.write(self.tr(u'{valX}\t{valY}\t{val}{linesep}'.format(valX = X,
-                                                                           valY = Y,
-                                                                           val = value.values()[0], 
-                                                                           linesep=os.linesep)))
+            csvFile.write(self.tr(u'{valX},{valY},{val}{linesep}'.format(valX = X,
+                                                                         valY = Y,
+                                                                         val = value.values()[0], 
+                                                                         linesep=os.linesep)))
             # get non-None dose rate values and their indexes
             if value.values()[0]:
                 dose.append(value.values()[0])
@@ -383,7 +383,7 @@ total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitorin
         self.computeProgress.emit(u'Creating shapefile...')
 
         reader = csv.DictReader(open(self.tr(u'{f}').format(f = self.csvFileName),"rb"),
-                                delimiter='\t',
+                                delimiter=',',
                                 quoting=csv.QUOTE_NONE)
 
         # set up the shapefile driver
