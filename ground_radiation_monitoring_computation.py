@@ -346,30 +346,27 @@ class GroundRadiationMonitoringComputation(QThread):
             self.computeMessage.emit(u'Error', u'Unable open {} for writing. Reason: {}'.format(self.reportFileName, e),'CRITICAL')
             return
 
-        report.write(u'''{title}{ls}
-{ls}
-Route information{ls}
-------------------------{ls}
-route: {route}{ls}
-monitoring speed (km/h): {speed}{ls}
-total monitoring time: {hours}:{minutes}:{seconds}{ls}
-total distance (km): {distance}{ls}
-{ls}
-Radiation values (estimated){ls}
-------------------------{ls}
-maximum dose rate (nSv/h): {maxDose}{ls}
-average dose rate (nSv/h): {avgDose}{ls}
-total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitoring plugin report',
-                                        route = trackName,
-                                        speed = self.speed,
-                                        hours = time[0],
-                                        minutes = time[1],
-                                        seconds = time[2],
-                                        distance = distance,
-                                        maxDose = maxDose,
-                                        avgDose = avgDose,
-                                        totalDose = totalDose,
-                                        ls = os.linesep))
+        report.write(u'QGIS ground radiation monitoring plugin report{ls}{ls}'.format(ls = os.linesep))
+        report.write(u'Route information{ls}'.format(ls = os.linesep))
+        report.write(u'--------------------------------------{ls}'.format(ls = os.linesep))
+        report.write(u'route: {trackName}{ls}'.format(trackName = trackName, 
+                                                      ls = os.linesep))
+        report.write(u'monitoring speed (km/h): {speed}{ls}'.format(speed = self.speed, 
+                                                                    ls = os.linesep))
+        report.write(u'total monitoring time: {hours}:{minutes}:{seconds}{ls}'.format(hours = time[0],
+                                                                                  minutes = time[1],
+                                                                                  seconds = time[2],
+                                                                                  ls = os.linesep))
+        report.write(u'total distance (km): {distance}{ls}{ls}'.format(distance = distance,
+                                                                   ls = os.linesep))
+        report.write(u'Radiation values (estimated){ls}'.format(ls = os.linesep))
+        report.write(u'--------------------------------------{ls}'.format(ls = os.linesep))
+        report.write(u'maximum dose rate (nSv/h): {maxDose}{ls}'.format(maxDose = maxDose,
+                                                                        ls = os.linesep))
+        report.write(u'average dose rate (nSv/h): {avgDose}{ls}'.format(avgDose = avgDose,
+                                                                        ls = os.linesep))
+        report.write(u'total dose (nSv): {totalDose}'.format(totalDose = totalDose))
+
         report.close()
 
     def createShp(self, vertexX, vertexY, trackLayer):
