@@ -239,13 +239,43 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
                                             QtGui.QMessageBox.Yes)
         if reply == QMessageBox.Yes:
             GroundRadiationMonitoringComputation.abortThread(self.computeThread)
-            
+           
             # kill progress bar if it is still on (if computation is still on)
             try:
                 self.progress.setParent(None)
                 self.iface.messageBar().popWidget(self.progressMessageBar)
             except:
-                pass            
+                pass    
+            
+            self.cleanCreatedFiles()
+            
+    def cleanCreatedFiles(self):
+        """Remove created files."""
+        
+        # remove layers with same name as newly created layer (if is created
+        # and added to map canvas) so shape file could be removed
+        for lyr in QgsMapLayerRegistry.instance().mapLayers().values():
+            if lyr.source() == self.saveShpName:
+                QgsMapLayerRegistry.instance().removeMapLayer(lyr.id())
+
+        # remove created files
+        if os.path.isfile(self.saveReportName):
+            os.remove(self.saveReportName) 
+            
+        if os.path.isfile(self.saveCsvName):
+            os.remove(self.saveCsvName)
+            
+        if os.path.isfile(self.saveShpName):
+            os.remove(self.saveShpName)
+        
+        if os.path.isfile(self.saveShpName.split('.')[0]+'.shx'):
+            os.remove(self.saveShpName.split('.')[0]+'.shx')
+            
+        if os.path.isfile(self.saveShpName.split('.')[0]+'.dbf'):
+            os.remove(self.saveShpName.split('.')[0]+'.dbf')
+        
+        if os.path.isfile(self.saveShpName.split('.')[0]+'.prj'):
+            os.remove(self.saveShpName.split('.')[0]+'.prj')
 
     def progressBar(self, text):
         """Initializing progress bar.
