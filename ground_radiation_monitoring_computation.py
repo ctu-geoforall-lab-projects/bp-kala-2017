@@ -56,7 +56,7 @@ class GroundRadiationMonitoringComputation(QThread):
         if self.abort == True:
             return
 
-        dose, index = self.exportRasterValues(vertexX, vertexY, rasterLayer)
+        dose, index = self.createCsv(vertexX, vertexY, rasterLayer)
 
         if self.abort == True:
             return
@@ -182,7 +182,7 @@ class GroundRadiationMonitoringComputation(QThread):
 
         return newX, newY
 
-    def exportRasterValues(self, vertexX, vertexY, rasterLayer):
+    def createCsv(self, vertexX, vertexY, rasterLayer):
         """Export sampled raster values to output CSV file.
         
         Prints error when CSV file cannot be opened for writing.
