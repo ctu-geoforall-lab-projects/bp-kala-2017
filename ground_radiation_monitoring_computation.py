@@ -98,6 +98,10 @@ class GroundRadiationMonitoringComputation(QThread):
         # get coordinates of vertices of uploaded track layer
         i = 1
         for featureIndex, feature in enumerate(trackLayer.getFeatures()):
+            
+            if self.abort == True:
+                    break
+
             self.computeProgress.emit(u'Sampling track ({})...'.format(i))
             i = i + 1
 
@@ -108,6 +112,9 @@ class GroundRadiationMonitoringComputation(QThread):
             amount = len(polyline)
             while pointCounter < (amount-1):
                 
+                if self.abort == True:
+                    break
+
                 self.computeStat.emit(float(pointCounter)/amount * 100)
                 
                 point1 = polyline[pointCounter]
@@ -202,6 +209,11 @@ class GroundRadiationMonitoringComputation(QThread):
         
         i = 0
         for X,Y in zip(vertexX,vertexY):
+            
+            if self.abort == True:
+                csvFile.close()
+                break
+            
             i = i + 1
             self.computeStat.emit(float(i)/rows * 100)
 
@@ -272,6 +284,9 @@ class GroundRadiationMonitoringComputation(QThread):
         # total dose
         i = 0
         for rate in dose:
+            
+            if self.abort == True:
+                break
 
             if len(dose) == 0:
                 return
@@ -393,6 +408,10 @@ total dose (nSv): {totalDose}'''.format(title = 'QGIS ground radiation monitorin
         i = 0
         rows = len(vertexX)
         for row in reader:
+            
+            if self.abort == True:
+                    break
+            
             i = i + 1
             self.computeStat.emit(float(i)/rows * 100)
             # create the feature
