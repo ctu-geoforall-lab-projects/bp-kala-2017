@@ -258,21 +258,23 @@ class GroundRadiationMonitoringComputation(QThread):
         self.computeProgress.emit(u'Computing and creating report file...')
         
         # initialize variables
-        distance = time = maxDose = avgDose = totalDose = None
+        maxDose = avgDose = totalDose = None
+        time = [0,0,0]
+        totalDistance = 0
         
         # total distance
-        distance = round(sum(distances)/1000,3)
+        # distance = round(sum(distances)/1000,3)
 
         # total time
-        decTime = distance/float(self.speed)
-        hours = int(decTime)
-        minutes = int((decTime-hours)*60)
-        seconds = int(round(((decTime-hours)*60-minutes)*60))
-        time = [hours, minutes, seconds]
+        # decTime = distance/float(self.speed)
+        # hours = int(decTime)
+        # minutes = int((decTime-hours)*60)
+        # seconds = int(round(((decTime-hours)*60-minutes)*60))
+        # time = [hours, minutes, seconds]
 
         
         if not dose:
-            return distance, time, maxDose, avgDose, totalDose
+            return totalDistance, time, maxDose, avgDose, totalDose
         # max dose
         maxDose = round(max(dose),3)
 
@@ -281,7 +283,7 @@ class GroundRadiationMonitoringComputation(QThread):
         
         estimate = array('d', [])
         
-        # total dose
+        # total dose, distance
         i = 0
         for rate in dose:
             
@@ -302,10 +304,12 @@ class GroundRadiationMonitoringComputation(QThread):
             dist = self.distance(point1,point2)
             interval = (dist/1000)/float(self.speed)
             estimate.append(interval * rate)
-
+            
+            totalDistance = totalDistance + dist
+            
             i = i + 1
             self.computeStat.emit(float(i)/len(dose) * 100)
-
+        
         if str(self.units) == 'nanoSv/h':
             totalDose = sum(estimate)
             
@@ -319,7 +323,16 @@ class GroundRadiationMonitoringComputation(QThread):
             totalDose = COEFICIENT * sum(estimate) * 1000
 
         totalDose = round(totalDose,3)
-        return distance, time, maxDose, avgDose, totalDose
+        totalDistance = round(totalDistance/1000,3)
+        
+        # total time
+        decTime = totalDistance/float(self.speed)
+        hours = int(decTime)
+        minutes = int((decTime-hours)*60)
+        seconds = int(round(((decTime-hours)*60-minutes)*60))
+        time = [hours, minutes, seconds]
+        
+        return totalDistance, time, maxDose, avgDose, totalDose
 
     def createReport(self, trackName, time, distance, maxDose, avgDose, totalDose):
         """Create report file.
