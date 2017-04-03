@@ -100,7 +100,10 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         if fileName:
             self.iface.addVectorLayer(fileName, QFileInfo(fileName).baseName(), "ogr")
             self.settings.setValue(sender, os.path.dirname(fileName))
-
+            
+            if self.iface.activeLayer().type() != QgsMapLayer.VectorLayer:
+                return
+            
             # TODO: make this work for multiple layer loading
             if self.iface.activeLayer().geometryType() != QGis.Line:
                 self.sendMessage(u'Info', u'{} does not have lineString type.'.format(QFileInfo(fileName).baseName()), 'INFO')
