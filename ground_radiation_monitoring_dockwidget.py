@@ -228,6 +228,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
                                                                   self.vertex_dist.text(),
                                                                   self.speed.text(),
                                                                   self.unit_box.currentText())
+        self.saveShpNameOriginal = self.saveShpName
         self.computeThread.computeEnd.connect(self.addNewLayer)
         self.computeThread.computeStat.connect(self.setStatus)
         self.computeThread.computeProgress.connect(self.progressBar)
@@ -328,8 +329,8 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
                                             QtGui.QMessageBox.Yes)
         # add map layer to map canvas
         if reply == QMessageBox.Yes:
-            newLayer = iface.addVectorLayer(u'{f}'.format(f=self.saveShpName),
-                                             u'{f}'.format(f=QFileInfo(self.saveShpName).baseName()), "ogr")  
+            newLayer = iface.addVectorLayer(u'{f}'.format(f=self.saveShpNameOriginal),
+                                             u'{f}'.format(f=QFileInfo(self.saveShpNameOriginal).baseName()), "ogr")  
         
         self.iface.messageBar().popWidget(self.progressMessageBar)
         self.save_button.setEnabled(True)
