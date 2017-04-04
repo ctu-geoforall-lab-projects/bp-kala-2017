@@ -27,7 +27,7 @@ class GroundRadiationMonitoringComputation(QThread):
     # set signals
     computeEnd = pyqtSignal()
     computeStat = pyqtSignal(int)
-    computeProgress = pyqtSignal(str)
+    computeProgress = pyqtSignal(int,str)
     computeMessage = pyqtSignal(str,str,str)
 
     def __init__(self,  rasterLayerId, trackLayerId, reportFileName, csvFileName, shpFileName, vertexDist, speed, units):
@@ -102,7 +102,7 @@ class GroundRadiationMonitoringComputation(QThread):
             if self.abort == True:
                     break
 
-            self.computeProgress.emit(u'Sampling track ({})...'.format(i))
+            self.computeProgress.emit(1,u'({}/{}) Sampling track...'.format(i, len(list(trackLayer.getFeatures()))))
             i = i + 1
 
             polyline = feature.geometry().asPolyline()
@@ -199,7 +199,7 @@ class GroundRadiationMonitoringComputation(QThread):
 
         csvFile.write(self.tr(u'X,Y,dosage{linesep}'.format(linesep = os.linesep)))
 
-        self.computeProgress.emit(u'Getting raster values...')
+        self.computeProgress.emit(2,u'Getting raster values...')
 
         rows = len(vertexX)
         
@@ -255,7 +255,7 @@ class GroundRadiationMonitoringComputation(QThread):
         # COEFICIENT Gy/Sv
         COEFICIENT = 1
         
-        self.computeProgress.emit(u'Computing and creating report file...')
+        self.computeProgress.emit(3,u'Computing and creating report file...')
         
         # initialize variables
         maxDose = avgDose = totalDose = None
@@ -322,7 +322,7 @@ class GroundRadiationMonitoringComputation(QThread):
         elif str(self.units) == 'microGy/h':
             totalDose = COEFICIENT * sum(estimate) * 1000
 
-        totalDose = round(totalDose,3)
+        #totalDose = round(totalDose,3)
         totalDistance = round(totalDistance/1000,3)
         
         # total time
@@ -390,7 +390,7 @@ class GroundRadiationMonitoringComputation(QThread):
         :trackLayer: layer to get coordinate system from
         """
         
-        self.computeProgress.emit(u'Creating shapefile...')
+        self.computeProgress.emit(4,u'Creating shapefile...')
 
         reader = csv.DictReader(open(self.tr(u'{f}').format(f = self.csvFileName),"rb"),
                                 delimiter=',',

@@ -280,7 +280,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         if os.path.isfile(self.saveShpName.split('.')[0]+'.prj'):
             os.remove(self.saveShpName.split('.')[0]+'.prj')
 
-    def progressBar(self, text):
+    def progressBar(self, i, text):
         """Initializing progress bar.
         
         :text: message to indicate what operation is currently on
@@ -289,7 +289,8 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
             self.iface.messageBar().popWidget(self.progressMessageBar)
         except:
             pass
-        self.progressMessageBar = iface.messageBar().createMessage(u"Ground Radiation Monitoring: ", u"{}".format(text))
+        self.progressMessageBar = iface.messageBar().createMessage(u"({}/4) Ground Radiation Monitoring: ".format(i), 
+                                                                   u"{}".format(text))
         self.progress = QProgressBar()
         self.progress.setMaximum(100)
         self.progress.setAlignment(Qt.AlignLeft|Qt.AlignVCenter)
@@ -300,6 +301,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         iface.messageBar().pushWidget(self.progressMessageBar, iface.messageBar().INFO)
 
         self.cancelButton.clicked.connect(self.onCancelButton)
+        #self.progressMessageBar.closed.clicked.connect(self.onCancelButton)
 
     def setStatus(self, num):
         """Update progress status.
