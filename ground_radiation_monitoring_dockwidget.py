@@ -235,6 +235,9 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         if not self.computeThread.isRunning():
             self.computeThread.start()
 
+        self.save_button.setEnabled(False)
+
+
     def onCancelButton(self):
         reply  = QMessageBox.question(self, u'Ground Radiation Monitoring',
                                             u"Cancel computation?",
@@ -251,6 +254,8 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
                 pass    
             
             self.cleanCreatedFiles()
+            self.save_button.setEnabled(True)
+
             
     def cleanCreatedFiles(self):
         """Remove created files."""
@@ -327,7 +332,8 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
                                              u'{f}'.format(f=QFileInfo(self.saveShpName).baseName()), "ogr")  
         
         self.iface.messageBar().popWidget(self.progressMessageBar)
-      
+        self.save_button.setEnabled(True)
+
     def sendMessage(self, caption, message, type):
         if type == 'CRITICAL':
             self.iface.messageBar().pushMessage(self.tr(u'{}').format(caption),
