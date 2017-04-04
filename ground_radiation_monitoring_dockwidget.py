@@ -101,7 +101,8 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
             self.iface.addVectorLayer(fileName, QFileInfo(fileName).baseName(), "ogr")
             self.settings.setValue(sender, os.path.dirname(fileName))
             
-            if self.iface.activeLayer().type() != QgsMapLayer.VectorLayer:
+            name, fileExtension = os.path.splitext(fileName)
+            if fileExtension not in QgsProviderRegistry.instance().fileVectorFilters():
                 return
             
             # TODO: make this work for multiple layer loading
