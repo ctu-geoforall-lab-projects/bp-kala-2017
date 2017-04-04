@@ -146,7 +146,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
                                                        self.tr(u'{}{}.csv').format(lastUsedFilePath,os.path.sep), 
                                                        filter ="CSV (*.csv)")
 
-        self.csv_file.setText('{}'.format(self.saveCsvName))
+        self.csv_file.setText(u'{}'.format(self.saveCsvName))
         if self.saveCsvName:
             self.settings.setValue(sender, os.path.dirname(self.saveCsvName))
 
