@@ -79,7 +79,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
 
     def onLoadRaster(self):
         """Open 'Add raster layer dialog'."""
-        sender = '{}-lastUserFilePath'.format(self.sender().objectName())
+        sender = u'{}-lastUserFilePath'.format(self.sender().objectName())
         lastUsedFilePath = self.settings.value(sender, '')
 
         fileName = QFileDialog.getOpenFileName(self,self.tr(u'Open raster'), 
@@ -91,7 +91,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
             
     def onLoadTrack(self):
         """Open 'Add track layer dialog'."""
-        sender = '{}-lastUserFilePath'.format(self.sender().objectName())
+        sender = u'{}-lastUserFilePath'.format(self.sender().objectName())
         lastUsedFilePath = self.settings.value(sender, '')
         
         fileName = QFileDialog.getOpenFileName(self,self.tr(u'Open track'),
@@ -115,7 +115,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         
         Set default name for report file same as track layer name"""
 
-        sender = '{}-lastUserFilePath'.format(self.sender().objectName())
+        sender = u'{}-lastUserFilePath'.format(self.sender().objectName())
         lastUsedFilePath = self.settings.value(sender, '')
 
         self.saveReportName = QFileDialog.getSaveFileName(self, self.tr(u'Select destination file'), 
@@ -140,7 +140,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
     def onCsvButton(self):
         """Get destination of csv file."""
         
-        sender = '{}-lastUserFilePath'.format(self.sender().objectName())
+        sender = u'{}-lastUserFilePath'.format(self.sender().objectName())
         lastUsedFilePath = self.settings.value(sender, '')
         self.saveCsvName = QFileDialog.getSaveFileName(self, self.tr(u'Select destination file'), 
                                                        self.tr(u'{}{}.csv').format(lastUsedFilePath,os.path.sep), 
@@ -158,13 +158,13 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
     def onShpButton(self):
         """Get destination of shp file."""
 
-        sender = '{}-lastUserFilePath'.format(self.sender().objectName())
+        sender = u'{}-lastUserFilePath'.format(self.sender().objectName())
         lastUsedFilePath = self.settings.value(sender, '')
         self.saveShpName = QFileDialog.getSaveFileName(self, self.tr(u'Select destination file'), 
                                                        self.tr(u'{}{}.shp').format(lastUsedFilePath,os.path.sep), 
                                                        filter ="ESRI Shapefile (*.shp)")
 
-        self.shp_file.setText('{}'.format(self.saveShpName))
+        self.shp_file.setText(u'{}'.format(self.saveShpName))
         if self.saveShpName:
             self.settings.setValue(sender, os.path.dirname(self.saveShpName))
 
