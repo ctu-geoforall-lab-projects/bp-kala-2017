@@ -88,8 +88,6 @@ class GroundRadiationMonitoringComputation(QThread):
         :trackLayer: linestring vector layer to be sampled (QgsVectorLayer)
         """
 
-        distanceBetweenVertices = float(self.vertexDist.replace(',', '.'))
-
         # declare arrays of coordinates of vertices and of distance between them
         vertexX = array('d',[])
         vertexY = array('d',[])
@@ -123,8 +121,8 @@ class GroundRadiationMonitoringComputation(QThread):
                 distances.append(distance)
 
                 # check whether the input distance between vertices is longer then the distance between points
-                if distance > distanceBetweenVertices:
-                    newX, newY = self.sampleLine(point1,point2, distance, distanceBetweenVertices)
+                if distance > self.vertexDist and self.vertexDist != 0:
+                    newX, newY = self.sampleLine(point1,point2, distance)
                     vertexX.extend(newX)
                     vertexY.extend(newY)
                 else:
@@ -135,7 +133,7 @@ class GroundRadiationMonitoringComputation(QThread):
         # returns coordinates of all vertices of track   
         return vertexX, vertexY, distances
 
-    def sampleLine(self,point1, point2, dist, distBetweenVertices):
+    def sampleLine(self,point1, point2, dist):
         """Sample line between two points to segments of user selected length.
 
         Compute coordinates of new vertices.
@@ -143,17 +141,16 @@ class GroundRadiationMonitoringComputation(QThread):
         :point1: first point of line
         :point2: last point of line
         :dist: length of line in metres
-        :distBetweenVertices: length of segment selected by user
         """
 
         # number of vertices, that should be added between 2 points
-        vertexQuantity = ceil(dist / float(distBetweenVertices)) - 1
+        vertexQuantity = ceil(dist / float(self.vertexDist)) - 1
 
         # if modulo of division of line length and 1 segment length is not 0,
         # point where last complete segment ends is computed
         lastPointX = lastPointY = None
-        if dist % distBetweenVertices != 0:
-            shortestSegmentRel = (dist % distBetweenVertices) / dist
+        if dist % self.vertexDist != 0:
+            shortestSegmentRel = (dist % self.vertexDist) / dist
             lastPointX = point2[0] - (point2[0] - point1[0]) * shortestSegmentRel
             lastPointY = point2[1] - (point2[1] - point1[1]) * shortestSegmentRel
             vectorX = lastPointX - point1[0]
