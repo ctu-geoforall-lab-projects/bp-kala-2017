@@ -19,6 +19,9 @@ import csv
 import codecs
 
 class GroundRadiationMonitoringComputation(QThread):
+    # set Gy/Sv coeficient
+    COEFICIENT = 1
+    
     # set length measurement
     length = QgsDistanceArea()
     length.setEllipsoid('WGS84')
@@ -250,7 +253,7 @@ class GroundRadiationMonitoringComputation(QThread):
         :distances: list of distances between vertices of non-sampled track
         """
         # COEFICIENT Gy/Sv
-        COEFICIENT = 1
+        coef = GroundRadiationMonitoringComputation.COEFICIENT
         
         self.computeProgress.emit(3,u'Computing and creating report file...')
         
@@ -317,14 +320,14 @@ class GroundRadiationMonitoringComputation(QThread):
             maxDose = maxDose * 1000
             
         elif str(self.units) == 'nanoGy/h':
-            totalDose = COEFICIENT * sum(estimate)
-            avgDose = COEFICIENT * avgDose
-            maxDose = COEFICIENT * maxDose
+            totalDose = coef * sum(estimate)
+            avgDose = coef * avgDose
+            maxDose = coef * maxDose
             
         elif str(self.units) == 'microGy/h':
-            totalDose = COEFICIENT * sum(estimate) * 1000
-            avgDose = COEFICIENT * avgDose * 1000
-            maxDose = COEFICIENT * maxDose * 1000
+            totalDose = coef * sum(estimate) * 1000
+            avgDose = coef * avgDose * 1000
+            maxDose = coef * maxDose * 1000
             
         totalDose = round(totalDose,6)
         avgDose = round(avgDose,6)
