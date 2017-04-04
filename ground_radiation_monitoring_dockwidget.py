@@ -230,6 +230,8 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
                                                                   self.speed.text(),
                                                                   self.unit_box.currentText())
         self.saveShpNameOriginal = self.saveShpName
+        self.saveReportNameOriginal = self.saveReportName
+        self.saveCsvNameOriginal = self.saveCsvName
         self.computeThread.computeEnd.connect(self.addNewLayer)
         self.computeThread.computeStat.connect(self.setStatus)
         self.computeThread.computeProgress.connect(self.progressBar)
@@ -265,27 +267,27 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         # remove layers with same name as newly created layer (if is created
         # and added to map canvas) so shape file could be removed
         for lyr in QgsMapLayerRegistry.instance().mapLayers().values():
-            if lyr.source() == self.saveShpName:
+            if lyr.source() == self.saveShpNameOriginal:
                 QgsMapLayerRegistry.instance().removeMapLayer(lyr.id())
 
         # remove created files
-        if os.path.isfile(self.saveReportName):
-            os.remove(self.saveReportName) 
+        if os.path.isfile(self.saveReportNameOriginal):
+            os.remove(self.saveReportNameOriginal) 
             
-        if os.path.isfile(self.saveCsvName):
-            os.remove(self.saveCsvName)
+        if os.path.isfile(self.saveCsvNameOriginal):
+            os.remove(self.saveCsvNameOriginal)
             
-        if os.path.isfile(self.saveShpName):
-            os.remove(self.saveShpName)
+        if os.path.isfile(self.saveShpNameOriginal):
+            os.remove(self.saveShpNameOriginal)
         
-        if os.path.isfile(self.saveShpName.split('.')[0]+'.shx'):
-            os.remove(self.saveShpName.split('.')[0]+'.shx')
+        if os.path.isfile(self.saveShpNameOriginal.split('.')[0]+'.shx'):
+            os.remove(self.saveShpNameOriginal.split('.')[0]+'.shx')
             
-        if os.path.isfile(self.saveShpName.split('.')[0]+'.dbf'):
-            os.remove(self.saveShpName.split('.')[0]+'.dbf')
+        if os.path.isfile(self.saveShpNameOriginal.split('.')[0]+'.dbf'):
+            os.remove(self.saveShpNameOriginal.split('.')[0]+'.dbf')
         
-        if os.path.isfile(self.saveShpName.split('.')[0]+'.prj'):
-            os.remove(self.saveShpName.split('.')[0]+'.prj')
+        if os.path.isfile(self.saveShpNameOriginal.split('.')[0]+'.prj'):
+            os.remove(self.saveShpNameOriginal.split('.')[0]+'.prj')
 
     def progressBar(self, i, text):
         """Initializing progress bar.
