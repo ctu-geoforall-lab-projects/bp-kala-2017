@@ -258,7 +258,11 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
                 pass    
             
             self.cleanCreatedFiles()
-            self.save_button.setEnabled(True)
+            
+            if not (self.report_file.text() and self.csv_file.text() and self.shp_file.text()):
+                self.save_button.setEnabled(False)
+            else:
+                self.save_button.setEnabled(True)  
 
             
     def cleanCreatedFiles(self):
