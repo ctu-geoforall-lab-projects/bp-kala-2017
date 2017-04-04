@@ -275,12 +275,7 @@ class GroundRadiationMonitoringComputation(QThread):
         
         if not dose:
             return totalDistance, time, maxDose, avgDose, totalDose
-        # max dose
-        maxDose = round(max(dose),3)
 
-        # avg dose
-        avgDose = round(sum(dose)/float(len(dose)),3)
-        
         estimate = array('d', [])
         
         # total dose, distance
@@ -310,19 +305,33 @@ class GroundRadiationMonitoringComputation(QThread):
             i = i + 1
             self.computeStat.emit(float(i)/len(dose) * 100)
         
+        # max dose
+        maxDose = max(dose)
+
+        # avg dose
+        avgDose = sum(dose)/float(len(dose))
+        
         if str(self.units) == 'nanoSv/h':
             totalDose = sum(estimate)
             
         elif str(self.units) == 'microSv/h':
-            totalDose = sum(estimate)*1000
+            totalDose = sum(estimate) * 1000
+            avgDose = avgDose * 1000
+            maxDose = maxDose * 1000
             
         elif str(self.units) == 'nanoGy/h':
             totalDose = COEFICIENT * sum(estimate)
+            avgDose = COEFICIENT * avgDose
+            maxDose = COEFICIENT * maxDose
             
         elif str(self.units) == 'microGy/h':
             totalDose = COEFICIENT * sum(estimate) * 1000
-
-        #totalDose = round(totalDose,3)
+            avgDose = COEFICIENT * avgDose * 1000
+            maxDose = COEFICIENT * maxDose * 1000
+            
+        totalDose = round(totalDose,6)
+        avgDose = round(avgDose,6)
+        maxDose = round(maxDose,6)
         totalDistance = round(totalDistance/1000,3)
         
         # total time
