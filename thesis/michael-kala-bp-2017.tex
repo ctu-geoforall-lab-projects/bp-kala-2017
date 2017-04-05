@@ -1,0 +1,219 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%													%%
+%% 	BAKALÁŘSKÁ PRÁCE -  Zásuvný modul QGIS pro pozemní monitorování radiace			%%
+%% 				 Michael Kala							%%
+%%													%%
+%% pro formátování využita šablona: http://geo3.fsv.cvut.cz/kurzy/mod/resource/view.php?id=775 	%%
+%%													%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+\documentclass[%
+  12pt,         			% Velikost základního písma je 12 bodů
+  a4paper,      			% Formát papíru je A4
+  oneside,       			% Oboustranný tisk
+  pdftex,				    % překlad bude proveden programem 'pdftex' do PDF
+%%%  draft
+]{report}       			% Dokument třídy 'zpráva'
+%
+
+\newcommand{\Fbox}[1]{\fbox{\strut#1}}
+
+\usepackage[czech, english]{babel}	% použití češtiny, angličtiny
+\usepackage[utf8]{inputenc}		% Kódování zdrojových souborů je UTF8
+
+\usepackage[square,sort,comma,numbers]{natbib}
+
+\usepackage{caption}
+\usepackage{subcaption}
+\captionsetup{font=small}
+\usepackage{enumitem} 
+\setlist{leftmargin=*} % bez odsazení
+
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpbot}{0pt plus 1fil}
+\makeatletter
+
+\usepackage[dvips]{graphicx}   
+\usepackage{color}
+\usepackage{transparent}
+\usepackage{wrapfig}
+\usepackage{float} 
+
+\usepackage{cmap}           
+\usepackage[T1]{fontenc}    
+
+\usepackage{textcomp}
+\usepackage[compact]{titlesec}
+\usepackage{amsmath}
+\addtolength{\jot}{1em} 
+
+\usepackage{chngcntr}
+\counterwithout{footnote}{chapter}
+
+\usepackage{acronym}
+
+\usepackage[
+    unicode,                
+    breaklinks=true,        
+    hypertexnames=false,
+    colorlinks=true, % true for print version
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+]{hyperref}         
+
+\usepackage{url}
+\usepackage{fancyhdr}
+%\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{algcompatible}
+\renewcommand{\ALG@name}{Pseudokód}% Update algorithm name
+\def\ALG@name{Pseudokód}
+
+\usepackage[
+  cvutstyle,          
+  bachelor           
+]{thesiscvut}
+
+
+\newif\ifweb
+\ifx\ifHtml\undefined % Mimo HTML.
+    \webfalse
+\else % V HTML.
+    \webtrue
+\fi 
+
+\renewcommand{\figurename}{Obrázek}
+\def\figurename{Obrázek}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%% Definice informací o dokumentu  %%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Název práce
+\nazev{ Zásuvný modul QGIS pro pozemní monitorování radiace}
+{QGIS Plugin for Ground Radiation Monitoring     }
+
+%% Jméno a příjmení autora
+\autor{Michael}{Kala}
+
+%% Jméno a příjmení vedoucího práce včetně titulů
+\garant{Ing.~Martin~Landa,~Ph.D.}
+
+%% Označení oboru studia
+\oborstudia{Geodézie, kartografie a~geoinformatika}{}
+
+%% Označení ústavu
+\ustav{Katedra geomatiky}{}
+
+%% Rok obhajoby
+\rok{2017}
+
+%Mesic obhajoby
+\mesic{červen}
+
+%% Místo obhajoby
+\misto{Praha}
+
+%% Abstrakt
+%%% ML: rozsirit, kopie zadani je pro abstrakt malo
+\abstrakt 
+{Abstrakt cesky}
+{Abstract english}
+
+%% Klíčová slova
+\klicovaslova
+{GIS, QGIS, zásuvný~modul, python}
+{GIS, QGIS, plugin, python}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Nastavení polí ve Vlastnostech dokumentu PDF
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\nastavenipdf
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% Začátek dokumentu
+\begin{document}
+
+\catcode`\-=12  % pro vypnuti aktivniho znaku '-' pouzivaneho napr. v \cline 
+
+% aktivace záhlaví
+\zahlavi
+
+% předefinování vzhledu záhlaví
+\renewcommand{\chaptermark}[1]{%
+	\markboth{\MakeUppercase
+	{%
+	\thechapter.%
+	\ #1}}{}}
+
+% Vysázení přebalu práce
+%\vytvorobalku
+
+% Vysázení titulní stránky práce
+\vytvortitulku
+
+% Vysázení listu zadani
+\stranka{}%
+	{\includegraphics[scale=0.7]{./pictures/zadani.pdf}}%\sffamily\Huge\centering\ }%ZDE VLOŽIT LIST ZADÁNÍ}%
+	%{\sffamily\centering Z~důvodu správného číslování stránek}
+
+% Vysázení stránky s abstraktem
+\vytvorabstrakt
+
+% Vysázení prohlaseni o samostatnosti
+\vytvorprohlaseni
+
+% Vysázení poděkování
+\stranka{%nahore
+       }{%uprostred
+       }{%dole
+       \sffamily
+	\begin{flushleft}
+		\large
+		\MakeUppercase{Poděkování}
+	\end{flushleft}
+	\vspace{1em}
+		%\noindent
+	\par\hspace{2ex}
+	{Chtěl bych poděkovat }
+}
+
+% Vysázení obsahu
+\obsah
+
+% Vysázení seznamu obrázků
+\seznamobrazku
+
+% Vysázení seznamu tabulek
+%\seznamtabulek
+
+% jednotlivé kapitoly
+\include{1-uvod}
+
+% Vysázení seznamu zkratek
+\include{zkratky}
+
+% Literatura
+\nocite{*}
+\def\refname{Literatura}
+\bibliographystyle{mystyle}
+\bibliography{literatura}
+
+
+% Začátek příloh
+\def\figurename{Figure}%
+\prilohy
+
+% Vysázení seznamu příloh
+\seznampriloh
+
+% Vložení souboru s přílohami
+\include{prilohy}
+
+% Konec dokumentu
+\end{document}
