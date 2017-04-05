@@ -97,7 +97,12 @@ ENV/
 *.autosave
 *.aux
 *.lof
-thesis/michael-kala-bp-2017.out
+*.out
 *.gz
-thesis/michael-kala-bp-2017.toc
+*.toc
 *.eps
+*.bbl
+*.blg
+*.loa
+*~
+text/michael-kala-bp-2017.pdf
