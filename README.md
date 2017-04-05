@@ -1,8 +1,8 @@
-# Bakalářská práce
+﻿# Bakalářská práce
 
 ## Název
 
-**TODO**
+**Zásuvný modul QGIS pro pozemní monitorování radiace**
 
 ## Student
 
