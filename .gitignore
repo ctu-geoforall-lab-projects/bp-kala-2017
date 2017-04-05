@@ -95,3 +95,9 @@ ENV/
 # QT autosafe
 .ui.autosave
 *.autosave
+*.aux
+*.lof
+thesis/michael-kala-bp-2017.out
+*.gz
+thesis/michael-kala-bp-2017.toc
+*.eps
