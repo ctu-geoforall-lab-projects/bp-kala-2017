@@ -29,8 +29,8 @@ class GroundRadiationMonitoringComputation(QThread):
     
     # set signals
     computeEnd = pyqtSignal()
-    computeStat = pyqtSignal(int)
-    computeProgress = pyqtSignal(int,str)
+    computeStat = pyqtSignal(int,str)
+    computeProgress = pyqtSignal()
     computeMessage = pyqtSignal(str,str,str)
 
     def __init__(self,  rasterLayerId, trackLayerId, reportFileName, csvFileName, shpFileName, vertexDist, speed, units):
@@ -46,7 +46,9 @@ class GroundRadiationMonitoringComputation(QThread):
 
     def run(self):
         """Run compute thread."""
-
+        
+        self.computeProgress.emit()
+        
         self.abort = False
 
         rasterLayer = QgsMapLayerRegistry.instance().mapLayer(self.rasterLayerId)
@@ -97,14 +99,11 @@ class GroundRadiationMonitoringComputation(QThread):
         distances = array('d',[])
 
         # get coordinates of vertices of uploaded track layer
-        i = 1
         for featureIndex, feature in enumerate(trackLayer.getFeatures()):
             
             if self.abort == True:
                     break
 
-            self.computeProgress.emit(1,u'({}/{}) Sampling track...'.format(i, len(list(trackLayer.getFeatures()))))
-            i = i + 1
 
             polyline = feature.geometry().asPolyline()
             pointCounter = 0
@@ -116,7 +115,7 @@ class GroundRadiationMonitoringComputation(QThread):
                 if self.abort == True:
                     break
 
-                self.computeStat.emit(float(pointCounter)/amount * 100)
+                self.computeStat.emit(float(pointCounter)/amount * 10, u'(1/4) Sampling track...')
                 
                 point1 = polyline[pointCounter]
                 point2 = polyline[pointCounter+1]
@@ -199,8 +198,6 @@ class GroundRadiationMonitoringComputation(QThread):
 
         csvFile.write(self.tr(u'X,Y,dosage{linesep}'.format(linesep = os.linesep)))
 
-        self.computeProgress.emit(2,u'Getting raster values...')
-
         rows = len(vertexX)
         
         # declare arrays for non-None dose rates and their indexes for use in total dosage computation
@@ -215,7 +212,7 @@ class GroundRadiationMonitoringComputation(QThread):
                 break
             
             i = i + 1
-            self.computeStat.emit(float(i)/rows * 100)
+            self.computeStat.emit(float(i)/rows * 100, u'(2/4) Getting raster values...')
 
             value = rasterLayer.dataProvider().identify(QgsPoint(X,Y),QgsRaster.IdentifyFormatValue).results()
             csvFile.write(self.tr(u'{valX},{valY},{val}{linesep}'.format(valX = X,
@@ -254,8 +251,6 @@ class GroundRadiationMonitoringComputation(QThread):
         """
         # COEFICIENT Gy/Sv
         coef = GroundRadiationMonitoringComputation.COEFICIENT
-        
-        self.computeProgress.emit(3,u'Computing and creating report file...')
         
         # initialize variables
         maxDose = avgDose = totalDose = None
@@ -303,7 +298,7 @@ class GroundRadiationMonitoringComputation(QThread):
             totalDistance = totalDistance + dist
             
             i = i + 1
-            self.computeStat.emit(float(i)/len(dose) * 100)
+            self.computeStat.emit(float(i)/len(dose) * 100, u'(3/4) Computing and creating report file...')
         
         # max dose
         maxDose = max(dose)
@@ -398,8 +393,6 @@ class GroundRadiationMonitoringComputation(QThread):
         :vertexY: Y coordinates of points
         :trackLayer: layer to get coordinate system from
         """
-        
-        self.computeProgress.emit(4,u'Creating shapefile...')
 
         reader = csv.DictReader(open(self.tr(u'{f}').format(f = self.csvFileName),"rb"),
                                 delimiter=',',
@@ -432,7 +425,7 @@ class GroundRadiationMonitoringComputation(QThread):
                     break
             
             i = i + 1
-            self.computeStat.emit(float(i)/rows * 100)
+            self.computeStat.emit(float(i)/rows * 100, u'(4/4) Creating shape file...')
             # create the feature
             feature = ogr.Feature(layer.GetLayerDefn())
             # Set the attributes using the values from the delimited text file

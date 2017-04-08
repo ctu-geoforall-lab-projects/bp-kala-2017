@@ -293,35 +293,31 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         if os.path.isfile(self.saveShpNameOriginal.split('.')[0]+'.prj'):
             os.remove(self.saveShpNameOriginal.split('.')[0]+'.prj')
 
-    def progressBar(self, i, text):
+    def progressBar(self):
         """Initializing progress bar.
         
         :text: message to indicate what operation is currently on
         """
-        try:
-            self.iface.messageBar().popWidget(self.progressMessageBar)
-        except:
-            pass
-        self.progressMessageBar = iface.messageBar().createMessage(u"({}/4) Ground Radiation Monitoring: ".format(i), 
-                                                                   u"{}".format(text))
+        self.progressMessageBar = iface.messageBar().createMessage(u"Ground Radiation Monitoring:",u" Computing...")
         self.progress = QProgressBar()
         self.progress.setMaximum(100)
         self.progress.setAlignment(Qt.AlignLeft|Qt.AlignVCenter)
+        
         self.cancelButton = QtGui.QPushButton()
         self.cancelButton.setText('Cancel')
         self.progressMessageBar.layout().addWidget(self.cancelButton)
         self.progressMessageBar.layout().addWidget(self.progress)
-        iface.messageBar().pushWidget(self.progressMessageBar, iface.messageBar().INFO)
+        self.iface.messageBar().pushWidget(self.progressMessageBar, iface.messageBar().INFO)
 
         self.cancelButton.clicked.connect(self.onCancelButton)
-        #self.progressMessageBar.closed.clicked.connect(self.onCancelButton)
 
-    def setStatus(self, num):
+    def setStatus(self, num, text):
         """Update progress status.
         
         :num: progress percent
         """
-        
+
+        self.progress.setFormat(text)
         self.progress.setValue(num)
 
     def addNewLayer(self):
