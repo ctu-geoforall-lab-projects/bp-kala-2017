@@ -414,7 +414,7 @@ class GroundRadiationMonitoringComputation(QThread):
         # Add the fields we're interested in
         layer.CreateField(ogr.FieldDefn("X", ogr.OFTReal))
         layer.CreateField(ogr.FieldDefn("Y", ogr.OFTReal))
-        layer.CreateField(ogr.FieldDefn("dose rate", ogr.OFTString))
+        layer.CreateField(ogr.FieldDefn("dose rate", ogr.OFTReal))
 
         # Process the text file and add the attributes and features to the shapefile
         i = 0
