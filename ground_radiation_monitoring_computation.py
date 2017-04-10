@@ -56,27 +56,17 @@ class GroundRadiationMonitoringComputation(QThread):
         trackName = QgsMapLayerRegistry.instance().mapLayer(self.trackLayerId).name()
 
         # get coordinates of vertices based on user defined sample segment length
-        vertexX, vertexY, distances = self.getCoor(rasterLayer, trackLayer)
+        vertexX, vertexY = self.getCoor(rasterLayer, trackLayer)
 
         if self.abort == True:
             return
 
-        dose, index = self.createCsv(vertexX, vertexY, rasterLayer)
-
-        if self.abort == True:
-            return
-
-        distance, time, maxDose, avgDose, totalDose = self.computeReport(vertexX, vertexY, dose, index, distances)
+        distance, time, maxDose, avgDose, totalDose = self.exportValues(vertexX, vertexY, rasterLayer, trackLayer)
 
         if self.abort == True:
             return
 
         self.createReport(trackName, time, distance, maxDose, avgDose, totalDose)
-
-        if self.abort == True:
-            return
-
-        self.createShp(vertexX, vertexY, trackLayer)
 
         if self.abort == True:
             return
@@ -96,7 +86,6 @@ class GroundRadiationMonitoringComputation(QThread):
         # declare arrays of coordinates of vertices and of distance between them
         vertexX = array('d',[])
         vertexY = array('d',[])
-        distances = array('d',[])
 
         # get coordinates of vertices of uploaded track layer
         for featureIndex, feature in enumerate(trackLayer.getFeatures()):
@@ -115,13 +104,12 @@ class GroundRadiationMonitoringComputation(QThread):
                 if self.abort == True:
                     break
 
-                self.computeStat.emit(float(pointCounter)/amount * 10, u'(1/4) Sampling track...')
+                self.computeStat.emit(float(pointCounter)/amount * 10, u'(1/2) Sampling track...')
                 
                 point1 = polyline[pointCounter]
                 point2 = polyline[pointCounter+1]
                 distance = self.distance(point1, point2)
-                distances.append(distance)
-
+                
                 # check whether the input distance between vertices is longer then the distance between points
                 if distance > self.vertexDist and self.vertexDist != 0:
                     newX, newY = self.sampleLine(point1,point2, distance)
@@ -133,7 +121,7 @@ class GroundRadiationMonitoringComputation(QThread):
                 pointCounter = pointCounter + 1
  
         # returns coordinates of all vertices of track   
-        return vertexX, vertexY, distances
+        return vertexX, vertexY
 
     def sampleLine(self,point1, point2, dist):
         """Sample line between two points to segments of user selected length.
@@ -181,53 +169,164 @@ class GroundRadiationMonitoringComputation(QThread):
 
         return newX, newY
 
-    def createCsv(self, vertexX, vertexY, rasterLayer):
-        """Export sampled raster values to output CSV file.
-        
-        Prints error when CSV file cannot be opened for writing.
-
+    def exportValues(self, vertexX, vertexY, rasterLayer, trackLayer):
+        """
         :vertexX: X coordinates of points
         :vertexY: Y coordinates of points
         :rasterLayer: raster layer dose rate is exctracted from
         """
+        # open csv file
         try:
             csvFile = open(self.csvFileName, 'wb')
         except IOError as e:
             self.computeMessage.emit(u'Error', u'Unable open {} for writing. Reason: {}'.format(self.csvFileName, e),'CRITICAL')
             return
-
-        csvFile.write(self.tr(u'X,Y,dosage{linesep}'.format(linesep = os.linesep)))
-
-        rows = len(vertexX)
         
-        # declare arrays for non-None dose rates and their indexes for use in total dosage computation
-        dose = array('d',[])
-        index = []
+        csvFile.write(self.tr(u'X,Y,dose rate,cumulative{linesep}'.format(linesep = os.linesep)))
+        
+        # COEFICIENT Gy/Sv
+        coef = GroundRadiationMonitoringComputation.COEFICIENT
+        
+        self.speed = float(self.speed.replace(',', '.'))
+        
+        # set up the shapefile driver
+        driver = ogr.GetDriverByName("ESRI Shapefile")
+        
+        # create the data source
+        dataSource = driver.CreateDataSource(self.tr(u'{f}').format(f=self.shpFileName))
+
+        # create the spatial reference
+        srs = osr.SpatialReference()
+        srs.ImportFromEPSG(int(trackLayer.crs().authid()[5:]))
+
+        # create the layer
+        layer = dataSource.CreateLayer('{}'.format(self.shpFileName.encode('utf8')), srs, ogr.wkbPoint)
+
+        # Add the fields we're interested in
+        layer.CreateField(ogr.FieldDefn("X", ogr.OFTReal))
+        layer.CreateField(ogr.FieldDefn("Y", ogr.OFTReal))
+        layer.CreateField(ogr.FieldDefn("dose rate (nSv/h)", ogr.OFTReal))
+        layer.CreateField(ogr.FieldDefn("cumulative (nSv)", ogr.OFTReal))
         
         i = 0
+        totalDistance = 0
+        cumulDose = 0
+        maxDose = 0
+        valueYes = 0
+        avgDose = 0
+        valuePrev = 0
         for X,Y in zip(vertexX,vertexY):
-            
+
             if self.abort == True:
                 csvFile.close()
                 break
             
             i = i + 1
-            self.computeStat.emit(float(i)/rows * 100, u'(2/4) Getting raster values...')
+            self.computeStat.emit(float(i)/len(vertexX) * 100, u'(2/2) Computing statistics, creating files...')
+            
+            if i == len(vertexX):
+                dist = 0
+            else:
+                dist = self.distance([vertexX[i-1],vertexY[i-1]],[vertexX[i],vertexY[i]])
 
-            value = rasterLayer.dataProvider().identify(QgsPoint(X,Y),QgsRaster.IdentifyFormatValue).results()
-            csvFile.write(self.tr(u'{valX},{valY},{val}{linesep}'.format(valX = X,
-                                                                         valY = Y,
-                                                                         val = value.values()[0], 
-                                                                         linesep=os.linesep)))
-            # get non-None dose rate values and their indexes
-            if value.values()[0]:
-                dose.append(value.values()[0])
-                index.append(i-1)
+            # time interval between points
+            interval = (dist/1000)/float(self.speed)
+                        
+            # raster value
+            v = rasterLayer.dataProvider().identify(QgsPoint(X,Y),QgsRaster.IdentifyFormatValue).results()
+            value = v.values()[0]
+            
+            if value != None:
+                if str(self.units) == 'microSv/h':
+                    value = value * 1000
+            
+                elif str(self.units) == 'nanoGy/h':
+                    value = value * coef
+                
+                elif str(self.units) == 'microGy/h':
+                    value = value * coef * 1000
+                
+                # dose on interval
+                if valuePrev == None:
+                    estimate = 0
+                else:
+                    # dose on interval
+                    estimate = interval * valuePrev
+                
+                # counter of points with raster value
+                valueYes = valueYes + 1
+                
+                # add dose rate on point to compute avg dose rate later
+                avgDose = avgDose + value
+                
+                # max dose rate
+                if value > maxDose:
+                    maxDose = value
+            
+            elif valuePrev != None:
+                estimate = interval * valuePrev
+                
+            else:
+                estimate = 0  
+                
+            valuePrev = value
 
-        # close output file
-        csvFile.close()
+            # cumulative dose
+            cumulDose = cumulDose + estimate
+            
+            # total distance
+            totalDistance = totalDistance + dist
+            
+            # write to csv file
+            csvFile.write(self.tr(u'{valX},{valY},{val},{cumul}{linesep}'.format(valX = X,
+                                                                                 valY = Y,
+                                                                                 val = value, 
+                                                                                 cumul = cumulDose,
+                                                                                 linesep=os.linesep)))
+            
+            # write to shape file
+             # create the feature
+            feature = ogr.Feature(layer.GetLayerDefn())
+            # Set the attributes using the values from the delimited text file
+            feature.SetField("X", X)
+            feature.SetField("Y", Y)
+            feature.SetField("dose rate (nSv/h)", value)
+            feature.SetField("cumulative (nSv)", cumulDose)
+
+            # Create the point geometry
+            point = ogr.Geometry(ogr.wkbPoint)
+            point.AddPoint(X, Y)
+
+            # Set the feature geometry using the point
+            feature.SetGeometry(point)
+            # Create the feature in the layer (shapefile)
+            layer.CreateFeature(feature)
+            # Dereference the feature
+            feature = None
+            
+        # Save and close the data source
+        dataSource = None
         
-        return dose, index
+        # close output csv file
+        csvFile.close() 
+           
+        # avg dose {here cumulDose = totalDose)
+        if valueYes == 0:
+            avgDose = None
+        else:
+            avgDose = avgDose/valueYes
+        
+        # total time
+        decTime = totalDistance/(float(self.speed) * 1000)
+        hours = int(decTime)
+        minutes = int((decTime-hours)*60)
+        seconds = int(round(((decTime-hours)*60-minutes)*60))
+        time = [hours, minutes, seconds]
+        
+        # close output file
+        csvFile.close()        
+        
+        return totalDistance/1000, time, maxDose, avgDose, cumulDose
 
     def distance(self, point1, point2):
         """Compute length between 2 QgsPoints.
@@ -238,105 +337,6 @@ class GroundRadiationMonitoringComputation(QThread):
         distance = GroundRadiationMonitoringComputation.length.measureLine(QgsPoint(point1[0],point1[1]), QgsPoint(point2[0],point2[1]))
         return distance
 
-    def computeReport(self, vertexX, vertexY, dose, index, distances):
-        """Compute statistics (main output of plugin).
-        
-        COEFICIENT for Gy/Sv ratio
-        
-        :vertexX: X coordinates of points
-        :vertexY: Y coordinates of points
-        :dose: list of dose rates on points
-        :index: list of indexes indicating on what coordinates are raster values avaiable
-        :distances: list of distances between vertices of non-sampled track
-        """
-        # COEFICIENT Gy/Sv
-        coef = GroundRadiationMonitoringComputation.COEFICIENT
-        
-        # initialize variables
-        maxDose = avgDose = totalDose = None
-        time = [0,0,0]
-        totalDistance = 0
-        
-        # total distance
-        # distance = round(sum(distances)/1000,3)
-
-        # total time
-        # decTime = distance/float(self.speed)
-        # hours = int(decTime)
-        # minutes = int((decTime-hours)*60)
-        # seconds = int(round(((decTime-hours)*60-minutes)*60))
-        # time = [hours, minutes, seconds]
-
-        
-        if not dose:
-            return totalDistance, time, maxDose, avgDose, totalDose
-
-        estimate = array('d', [])
-        
-        # total dose, distance
-        i = 0
-        for rate in dose:
-            
-            if self.abort == True:
-                break
-
-            if len(dose) == 0:
-                return
-
-            if (i+1) < len(dose):
-                point1 = [vertexX[index[i]], vertexY[index[i]]]
-                point2 = [vertexX[index[i+1]], vertexY[index[i+1]]]
-
-            elif (i+1) == len(dose):
-                point1 = [vertexX[index[i-1]], vertexY[index[i-1]]]
-                point2 = [vertexX[index[i]], vertexY[index[i]]]
-
-            dist = self.distance(point1,point2)
-            interval = (dist/1000)/float(self.speed)
-            estimate.append(interval * rate)
-            
-            totalDistance = totalDistance + dist
-            
-            i = i + 1
-            self.computeStat.emit(float(i)/len(dose) * 100, u'(3/4) Computing and creating report file...')
-        
-        # max dose
-        maxDose = max(dose)
-
-        # avg dose
-        avgDose = sum(dose)/float(len(dose))
-        
-        if str(self.units) == 'nanoSv/h':
-            totalDose = sum(estimate)
-            
-        elif str(self.units) == 'microSv/h':
-            totalDose = sum(estimate) * 1000
-            avgDose = avgDose * 1000
-            maxDose = maxDose * 1000
-            
-        elif str(self.units) == 'nanoGy/h':
-            totalDose = coef * sum(estimate)
-            avgDose = coef * avgDose
-            maxDose = coef * maxDose
-            
-        elif str(self.units) == 'microGy/h':
-            totalDose = coef * sum(estimate) * 1000
-            avgDose = coef * avgDose * 1000
-            maxDose = coef * maxDose * 1000
-            
-        totalDose = round(totalDose,6)
-        avgDose = round(avgDose,6)
-        maxDose = round(maxDose,6)
-        totalDistance = round(totalDistance/1000,3)
-        
-        # total time
-        decTime = totalDistance/float(self.speed)
-        hours = int(decTime)
-        minutes = int((decTime-hours)*60)
-        seconds = int(round(((decTime-hours)*60-minutes)*60))
-        time = [hours, minutes, seconds]
-        
-        return totalDistance, time, maxDose, avgDose, totalDose
 
     def createReport(self, trackName, time, distance, maxDose, avgDose, totalDose):
         """Create report file.
@@ -350,8 +350,6 @@ class GroundRadiationMonitoringComputation(QThread):
         :avgDose: average dose rate on route
         :totalDose: total dose rate on route
         """
-        self.speed = float(self.speed.replace(',', '.'))
-
         try:
             try:
                 # python 3.x
@@ -385,64 +383,3 @@ class GroundRadiationMonitoringComputation(QThread):
         report.write(u'total dose (nSv): {totalDose}'.format(totalDose = totalDose))
 
         report.close()
-
-    def createShp(self, vertexX, vertexY, trackLayer):
-        """Create ESRI shapefile and write new points. 
-
-        :vertexX: X coordinates of points
-        :vertexY: Y coordinates of points
-        :trackLayer: layer to get coordinate system from
-        """
-
-        reader = csv.DictReader(open(self.tr(u'{f}').format(f = self.csvFileName),"rb"),
-                                delimiter=',',
-                                quoting=csv.QUOTE_NONE)
-
-        # set up the shapefile driver
-        driver = ogr.GetDriverByName("ESRI Shapefile")
-        
-        # create the data source
-        dataSource = driver.CreateDataSource(self.tr(u'{f}').format(f=self.shpFileName))
-
-        # create the spatial reference
-        srs = osr.SpatialReference()
-        srs.ImportFromEPSG(int(trackLayer.crs().authid()[5:]))
-
-        # create the layer
-        layer = dataSource.CreateLayer('{}'.format(self.shpFileName.encode('utf8')), srs, ogr.wkbPoint)
-
-        # Add the fields we're interested in
-        layer.CreateField(ogr.FieldDefn("X", ogr.OFTReal))
-        layer.CreateField(ogr.FieldDefn("Y", ogr.OFTReal))
-        layer.CreateField(ogr.FieldDefn("dose rate", ogr.OFTReal))
-
-        # Process the text file and add the attributes and features to the shapefile
-        i = 0
-        rows = len(vertexX)
-        for row in reader:
-            
-            if self.abort == True:
-                    break
-            
-            i = i + 1
-            self.computeStat.emit(float(i)/rows * 100, u'(4/4) Creating shape file...')
-            # create the feature
-            feature = ogr.Feature(layer.GetLayerDefn())
-            # Set the attributes using the values from the delimited text file
-            feature.SetField("X", row["X"])
-            feature.SetField("Y", row["Y"])
-            feature.SetField("dose rate", row["dosage"])
-
-            # Create the point geometry
-            point = ogr.Geometry(ogr.wkbPoint)
-            point.AddPoint(float(row["X"]), float(row["Y"]))
-
-            # Set the feature geometry using the point
-            feature.SetGeometry(point)
-            # Create the feature in the layer (shapefile)
-            layer.CreateFeature(feature)
-            # Dereference the feature
-            feature = None
-
-        # Save and close the data source
-        dataSource = None
