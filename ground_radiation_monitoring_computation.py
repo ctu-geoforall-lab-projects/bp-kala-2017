@@ -170,10 +170,14 @@ class GroundRadiationMonitoringComputation(QThread):
         return newX, newY
 
     def exportValues(self, vertexX, vertexY, rasterLayer, trackLayer):
-        """
+        """Compute statistics, create csv and shape file. All in one loop for time omptimalization.
+            
+        Prints error when csv file cannot be opened for writing.
+        
         :vertexX: X coordinates of points
         :vertexY: Y coordinates of points
-        :rasterLayer: raster layer dose rate is exctracted from
+        :rasterLayer: raster layer to get dose rate from
+        :trackLayer: track layer to get coordinate system from
         """
         # open csv file
         try:

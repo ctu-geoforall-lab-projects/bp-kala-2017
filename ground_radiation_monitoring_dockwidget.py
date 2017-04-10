@@ -243,6 +243,8 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
 
 
     def onCancelButton(self):
+        """Show message box with question on canceling. Cancel computation."""
+        
         reply  = QMessageBox.question(self, u'Ground Radiation Monitoring',
                                             u"Cancel computation?{ls}(All created files will be lost.)".format(ls = 2*os.linesep),
                                             QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
