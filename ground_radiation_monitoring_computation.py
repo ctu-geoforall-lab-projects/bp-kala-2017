@@ -61,16 +61,26 @@ class GroundRadiationMonitoringComputation(QThread):
         if self.abort == True:
             return
 
-        distance, time, maxDose, avgDose, totalDose = self.exportValues(vertexX, vertexY, rasterLayer, trackLayer)
+        doseRate, accTime, timeSec, accDose, distance, time, maxDose, avgDose, totalDose = self.exportValues(vertexX, vertexY, rasterLayer)
 
         if self.abort == True:
             return
 
         self.createReport(trackName, time, distance, maxDose, avgDose, totalDose)
+        
+        if self.abort == True:
+            return
+        
+        self.createCsv(vertexX, vertexY, doseRate, accTime, timeSec, accDose)
 
         if self.abort == True:
             return
+        
+        self.createShp(vertexX, vertexY, doseRate, accTime, timeSec, accDose, trackLayer)
 
+        if self.abort == True:
+            return
+        
         self.computeEnd.emit()
     
     def abortThread(self):
@@ -104,7 +114,7 @@ class GroundRadiationMonitoringComputation(QThread):
                 if self.abort == True:
                     break
 
-                self.computeStat.emit(float(pointCounter)/amount * 10, u'(1/2) Sampling track...')
+                self.computeStat.emit(float(pointCounter)/amount * 10, u'(1/4) Sampling track...')
                 
                 point1 = polyline[pointCounter]
                 point2 = polyline[pointCounter+1]
@@ -169,52 +179,31 @@ class GroundRadiationMonitoringComputation(QThread):
 
         return newX, newY
 
-    def exportValues(self, vertexX, vertexY, rasterLayer, trackLayer):
-        """Compute statistics, create csv and shape file. All in one loop for time omptimalization.
+    def exportValues(self, vertexX, vertexY, rasterLayer):
+        """Compute statistics.
             
-        Prints error when csv file cannot be opened for writing.
-        
+       
         :vertexX: X coordinates of points
         :vertexY: Y coordinates of points
         :rasterLayer: raster layer to get dose rate from
-        :trackLayer: track layer to get coordinate system from
         """
-        # open csv file
-        try:
-            csvFile = open(self.csvFileName, 'wb')
-        except IOError as e:
-            self.computeMessage.emit(u'Error', u'Unable open {} for writing. Reason: {}'.format(self.csvFileName, e),'CRITICAL')
-            return
-        
-        csvFile.write(self.tr(u'X,Y,dose_rate_nSvh,accum_time,time_interval_sec,accum_dose_nSv{linesep}'.format(linesep = os.linesep)))
-        
-        # COEFICIENT Gy/Sv
-        coef = GroundRadiationMonitoringComputation.COEFICIENT
+
+        # get raster value multiplicator
+        if str(self.units) == 'microSv/h':
+            coef = 1000
+        elif str(self.units) == 'nanoGy/h':
+            coef = GroundRadiationMonitoringComputation.COEFICIENT
+        elif str(self.units) == 'microGy/h':
+            coef = GroundRadiationMonitoringComputation.COEFICIENT * 1000
+        else:
+            coef = 1
         
         self.speed = float(self.speed.replace(',', '.'))
         
-        # set up the shapefile driver
-        driver = ogr.GetDriverByName("ESRI Shapefile")
-        
-        # create the data source
-        dataSource = driver.CreateDataSource(self.tr(u'{f}').format(f=self.shpFileName))
-
-        # create the spatial reference
-        srs = osr.SpatialReference()
-        srs.ImportFromEPSG(int(trackLayer.crs().authid()[5:]))
-
-        # create the layer
-        layer = dataSource.CreateLayer('{}'.format(self.shpFileName.encode('utf8')), srs, ogr.wkbPoint)
-
-        # Add the fields we're interested in
-        # layer.CreateField(ogr.FieldDefn("X", ogr.OFTReal))
-        # layer.CreateField(ogr.FieldDefn("Y", ogr.OFTReal))
-        layer.CreateField(ogr.FieldDefn("rate nSvh", ogr.OFTReal))
-        layer.CreateField(ogr.FieldDefn("accTime", ogr.OFTString))
-        layer.CreateField(ogr.FieldDefn("interval s", ogr.OFTReal))
-        layer.CreateField(ogr.FieldDefn("accDose", ogr.OFTReal))
-        
-
+        doseRate = []
+        accTime = []
+        timeSec = []
+        accDose = []
         
         i = 0
         totalDistance = 0
@@ -225,6 +214,7 @@ class GroundRadiationMonitoringComputation(QThread):
         valuePrev = 0
         totalInterval = 0
         intervalPrev = 0
+        cycleLength = len(vertexX)
         for X,Y in zip(vertexX,vertexY):
 
             if self.abort == True:
@@ -232,23 +222,23 @@ class GroundRadiationMonitoringComputation(QThread):
                 break
             
             i = i + 1
-            self.computeStat.emit(float(i)/len(vertexX) * 100, u'(2/2) Computing statistics, creating files...')
+            self.computeStat.emit(float(i)/cycleLength * 100, u'(2/4) Computing statistics...')
             
-            if i == len(vertexX):
+            if i == cycleLength:
                 dist = 0
             else:
                 dist = self.distance([vertexX[i-1],vertexY[i-1]],[vertexX[i],vertexY[i]])
 
             # time interval between points, totalInterval for cumulative time
             interval = (dist/1000)/float(self.speed)
-            totalInterval += intervalPrev
+            totalInterval = totalInterval + intervalPrev
             hours = int(totalInterval)
             minutes = int((totalInterval-hours)*60)
             seconds = int(round(((totalInterval-hours)*60-minutes)*60))
             if seconds == 60:
                 seconds = 0
-                minutes += 1
-            intervalSeconds = round(intervalPrev * 3600,3)
+                minutes = minutes + 1
+            intervalSeconds = intervalPrev * 3600
             intervalPrev = interval
                         
             # raster value
@@ -256,15 +246,8 @@ class GroundRadiationMonitoringComputation(QThread):
             value = v.values()[0]
             
             if value != None:
-                if str(self.units) == 'microSv/h':
-                    value = value * 1000
-            
-                elif str(self.units) == 'nanoGy/h':
-                    value = value * coef
-                
-                elif str(self.units) == 'microGy/h':
-                    value = value * coef * 1000
-                
+                value = value * coef
+ 
                 # dose on interval
                 if valuePrev == None:
                     estimate = 0
@@ -296,43 +279,11 @@ class GroundRadiationMonitoringComputation(QThread):
             # total distance
             totalDistance = totalDistance + dist
             
-            # write to csv file
-            csvFile.write(self.tr(u'{X},{Y},{doseRate},{accTime},{timeSec},{accDose}{linesep}'.format(X = X,
-                                                                                                      Y = Y,
-                                                                                                      doseRate = value, 
-                                                                                                      accTime = "{}:{}:{}".format(hours,minutes,seconds),
-                                                                                                      timeSec = intervalSeconds,                                                                                                      
-                                                                                                      accDose = cumulDose,
-                                                                                                      linesep=os.linesep)))
+            doseRate.append(value)
+            accTime.append("{}:{}:{}".format(hours,minutes,seconds)) 
+            timeSec.append(intervalSeconds)
+            accDose.append(cumulDose)
 
-            # write to shape file
-             # create the feature
-            feature = ogr.Feature(layer.GetLayerDefn())
-            # Set the attributes using the values from the delimited text file
-            # feature.SetField("X", X)
-            # feature.SetField("Y", Y)
-            feature.SetField("rate nSvh", value)
-            feature.SetField("accTime", "{}:{}:{}".format(hours,minutes,seconds))
-            feature.SetField("interval s", intervalSeconds)
-            feature.SetField("accDose", cumulDose)
-            
-            # Create the point geometry
-            point = ogr.Geometry(ogr.wkbPoint)
-            point.AddPoint(X, Y)
-
-            # Set the feature geometry using the point
-            feature.SetGeometry(point)
-            # Create the feature in the layer (shapefile)
-            layer.CreateFeature(feature)
-            # Dereference the feature
-            feature = None
-            
-        # Save and close the data source
-        dataSource = None
-        
-        # close output csv file
-        csvFile.close() 
-           
         # avg dose {here cumulDose = totalDose)
         if valueYes == 0:
             avgDose = None
@@ -340,16 +291,9 @@ class GroundRadiationMonitoringComputation(QThread):
             avgDose = avgDose/valueYes
         
         # total time
-        decTime = totalDistance/(float(self.speed) * 1000)
-        hours = int(decTime)
-        minutes = int((decTime-hours)*60)
-        seconds = int(round(((decTime-hours)*60-minutes)*60))
         time = [hours, minutes, seconds]
         
-        # close output file
-        csvFile.close()        
-        
-        return totalDistance/1000, time, maxDose, avgDose, cumulDose
+        return doseRate, accTime, timeSec, accDose, totalDistance/1000, time, maxDose, avgDose, cumulDose
 
     def distance(self, point1, point2):
         """Compute length between 2 QgsPoints.
@@ -360,6 +304,49 @@ class GroundRadiationMonitoringComputation(QThread):
         distance = GroundRadiationMonitoringComputation.length.measureLine(QgsPoint(point1[0],point1[1]), QgsPoint(point2[0],point2[1]))
         return distance
 
+    def createCsv(self, vertexX, vertexY, doseRate, accTime, timeSec, accDose):
+        """Create csv file.
+        
+        Print error when csv file cannot be opened for writing.        
+        
+        :vertexX: X coordinates of points
+        :vertexY: Y coordinates of points
+        :doseRate: dose rate on points
+        :accTime: accumulative time on points
+        :timeSec: time interval between points in seconds
+        :accDose: accumulative dose on points
+        """
+        
+        # open csv file
+        try:
+            csvFile = open(self.csvFileName, 'wb')
+        except IOError as e:
+            self.computeMessage.emit(u'Error', u'Unable open {} for writing. Reason: {}'.format(self.csvFileName, e),'CRITICAL')
+            return
+        
+        csvFile.write(self.tr(u'X,Y,dose_rate_nSvh,accum_time,time_interval_sec,accum_dose_nSv{linesep}'.format(linesep = os.linesep)))
+        
+        i = 0
+        cycleLength = len(vertexX)
+        while i < cycleLength:
+
+            if self.abort == True:
+                csvFile.close()
+                break
+            
+            csvFile.write(self.tr(u'{X},{Y},{doseRate},{accTime},{timeSec},{accDose}{linesep}'.format(X = vertexX[i],
+                                                                                                      Y = vertexY[i],
+                                                                                                      doseRate = doseRate[i], 
+                                                                                                      accTime = accTime[i],
+                                                                                                      timeSec = timeSec[i],                                                                                                      
+                                                                                                      accDose = accDose[i],
+                                                                                                      linesep=os.linesep)))
+
+            i = i + 1
+            self.computeStat.emit(float(i)/cycleLength * 100, u'(3/4) Creating report and csv file...')
+       
+        # close output file
+        csvFile.close()  
 
     def createReport(self, trackName, time, distance, maxDose, avgDose, totalDose):
         """Create report file.
@@ -406,3 +393,73 @@ class GroundRadiationMonitoringComputation(QThread):
         report.write(u'total dose (nSv): {totalDose}'.format(totalDose = totalDose))
 
         report.close()
+
+    def createShp(self, vertexX, vertexY, doseRate, accTime, timeSec, accDose, trackLayer):
+        """Create shapefile.
+   
+        :vertexX: X coordinates of points
+        :vertexY: Y coordinates of points
+        :doseRate: dose rate on points
+        :accTime: accumulative time on points
+        :timeSec: time interval between points in seconds
+        :accDose: accumulative dose on points
+        :trackLayer: layer of track to get coordinate system from
+        """
+        
+        # set up the shapefile driver
+        driver = ogr.GetDriverByName("ESRI Shapefile")
+        
+        # create the data source
+        dataSource = driver.CreateDataSource(self.tr(u'{f}').format(f=self.shpFileName))
+
+        # create the spatial reference
+        srs = osr.SpatialReference()
+        srs.ImportFromEPSG(int(trackLayer.crs().authid()[5:]))
+
+        # create the layer
+        layer = dataSource.CreateLayer('{}'.format(self.shpFileName.encode('utf8')), srs, ogr.wkbPoint)
+
+        # Add the fields we're interested in
+        # layer.CreateField(ogr.FieldDefn("X", ogr.OFTReal))
+        # layer.CreateField(ogr.FieldDefn("Y", ogr.OFTReal))
+        layer.CreateField(ogr.FieldDefn("rate nSvh", ogr.OFTReal))
+        layer.CreateField(ogr.FieldDefn("accTime", ogr.OFTString))
+        layer.CreateField(ogr.FieldDefn("interval s", ogr.OFTReal))
+        layer.CreateField(ogr.FieldDefn("accDose", ogr.OFTReal))
+        
+        i = 0
+        cycleLength = len(vertexX)
+        while i < cycleLength:
+            
+            if self.abort == True:
+                csvFile.close()
+                break
+            
+            # create the feature
+            feature = ogr.Feature(layer.GetLayerDefn())
+            # Set the attributes using the values from the delimited text file
+            # feature.SetField("X", X)
+            # feature.SetField("Y", Y)
+            feature.SetField("rate nSvh", doseRate[i])
+            feature.SetField("accTime", accTime[i])
+            feature.SetField("interval s", timeSec[i])
+            feature.SetField("accDose", accDose[i])
+            
+            # Create the point geometry
+            point = ogr.Geometry(ogr.wkbPoint)
+            point.AddPoint(vertexX[i], vertexY[i])
+
+            # Set the feature geometry using the point
+            feature.SetGeometry(point)
+            # Create the feature in the layer (shapefile)
+            layer.CreateFeature(feature)
+            # Dereference the feature
+            feature = None
+            
+            i = i + 1
+            self.computeStat.emit(float(i)/cycleLength * 100, u'(4/4) Creating shapefile...')
+            
+        # Save and close the data source
+        dataSource = None
+        
+        
