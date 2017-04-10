@@ -182,7 +182,7 @@ class GroundRadiationMonitoringComputation(QThread):
             self.computeMessage.emit(u'Error', u'Unable open {} for writing. Reason: {}'.format(self.csvFileName, e),'CRITICAL')
             return
         
-        csvFile.write(self.tr(u'X,Y,dose rate,cumulative{linesep}'.format(linesep = os.linesep)))
+        csvFile.write(self.tr(u'X,Y,dose_rate_nSvh,accum_time,time_interval_sec,accum_dose_nSv{linesep}'.format(linesep = os.linesep)))
         
         # COEFICIENT Gy/Sv
         coef = GroundRadiationMonitoringComputation.COEFICIENT
@@ -203,10 +203,14 @@ class GroundRadiationMonitoringComputation(QThread):
         layer = dataSource.CreateLayer('{}'.format(self.shpFileName.encode('utf8')), srs, ogr.wkbPoint)
 
         # Add the fields we're interested in
-        layer.CreateField(ogr.FieldDefn("X", ogr.OFTReal))
-        layer.CreateField(ogr.FieldDefn("Y", ogr.OFTReal))
-        layer.CreateField(ogr.FieldDefn("dose rate (nSv/h)", ogr.OFTReal))
-        layer.CreateField(ogr.FieldDefn("cumulative (nSv)", ogr.OFTReal))
+        # layer.CreateField(ogr.FieldDefn("X", ogr.OFTReal))
+        # layer.CreateField(ogr.FieldDefn("Y", ogr.OFTReal))
+        layer.CreateField(ogr.FieldDefn("rate nSvh", ogr.OFTReal))
+        layer.CreateField(ogr.FieldDefn("accTime", ogr.OFTString))
+        layer.CreateField(ogr.FieldDefn("interval s", ogr.OFTReal))
+        layer.CreateField(ogr.FieldDefn("accDose", ogr.OFTReal))
+        
+
         
         i = 0
         totalDistance = 0
@@ -215,6 +219,8 @@ class GroundRadiationMonitoringComputation(QThread):
         valueYes = 0
         avgDose = 0
         valuePrev = 0
+        totalInterval = 0
+        intervalPrev = 0
         for X,Y in zip(vertexX,vertexY):
 
             if self.abort == True:
@@ -229,8 +235,17 @@ class GroundRadiationMonitoringComputation(QThread):
             else:
                 dist = self.distance([vertexX[i-1],vertexY[i-1]],[vertexX[i],vertexY[i]])
 
-            # time interval between points
+            # time interval between points, totalInterval for cumulative time
             interval = (dist/1000)/float(self.speed)
+            totalInterval += intervalPrev
+            hours = int(totalInterval)
+            minutes = int((totalInterval-hours)*60)
+            seconds = int(round(((totalInterval-hours)*60-minutes)*60))
+            if seconds == 60:
+                seconds = 0
+                minutes += 1
+            intervalSeconds = round(intervalPrev * 3600,3)
+            intervalPrev = interval
                         
             # raster value
             v = rasterLayer.dataProvider().identify(QgsPoint(X,Y),QgsRaster.IdentifyFormatValue).results()
@@ -278,21 +293,25 @@ class GroundRadiationMonitoringComputation(QThread):
             totalDistance = totalDistance + dist
             
             # write to csv file
-            csvFile.write(self.tr(u'{valX},{valY},{val},{cumul}{linesep}'.format(valX = X,
-                                                                                 valY = Y,
-                                                                                 val = value, 
-                                                                                 cumul = cumulDose,
-                                                                                 linesep=os.linesep)))
-            
+            csvFile.write(self.tr(u'{X},{Y},{doseRate},{accTime},{timeSec},{accDose}{linesep}'.format(X = X,
+                                                                                                      Y = Y,
+                                                                                                      doseRate = value, 
+                                                                                                      accTime = "{}:{}:{}".format(hours,minutes,seconds),
+                                                                                                      timeSec = intervalSeconds,                                                                                                      
+                                                                                                      accDose = cumulDose,
+                                                                                                      linesep=os.linesep)))
+
             # write to shape file
              # create the feature
             feature = ogr.Feature(layer.GetLayerDefn())
             # Set the attributes using the values from the delimited text file
-            feature.SetField("X", X)
-            feature.SetField("Y", Y)
-            feature.SetField("dose rate (nSv/h)", value)
-            feature.SetField("cumulative (nSv)", cumulDose)
-
+            # feature.SetField("X", X)
+            # feature.SetField("Y", Y)
+            feature.SetField("rate nSvh", value)
+            feature.SetField("accTime", "{}:{}:{}".format(hours,minutes,seconds))
+            feature.SetField("interval s", intervalSeconds)
+            feature.SetField("accDose", cumulDose)
+            
             # Create the point geometry
             point = ogr.Geometry(ogr.wkbPoint)
             point.AddPoint(X, Y)
