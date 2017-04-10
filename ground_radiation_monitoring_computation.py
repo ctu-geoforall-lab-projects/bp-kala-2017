@@ -61,7 +61,7 @@ class GroundRadiationMonitoringComputation(QThread):
         if self.abort == True:
             return
 
-        doseRate, accTime, timeSec, accDose, distance, time, maxDose, avgDose, totalDose = self.exportValues(vertexX, vertexY, rasterLayer)
+        all, distance, time, maxDose, avgDose, totalDose = self.exportValues(vertexX, vertexY, rasterLayer)
 
         if self.abort == True:
             return
@@ -71,12 +71,12 @@ class GroundRadiationMonitoringComputation(QThread):
         if self.abort == True:
             return
         
-        self.createCsv(vertexX, vertexY, doseRate, accTime, timeSec, accDose)
+        self.createCsv(all)
 
         if self.abort == True:
             return
         
-        self.createShp(vertexX, vertexY, doseRate, accTime, timeSec, accDose, trackLayer)
+        self.createShp(all, trackLayer)
 
         if self.abort == True:
             return
@@ -200,10 +200,7 @@ class GroundRadiationMonitoringComputation(QThread):
         
         self.speed = float(self.speed.replace(',', '.'))
         
-        doseRate = []
-        accTime = []
-        timeSec = []
-        accDose = []
+        all = []
         
         i = 0
         totalDistance = 0
@@ -218,11 +215,10 @@ class GroundRadiationMonitoringComputation(QThread):
         for X,Y in zip(vertexX,vertexY):
 
             if self.abort == True:
-                csvFile.close()
                 break
             
             i = i + 1
-            self.computeStat.emit(float(i)/cycleLength * 100, u'(2/4) Computing statistics...')
+            self.computeStat.emit(float(i)/cycleLength * 100, u'(2/3) Computing statistics, creating csv and report file...')
             
             if i == cycleLength:
                 dist = 0
@@ -279,10 +275,7 @@ class GroundRadiationMonitoringComputation(QThread):
             # total distance
             totalDistance = totalDistance + dist
             
-            doseRate.append(value)
-            accTime.append("{}:{}:{}".format(hours,minutes,seconds)) 
-            timeSec.append(intervalSeconds)
-            accDose.append(cumulDose)
+            all.append([X,Y,value,"{}:{}:{}".format(hours,minutes,seconds),intervalSeconds,cumulDose])
 
         # avg dose {here cumulDose = totalDose)
         if valueYes == 0:
@@ -293,7 +286,7 @@ class GroundRadiationMonitoringComputation(QThread):
         # total time
         time = [hours, minutes, seconds]
         
-        return doseRate, accTime, timeSec, accDose, totalDistance/1000, time, maxDose, avgDose, cumulDose
+        return all, totalDistance/1000, time, maxDose, avgDose, cumulDose
 
     def distance(self, point1, point2):
         """Compute length between 2 QgsPoints.
@@ -304,50 +297,35 @@ class GroundRadiationMonitoringComputation(QThread):
         distance = GroundRadiationMonitoringComputation.length.measureLine(QgsPoint(point1[0],point1[1]), QgsPoint(point2[0],point2[1]))
         return distance
 
-    def createCsv(self, vertexX, vertexY, doseRate, accTime, timeSec, accDose):
+    def createCsv(self, all):
         """Create csv file.
         
         Print error when csv file cannot be opened for writing.        
         
-        :vertexX: X coordinates of points
-        :vertexY: Y coordinates of points
-        :doseRate: dose rate on points
-        :accTime: accumulative time on points
-        :timeSec: time interval between points in seconds
-        :accDose: accumulative dose on points
+        :all: list of lists containing [X, Y, dose rate, accumulative time, time interval, accumulative dose] 
+              of every point
+
         """
         
         # open csv file
         try:
-            csvFile = open(self.csvFileName, 'wb')
+            # python 3 (NOT TESTED)
+            try:
+                with open(self.csvFileName, "w",newline='') as f:
+                    f.write(u'X,Y,dose_rate_nSvh,accum_time,time_interval_sec,accum_dose_nSv{linesep}'.format(linesep = os.linesep))
+                    writer = csv.writer(f)
+                    writer.writerows(all)
+            # python 2
+            except:
+                with open(self.csvFileName, "wb") as f:
+                    f.write(u'X,Y,dose_rate_nSvh,accum_time,time_interval_sec,accum_dose_nSv{linesep}'.format(linesep = os.linesep))
+                    writer = csv.writer(f)
+                    writer.writerows(all)
+                        
         except IOError as e:
             self.computeMessage.emit(u'Error', u'Unable open {} for writing. Reason: {}'.format(self.csvFileName, e),'CRITICAL')
             return
         
-        csvFile.write(self.tr(u'X,Y,dose_rate_nSvh,accum_time,time_interval_sec,accum_dose_nSv{linesep}'.format(linesep = os.linesep)))
-        
-        i = 0
-        cycleLength = len(vertexX)
-        while i < cycleLength:
-
-            if self.abort == True:
-                csvFile.close()
-                break
-            
-            csvFile.write(self.tr(u'{X},{Y},{doseRate},{accTime},{timeSec},{accDose}{linesep}'.format(X = vertexX[i],
-                                                                                                      Y = vertexY[i],
-                                                                                                      doseRate = doseRate[i], 
-                                                                                                      accTime = accTime[i],
-                                                                                                      timeSec = timeSec[i],                                                                                                      
-                                                                                                      accDose = accDose[i],
-                                                                                                      linesep=os.linesep)))
-
-            i = i + 1
-            self.computeStat.emit(float(i)/cycleLength * 100, u'(3/4) Creating report and csv file...')
-       
-        # close output file
-        csvFile.close()  
-
     def createReport(self, trackName, time, distance, maxDose, avgDose, totalDose):
         """Create report file.
         
@@ -394,15 +372,11 @@ class GroundRadiationMonitoringComputation(QThread):
 
         report.close()
 
-    def createShp(self, vertexX, vertexY, doseRate, accTime, timeSec, accDose, trackLayer):
+    def createShp(self, all, trackLayer):
         """Create shapefile.
-   
-        :vertexX: X coordinates of points
-        :vertexY: Y coordinates of points
-        :doseRate: dose rate on points
-        :accTime: accumulative time on points
-        :timeSec: time interval between points in seconds
-        :accDose: accumulative dose on points
+        
+        :all: list of lists containing [X, Y, dose rate, accumulative time, time interval, accumulative dose] 
+              of every point
         :trackLayer: layer of track to get coordinate system from
         """
         
@@ -428,11 +402,10 @@ class GroundRadiationMonitoringComputation(QThread):
         layer.CreateField(ogr.FieldDefn("accDose", ogr.OFTReal))
         
         i = 0
-        cycleLength = len(vertexX)
-        while i < cycleLength:
+        cycleLength = len(all)
+        for values in all:
             
             if self.abort == True:
-                csvFile.close()
                 break
             
             # create the feature
@@ -440,14 +413,14 @@ class GroundRadiationMonitoringComputation(QThread):
             # Set the attributes using the values from the delimited text file
             # feature.SetField("X", X)
             # feature.SetField("Y", Y)
-            feature.SetField("rate nSvh", doseRate[i])
-            feature.SetField("accTime", accTime[i])
-            feature.SetField("interval s", timeSec[i])
-            feature.SetField("accDose", accDose[i])
+            feature.SetField("rate nSvh", values[2])
+            feature.SetField("accTime", values[3])
+            feature.SetField("interval s", values[4])
+            feature.SetField("accDose", values[5])
             
             # Create the point geometry
             point = ogr.Geometry(ogr.wkbPoint)
-            point.AddPoint(vertexX[i], vertexY[i])
+            point.AddPoint(values[0], values[1])
 
             # Set the feature geometry using the point
             feature.SetGeometry(point)
@@ -457,7 +430,7 @@ class GroundRadiationMonitoringComputation(QThread):
             feature = None
             
             i = i + 1
-            self.computeStat.emit(float(i)/cycleLength * 100, u'(4/4) Creating shapefile...')
+            self.computeStat.emit(float(i)/cycleLength * 100, u'(3/3) Creating shapefile...')
             
         # Save and close the data source
         dataSource = None
