@@ -358,18 +358,27 @@ class GroundRadiationMonitoringComputation(QThread):
         report.write(u'monitoring speed (km/h): {speed}{ls}'.format(speed = self.speed, 
                                                                     ls = os.linesep))
         report.write(u'total monitoring time: {hours}:{minutes}:{seconds}{ls}'.format(hours = time[0],
-                                                                                  minutes = time[1],
-                                                                                  seconds = time[2],
-                                                                                  ls = os.linesep))
+                                                                                      minutes = time[1],
+                                                                                      seconds = time[2],
+                                                                                      ls = os.linesep))
         report.write(u'total distance (km): {distance}{ls}{ls}'.format(distance = round(distance,3),
-                                                                   ls = os.linesep))
+                                                                       ls = os.linesep))
+        
         report.write(u'Radiation values (estimated){ls}'.format(ls = os.linesep))
         report.write(u'--------------------------------------{ls}'.format(ls = os.linesep))
         report.write(u'maximum dose rate (microSv/h): {maxDose}{ls}'.format(maxDose = round(maxDose,3),
-                                                                        ls = os.linesep))
+                                                                            ls = os.linesep))
         report.write(u'average dose rate (microSv/h): {avgDose}{ls}'.format(avgDose = round(avgDose,3),
-                                                                        ls = os.linesep))
+                                                                            ls = os.linesep))
         report.write(u'total dose (microSv): {totalDose}'.format(totalDose = round(totalDose,3)))
+        
+        report.write(u'{ls}{ls}Plugin settings'.format(ls = os.linesep))
+        report.write(u'{ls}--------------------------------------{ls}'.format(ls = os.linesep))
+        report.write(u'input raster units: {units}{ls}'.format(units = self.units, 
+                                                               ls = os.linesep))
+        report.write(u'distance between track vertices (m): {dist}{ls}'.format(dist = self.vertexDist,
+                                                                               ls = os.linesep))
+        report.write(u'background dose rate (microSv/h): {ls}'.format(ls = os.linesep))
 
         report.close()
 
