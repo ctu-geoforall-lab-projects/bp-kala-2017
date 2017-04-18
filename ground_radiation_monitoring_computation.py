@@ -9,6 +9,7 @@ from qgis.gui import QgsMapLayerComboBox,QgsMapLayerProxyModel
 from osgeo import gdal, ogr
 from math import ceil
 from array import array
+from datetime import datetime
 
 from qgis.core import QgsVectorLayer, QgsField, QgsFeature, QgsGeometry, QgsVectorFileWriter
 from PyQt4.QtCore import QVariant  
@@ -350,8 +351,9 @@ class GroundRadiationMonitoringComputation(QThread):
             self.computeMessage.emit(u'Error', u'Unable open {} for writing. Reason: {}'.format(self.reportFileName, e),'CRITICAL')
             return
 
-        report.write(u'QGIS ground radiation monitoring plugin report{ls}{ls}'.format(ls = os.linesep))
-        report.write(u'Route information{ls}'.format(ls = os.linesep))
+        report.write(u'QGIS ground radiation monitoring plugin report{ls}'.format(ls = os.linesep))
+        report.write(u'report created: {}'.format(datetime.now().strftime('%d.%m.%Y %H:%M')))
+        report.write(u'{ls}{ls}Route information{ls}'.format(ls = os.linesep))
         report.write(u'--------------------------------------{ls}'.format(ls = os.linesep))
         report.write(u'route: {trackName}{ls}'.format(trackName = trackName, 
                                                       ls = os.linesep))
