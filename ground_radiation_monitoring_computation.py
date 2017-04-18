@@ -408,7 +408,7 @@ class GroundRadiationMonitoringComputation(QThread):
         # Add the fields we're interested in
         # layer.CreateField(ogr.FieldDefn("X", ogr.OFTReal))
         # layer.CreateField(ogr.FieldDefn("Y", ogr.OFTReal))
-        layer.CreateField(ogr.FieldDefn("rate mSvh", ogr.OFTReal))
+        layer.CreateField(ogr.FieldDefn("rate uSvh", ogr.OFTReal))
         layer.CreateField(ogr.FieldDefn("accTime", ogr.OFTString))
         layer.CreateField(ogr.FieldDefn("interval s", ogr.OFTReal))
         layer.CreateField(ogr.FieldDefn("accDose", ogr.OFTReal))
@@ -425,7 +425,7 @@ class GroundRadiationMonitoringComputation(QThread):
             # Set the attributes using the values from the delimited text file
             # feature.SetField("X", X)
             # feature.SetField("Y", Y)
-            feature.SetField("rate mSvh", values[2])
+            feature.SetField("rate uSvh", values[2])
             feature.SetField("accTime", values[3])
             feature.SetField("interval s", values[4])
             feature.SetField("accDose", values[5])
