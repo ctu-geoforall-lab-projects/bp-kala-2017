@@ -34,7 +34,7 @@ class GroundRadiationMonitoringComputation(QThread):
     computeProgress = pyqtSignal()
     computeMessage = pyqtSignal(str,str,str)
 
-    def __init__(self,  rasterLayerId, trackLayerId, reportFileName, csvFileName, shpFileName, vertexDist, speed, units):
+    def __init__(self,  rasterLayerId, trackLayerId, reportFileName, csvFileName, shpFileName, vertexDist, speed, units, backgroundDoseRate):
         QThread.__init__(self)
         self.rasterLayerId = rasterLayerId
         self.trackLayerId = trackLayerId
@@ -44,6 +44,7 @@ class GroundRadiationMonitoringComputation(QThread):
         self.vertexDist = vertexDist
         self.speed = speed
         self.units = units
+        self.backgroundDoseRate = backgroundDoseRate
 
     def run(self):
         """Run compute thread."""
@@ -193,12 +194,19 @@ class GroundRadiationMonitoringComputation(QThread):
         # get raster value multiplicator
         if str(self.units) == 'nanoSv/h':
             coef = 0.001
+            backgroundDoseRate = self.backgroundDoseRate * 1000
+            
         elif str(self.units) == 'nanoGy/h':
             coef = GroundRadiationMonitoringComputation.COEFICIENT * 0.001
+            backgroundDoseRate = self.backgroundDoseRate * GroundRadiationMonitoringComputation.COEFICIENT * 1000
+            
         elif str(self.units) == 'microGy/h':
             coef = GroundRadiationMonitoringComputation.COEFICIENT
+            backgroundDoseRate = self.backgroundDoseRate * GroundRadiationMonitoringComputation.COEFICIENT
+            
         else:
             coef = 1
+            backgroundDoseRate = self.backgroundDoseRate
         
         self.speed = float(self.speed.replace(',', '.'))
         

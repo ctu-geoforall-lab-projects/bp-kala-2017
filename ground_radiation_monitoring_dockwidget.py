@@ -167,35 +167,47 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         If shapefile that will be created has the same name as one of the layers in
         map canvas, that layer will be removed from map layer registry.
         """
+        noSamplingFlag = False
         if not self.vertex_dist.text().strip():
             distanceBetweenVertices = 0
-        else:                   
+            noSamplingFlag = True
+        
+        if noSamplingFlag == False:
             try:
                 distanceBetweenVertices = float(self.vertex_dist.text().replace(',', '.'))
             except ValueError:
-                self.sendMessage(u'Error', u'{} is not a number. (distance between vertices)'.format(self.vertex_dist.text()), 'CRITICAL')
+                self.sendMessage(u'Error', u'"{}" is not a number. (distance between vertices)'.format(self.vertex_dist.text()), 'CRITICAL')
                 return
 
-            if distanceBetweenVertices <= 0:
-                self.sendMessage(u'Error', u'{} is not a positive number. (distance between vertices)'.format(distanceBetweenVertices), 'CRITICAL')
-                return
+        if distanceBetweenVertices <= 0 and noSamplingFlag == False:
+            self.sendMessage(u'Error', u'"{}" is not a positive number. (distance between vertices)'.format(distanceBetweenVertices), 'CRITICAL')
+            return
 
-            if not self.speed.text():
-                self.sendMessage(u'Error', u'No speed given.', 'CRITICAL')
-                return   
-            try:
-                speed = float(self.speed.text().replace(',', '.'))
-            except ValueError:
-                self.sendMessage(u'Error', u'{} is not a number. (speed)'.format(self.speed.text()), 'CRITICAL')
-                return
+        if not self.speed.text():
+            self.sendMessage(u'Error', u'No speed given.', 'CRITICAL')
+            return   
+        try:
+            speed = float(self.speed.text().replace(',', '.'))
+        except ValueError:
+            self.sendMessage(u'Error', u'"{}" is not a number. (speed)'.format(self.speed.text()), 'CRITICAL')
+            return
 
-            if speed <= 0:
-                self.sendMessage(u'Error', u'{} is not a positive number. (speed)'.format(speed), 'CRITICAL')
-                return
+        if speed <= 0:
+            self.sendMessage(u'Error', u'"{}" is not a positive number. (speed)'.format(speed), 'CRITICAL')
+            return
 
-            if not self.raster_box.currentLayer() or not self.track_box.currentLayer():
-                self.sendMessage(u'Error', u'No raster/track layer chosen.', 'CRITICAL')
-                return
+        if not self.raster_box.currentLayer() or not self.track_box.currentLayer():
+            self.sendMessage(u'Error', u'No raster/track layer chosen.', 'CRITICAL')
+            return
+        
+        try:
+            backgroundDoseRate = float(self.background_drate.text().replace(',','.'))
+        except ValueError:
+            self.sendMessage(u'Error', u'"{}" is not a number. (background dose rate)'.format(self.background_drate.text()), 'CRITICAL')
+            return
+        if backgroundDoseRate < 0:
+            self.sendMessage(u'Error', u'"{}" is a negative number. (background dose rate)'.format(backgroundDoseRate), 'CRITICAL')
+            return
         
         # remove layers with same name as newly created layer
         for lyr in QgsMapLayerRegistry.instance().mapLayers().values():
@@ -214,7 +226,8 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
                                                                   self.saveShpName,
                                                                   distanceBetweenVertices,
                                                                   self.speed.text(),
-                                                                  self.unit_box.currentText())
+                                                                  self.unit_box.currentText(),
+                                                                  backgroundDoseRate)
         self.saveShpNameOriginal = self.saveShpName
         self.saveReportNameOriginal = self.saveReportName
         self.saveCsvNameOriginal = self.saveCsvName
