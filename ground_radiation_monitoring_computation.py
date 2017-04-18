@@ -71,7 +71,8 @@ class GroundRadiationMonitoringComputation(QThread):
         if self.abort == True:
             return
         
-        self.createCsv(all)
+        if self.csvFileName != None:
+            self.createCsv(all)
 
         if self.abort == True:
             return
@@ -114,7 +115,7 @@ class GroundRadiationMonitoringComputation(QThread):
                 if self.abort == True:
                     break
 
-                self.computeStat.emit(float(pointCounter)/amount * 10, u'(1/4) Sampling track...')
+                self.computeStat.emit(float(pointCounter)/amount * 10, u'(1/3) Sampling track...')
                 
                 point1 = polyline[pointCounter]
                 point2 = polyline[pointCounter+1]
@@ -218,7 +219,7 @@ class GroundRadiationMonitoringComputation(QThread):
                 break
             
             i = i + 1
-            self.computeStat.emit(float(i)/cycleLength * 100, u'(2/3) Computing statistics, creating csv and report file...')
+            self.computeStat.emit(float(i)/cycleLength * 100, u'(2/3) Computing statistics, creating report file...')
             
             if i == cycleLength:
                 dist = 0

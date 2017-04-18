@@ -24,7 +24,7 @@
 import os
 
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt, QFileInfo, QThread, pyqtSignal
-from PyQt4.QtGui import QComboBox, QAction, QIcon, QToolButton, QFileDialog, QMessageBox, QProgressBar
+from PyQt4.QtGui import QComboBox, QAction, QIcon, QToolButton, QFileDialog, QMessageBox, QProgressBar, QCheckBox
 from qgis.core import QgsMapLayerRegistry, QgsMapLayer, QGis, QgsPoint, QgsRaster, QgsProject,  QgsProviderRegistry, QgsDistanceArea
 from qgis.utils import QgsMessageBar, iface
 from qgis.gui import QgsMapLayerComboBox,QgsMapLayerProxyModel
@@ -69,7 +69,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
 
         self.save_button.setEnabled(False)
         self.report_button.clicked.connect(self.onReportButton)
-        self.dir_button.clicked.connect(self.onCsvButton)
+        #self.dir_button.clicked.connect(self.onCsvButton)
         self.shp_button.clicked.connect(self.onShpButton)
         self.save_button.clicked.connect(self.onExportRasterValues)
 
@@ -122,13 +122,11 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         self.saveReportName = QFileDialog.getSaveFileName(self, self.tr(u'Select destination file'), 
                                                           self.tr(u'{}{}.txt').format(lastUsedFilePath,os.path.sep), 
                                                           filter ="TXT (*.txt)")
-        self.saveCsvName = self.tr(u'{}.csv').format(self.saveReportName.split('.')[0])
         self.saveShpName = self.tr(u'{}.shp').format(self.saveReportName.split('.')[0])
 
         self.report_file.setText(self.tr(u'{}').format(self.saveReportName))
 
         if self.saveReportName:
-            self.csv_file.setText(self.tr(u'{}').format(self.saveCsvName))
             self.shp_file.setText(self.tr(u'{}').format(self.saveShpName))
             self.settings.setValue(sender, os.path.dirname(self.saveReportName))
 
@@ -137,24 +135,6 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
             self.save_button.setEnabled(False)
         else:
             self.save_button.setEnabled(True)
-            
-    def onCsvButton(self):
-        """Get destination of csv file."""
-        
-        sender = u'{}-lastUserFilePath'.format(self.sender().objectName())
-        lastUsedFilePath = self.settings.value(sender, '')
-        self.saveCsvName = QFileDialog.getSaveFileName(self, self.tr(u'Select destination file'), 
-                                                       self.tr(u'{}{}.csv').format(lastUsedFilePath,os.path.sep), 
-                                                       filter ="CSV (*.csv)")
-
-        self.csv_file.setText(u'{}'.format(self.saveCsvName))
-        if self.saveCsvName:
-            self.settings.setValue(sender, os.path.dirname(self.saveCsvName))
-
-        if not (self.report_file.text() and self.csv_file.text() and self.shp_file.text()):
-            self.save_button.setEnabled(False)
-        else:
-            self.save_button.setEnabled(True)        
 
     def onShpButton(self):
         """Get destination of shp file."""
@@ -166,13 +146,14 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
                                                        filter ="ESRI Shapefile (*.shp)")
 
         self.shp_file.setText(u'{}'.format(self.saveShpName))
+        
         if self.saveShpName:
             self.settings.setValue(sender, os.path.dirname(self.saveShpName))
-
-        if not (self.report_file.text() and self.csv_file.text() and self.shp_file.text()):
+            
+        if not (self.report_file.text() and self.shp_file.text()):
             self.save_button.setEnabled(False)
         else:
-            self.save_button.setEnabled(True)        
+            self.save_button.setEnabled(True)    
 
     def onExportRasterValues(self):
         """Export sampled raster values to output CSV file.
@@ -220,6 +201,11 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         for lyr in QgsMapLayerRegistry.instance().mapLayers().values():
             if lyr.source() == self.saveShpName:
                 QgsMapLayerRegistry.instance().removeMapLayer(lyr.id())
+        
+        self.saveCsvName = None
+        
+        if self.create_csv.isChecked():
+            self.saveCsvName = self.tr(u'{}.csv').format(self.saveShpName.split('.')[0])            
         
         self.computeThread = GroundRadiationMonitoringComputation(self.raster_box.currentLayer().id(),
                                                                   self.track_box.currentLayer().id(),
