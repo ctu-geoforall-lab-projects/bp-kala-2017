@@ -190,12 +190,12 @@ class GroundRadiationMonitoringComputation(QThread):
         """
 
         # get raster value multiplicator
-        if str(self.units) == 'microSv/h':
-            coef = 1000
+        if str(self.units) == 'nanoSv/h':
+            coef = 0.001
         elif str(self.units) == 'nanoGy/h':
-            coef = GroundRadiationMonitoringComputation.COEFICIENT
+            coef = GroundRadiationMonitoringComputation.COEFICIENT * 0.001
         elif str(self.units) == 'microGy/h':
-            coef = GroundRadiationMonitoringComputation.COEFICIENT * 1000
+            coef = GroundRadiationMonitoringComputation.COEFICIENT
         else:
             coef = 1
         
@@ -313,13 +313,13 @@ class GroundRadiationMonitoringComputation(QThread):
             # python 3 (NOT TESTED)
             try:
                 with open(self.csvFileName, "w",newline='') as f:
-                    f.write(u'X,Y,dose_rate_nSvh,accum_time,time_interval_sec,accum_dose_nSv{linesep}'.format(linesep = os.linesep))
+                    f.write(u'X,Y,dose_rate_microSvh,accum_time,time_interval_sec,accum_dose_microSv{linesep}'.format(linesep = os.linesep))
                     writer = csv.writer(f)
                     writer.writerows(all)
             # python 2
             except:
                 with open(self.csvFileName, "wb") as f:
-                    f.write(u'X,Y,dose_rate_nSvh,accum_time,time_interval_sec,accum_dose_nSv{linesep}'.format(linesep = os.linesep))
+                    f.write(u'X,Y,dose_rate_microSvh,accum_time,time_interval_sec,accum_dose_microSv{linesep}'.format(linesep = os.linesep))
                     writer = csv.writer(f)
                     writer.writerows(all)
                         
@@ -365,11 +365,11 @@ class GroundRadiationMonitoringComputation(QThread):
                                                                    ls = os.linesep))
         report.write(u'Radiation values (estimated){ls}'.format(ls = os.linesep))
         report.write(u'--------------------------------------{ls}'.format(ls = os.linesep))
-        report.write(u'maximum dose rate (nSv/h): {maxDose}{ls}'.format(maxDose = maxDose,
+        report.write(u'maximum dose rate (microSv/h): {maxDose}{ls}'.format(maxDose = maxDose,
                                                                         ls = os.linesep))
-        report.write(u'average dose rate (nSv/h): {avgDose}{ls}'.format(avgDose = avgDose,
+        report.write(u'average dose rate (microSv/h): {avgDose}{ls}'.format(avgDose = avgDose,
                                                                         ls = os.linesep))
-        report.write(u'total dose (nSv): {totalDose}'.format(totalDose = totalDose))
+        report.write(u'total dose (microSv): {totalDose}'.format(totalDose = totalDose))
 
         report.close()
 
@@ -397,7 +397,7 @@ class GroundRadiationMonitoringComputation(QThread):
         # Add the fields we're interested in
         # layer.CreateField(ogr.FieldDefn("X", ogr.OFTReal))
         # layer.CreateField(ogr.FieldDefn("Y", ogr.OFTReal))
-        layer.CreateField(ogr.FieldDefn("rate nSvh", ogr.OFTReal))
+        layer.CreateField(ogr.FieldDefn("rate mSvh", ogr.OFTReal))
         layer.CreateField(ogr.FieldDefn("accTime", ogr.OFTString))
         layer.CreateField(ogr.FieldDefn("interval s", ogr.OFTReal))
         layer.CreateField(ogr.FieldDefn("accDose", ogr.OFTReal))
@@ -414,7 +414,7 @@ class GroundRadiationMonitoringComputation(QThread):
             # Set the attributes using the values from the delimited text file
             # feature.SetField("X", X)
             # feature.SetField("Y", Y)
-            feature.SetField("rate nSvh", values[2])
+            feature.SetField("rate mSvh", values[2])
             feature.SetField("accTime", values[3])
             feature.SetField("interval s", values[4])
             feature.SetField("accDose", values[5])

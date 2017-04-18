@@ -153,22 +153,22 @@
          <widget class="QComboBox" name="unit_box">
           <item>
            <property name="text">
-            <string>nanoSv/h</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
             <string>microSv/h</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>nanoGy/h</string>
+            <string>nanoSv/h</string>
            </property>
           </item>
           <item>
            <property name="text">
             <string>microGy/h</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>nanoGy/h</string>
            </property>
           </item>
          </widget>
