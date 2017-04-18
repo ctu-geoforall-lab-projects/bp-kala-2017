@@ -260,7 +260,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
             
             self.cleanCreatedFiles()
             
-            if not (self.report_file.text() and self.csv_file.text() and self.shp_file.text()):
+            if not (self.report_file.text() and self.shp_file.text()):
                 self.save_button.setEnabled(False)
             else:
                 self.save_button.setEnabled(True)  
@@ -278,9 +278,12 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         # remove created files
         if os.path.isfile(self.saveReportNameOriginal):
             os.remove(self.saveReportNameOriginal) 
-            
-        if os.path.isfile(self.saveCsvNameOriginal):
-            os.remove(self.saveCsvNameOriginal)
+        
+        try:
+            if os.path.isfile(self.saveCsvNameOriginal):
+                os.remove(self.saveCsvNameOriginal)
+        except:
+            pass
             
         if os.path.isfile(self.saveShpNameOriginal):
             os.remove(self.saveShpNameOriginal)
