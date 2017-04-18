@@ -361,15 +361,15 @@ class GroundRadiationMonitoringComputation(QThread):
                                                                                   minutes = time[1],
                                                                                   seconds = time[2],
                                                                                   ls = os.linesep))
-        report.write(u'total distance (km): {distance}{ls}{ls}'.format(distance = distance,
+        report.write(u'total distance (km): {distance}{ls}{ls}'.format(distance = round(distance,3),
                                                                    ls = os.linesep))
         report.write(u'Radiation values (estimated){ls}'.format(ls = os.linesep))
         report.write(u'--------------------------------------{ls}'.format(ls = os.linesep))
-        report.write(u'maximum dose rate (microSv/h): {maxDose}{ls}'.format(maxDose = maxDose,
+        report.write(u'maximum dose rate (microSv/h): {maxDose}{ls}'.format(maxDose = round(maxDose,3),
                                                                         ls = os.linesep))
-        report.write(u'average dose rate (microSv/h): {avgDose}{ls}'.format(avgDose = avgDose,
+        report.write(u'average dose rate (microSv/h): {avgDose}{ls}'.format(avgDose = round(avgDose,3),
                                                                         ls = os.linesep))
-        report.write(u'total dose (microSv): {totalDose}'.format(totalDose = totalDose))
+        report.write(u'total dose (microSv): {totalDose}'.format(totalDose = round(totalDose,3)))
 
         report.close()
 
