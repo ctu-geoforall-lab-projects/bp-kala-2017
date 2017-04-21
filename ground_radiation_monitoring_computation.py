@@ -229,18 +229,10 @@ class GroundRadiationMonitoringComputation(QThread):
             else:
                 dist = self.distance([vertexX[i],vertexY[i]],[vertexX[i+1],vertexY[i+1]])
             
-            # time interval between points, totalInterval for cumulative time
-            interval = (dist/1000)/self.speed
+            # time interval in hours dec between points, totalInterval for cumulative time
+            interval = (dist/1000)/self.speed 
             totalInterval = totalInterval + intervalPrev
-            hours = int(totalInterval)
-            minutes = int((totalInterval-hours)*60)
-            seconds = int(round(((totalInterval-hours)*60-minutes)*60))
-            if seconds == 60:
-                seconds = 0
-                minutes = minutes + 1
-            intervalSeconds = intervalPrev * 3600
-            
-            
+          
             # raster value
             v = rasterLayer.dataProvider().identify(QgsPoint(vertexX[i],vertexY[i]),QgsRaster.IdentifyFormatValue).results()
             value = v.values()[0]
@@ -252,7 +244,7 @@ class GroundRadiationMonitoringComputation(QThread):
                 value = value * coef
             
             estimate = intervalPrev * valuePrev
-            intervalPrev = interval  
+              
               
             # add dose rate on point to compute avg dose rate later
             avgDose = avgDose + value
@@ -269,14 +261,18 @@ class GroundRadiationMonitoringComputation(QThread):
             # total distance
             totalDistance = totalDistance + dist
             
-            all.append([vertexX[i],vertexY[i],value,"{}:{}:{}".format(hours,minutes,seconds),intervalSeconds,cumulDose])
+            all.append([vertexX[i],
+                        vertexY[i],
+                        value, 
+                        self.sec2Time(totalInterval), 
+                        intervalPrev * 3600,
+                        cumulDose])
 
+            intervalPrev = interval
+                    
         avgDose = avgDose/cycleLength
         
-        # total time
-        time = [hours, minutes, seconds]
-        
-        return all, totalDistance/1000, time, maxDose, avgDose, cumulDose    
+        return all, totalDistance/1000, self.sec2Time(totalInterval), maxDose, avgDose, cumulDose    
 
     def distance(self, point1, point2):
         """Compute length between 2 QgsPoints.
@@ -347,10 +343,8 @@ class GroundRadiationMonitoringComputation(QThread):
                                                       ls = os.linesep))
         report.write(u'monitoring speed (km/h): {speed}{ls}'.format(speed = self.speed, 
                                                                     ls = os.linesep))
-        report.write(u'total monitoring time: {hours}:{minutes}:{seconds}{ls}'.format(hours = time[0],
-                                                                                      minutes = time[1],
-                                                                                      seconds = time[2],
-                                                                                      ls = os.linesep))
+        report.write(u'total monitoring time: {time}{ls}'.format(time = time,
+                                                                 ls = os.linesep))
         report.write(u'total distance (km): {distance}{ls}{ls}'.format(distance = round(distance,3),
                                                                        ls = os.linesep))
         
@@ -432,5 +426,15 @@ class GroundRadiationMonitoringComputation(QThread):
             
         # Save and close the data source
         dataSource = None
+        
+    def sec2Time(self, time):
+           
+        hours = int(time)
+        minutes = int((time-hours)*60)
+        seconds = int(round(((time-hours)*60-minutes)*60))
+        if seconds == 60:
+            seconds = 0
+            minutes = minutes + 1
+        return '{}:{}:{}'.format(hours,minutes,seconds)
         
         
