@@ -194,19 +194,15 @@ class GroundRadiationMonitoringComputation(QThread):
         # get raster value multiplicator
         if str(self.units) == 'nanoSv/h':
             coef = 0.001
-            backgroundDoseRate = self.backgroundDoseRate * 1000
-            
+
         elif str(self.units) == 'nanoGy/h':
             coef = GroundRadiationMonitoringComputation.COEFICIENT * 0.001
-            backgroundDoseRate = self.backgroundDoseRate * GroundRadiationMonitoringComputation.COEFICIENT * 1000
             
         elif str(self.units) == 'microGy/h':
             coef = GroundRadiationMonitoringComputation.COEFICIENT
-            backgroundDoseRate = self.backgroundDoseRate * GroundRadiationMonitoringComputation.COEFICIENT
             
         else:
             coef = 1
-            backgroundDoseRate = self.backgroundDoseRate
         
         self.speed = float(self.speed.replace(',', '.'))
         
@@ -216,27 +212,26 @@ class GroundRadiationMonitoringComputation(QThread):
         totalDistance = 0
         cumulDose = 0
         maxDose = 0
-        valueYes = 0
         avgDose = 0
         valuePrev = 0
         totalInterval = 0
         intervalPrev = 0
-        cycleLength = len(vertexX)
-        for X,Y in zip(vertexX,vertexY):
-
+        cycleLength = len(vertexX)-1
+        
+        for i in range(0,len(vertexX)):
+            
             if self.abort == True:
                 break
-            
-            i = i + 1
+
             self.computeStat.emit(float(i)/cycleLength * 100, u'(2/3) Computing statistics, creating report file...')
             
             if i == cycleLength:
                 dist = 0
             else:
-                dist = self.distance([vertexX[i-1],vertexY[i-1]],[vertexX[i],vertexY[i]])
-
+                dist = self.distance([vertexX[i],vertexY[i]],[vertexX[i+1],vertexY[i+1]])
+            
             # time interval between points, totalInterval for cumulative time
-            interval = (dist/1000)/float(self.speed)
+            interval = (dist/1000)/self.speed
             totalInterval = totalInterval + intervalPrev
             hours = int(totalInterval)
             minutes = int((totalInterval-hours)*60)
@@ -245,38 +240,31 @@ class GroundRadiationMonitoringComputation(QThread):
                 seconds = 0
                 minutes = minutes + 1
             intervalSeconds = intervalPrev * 3600
-            intervalPrev = interval
-                        
+            
+            
             # raster value
-            v = rasterLayer.dataProvider().identify(QgsPoint(X,Y),QgsRaster.IdentifyFormatValue).results()
+            v = rasterLayer.dataProvider().identify(QgsPoint(vertexX[i],vertexY[i]),QgsRaster.IdentifyFormatValue).results()
             value = v.values()[0]
             
-            if value != None:
+            if value == None:
+                value = self.backgroundDoseRate
+                
+            elif value != None:
                 value = value * coef
- 
-                # dose on interval
-                if valuePrev == None:
-                    estimate = 0
-                else:
-                    # dose on interval
-                    estimate = interval * valuePrev
-                
-                # counter of points with raster value
-                valueYes = valueYes + 1
-                
-                # add dose rate on point to compute avg dose rate later
-                avgDose = avgDose + value
-                
-                # max dose rate
-                if value > maxDose:
-                    maxDose = value
             
-            elif valuePrev != None:
-                estimate = interval * valuePrev
+            if value < self.backgroundDoseRate:
+                value = self.backgroundDoseRate 
+            
+            estimate = intervalPrev * valuePrev
+            intervalPrev = interval  
+              
+            # add dose rate on point to compute avg dose rate later
+            avgDose = avgDose + value
                 
-            else:
-                estimate = 0  
-                
+            # max dose rate
+            if value > maxDose:
+                maxDose = value
+                 
             valuePrev = value
 
             # cumulative dose
@@ -285,18 +273,14 @@ class GroundRadiationMonitoringComputation(QThread):
             # total distance
             totalDistance = totalDistance + dist
             
-            all.append([X,Y,value,"{}:{}:{}".format(hours,minutes,seconds),intervalSeconds,cumulDose])
+            all.append([vertexX[i],vertexY[i],value,"{}:{}:{}".format(hours,minutes,seconds),intervalSeconds,cumulDose])
 
-        # avg dose {here cumulDose = totalDose)
-        if valueYes == 0:
-            avgDose = None
-        else:
-            avgDose = avgDose/valueYes
+        avgDose = avgDose/cycleLength
         
         # total time
         time = [hours, minutes, seconds]
         
-        return all, totalDistance/1000, time, maxDose, avgDose, cumulDose
+        return all, totalDistance/1000, time, maxDose, avgDose, cumulDose    
 
     def distance(self, point1, point2):
         """Compute length between 2 QgsPoints.
