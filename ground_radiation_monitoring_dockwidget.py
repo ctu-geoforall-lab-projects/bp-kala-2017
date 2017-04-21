@@ -200,15 +200,6 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
             self.sendMessage(u'Error', u'No raster/track layer chosen.', 'CRITICAL')
             return
         
-        try:
-            backgroundDoseRate = float(self.background_drate.text().replace(',','.'))
-        except ValueError:
-            self.sendMessage(u'Error', u'"{}" is not a number. (background dose rate)'.format(self.background_drate.text()), 'CRITICAL')
-            return
-        if backgroundDoseRate < 0:
-            self.sendMessage(u'Error', u'"{}" is a negative number. (background dose rate)'.format(backgroundDoseRate), 'CRITICAL')
-            return
-        
         # remove layers with same name as newly created layer
         for lyr in QgsMapLayerRegistry.instance().mapLayers().values():
             if lyr.source() == self.saveShpName:
@@ -226,8 +217,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
                                                                   self.saveShpName,
                                                                   distanceBetweenVertices,
                                                                   self.speed.text(),
-                                                                  self.unit_box.currentText(),
-                                                                  backgroundDoseRate)
+                                                                  self.unit_box.currentText())
         self.saveShpNameOriginal = self.saveShpName
         self.saveReportNameOriginal = self.saveReportName
         self.saveCsvNameOriginal = self.saveCsvName

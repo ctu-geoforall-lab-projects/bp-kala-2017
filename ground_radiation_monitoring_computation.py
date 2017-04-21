@@ -34,7 +34,7 @@ class GroundRadiationMonitoringComputation(QThread):
     computeProgress = pyqtSignal()
     computeMessage = pyqtSignal(str,str,str)
 
-    def __init__(self,  rasterLayerId, trackLayerId, reportFileName, csvFileName, shpFileName, vertexDist, speed, units, backgroundDoseRate):
+    def __init__(self,  rasterLayerId, trackLayerId, reportFileName, csvFileName, shpFileName, vertexDist, speed, units):
         QThread.__init__(self)
         self.rasterLayerId = rasterLayerId
         self.trackLayerId = trackLayerId
@@ -44,7 +44,6 @@ class GroundRadiationMonitoringComputation(QThread):
         self.vertexDist = vertexDist
         self.speed = speed
         self.units = units
-        self.backgroundDoseRate = backgroundDoseRate
 
     def run(self):
         """Run compute thread."""
@@ -246,14 +245,11 @@ class GroundRadiationMonitoringComputation(QThread):
             v = rasterLayer.dataProvider().identify(QgsPoint(vertexX[i],vertexY[i]),QgsRaster.IdentifyFormatValue).results()
             value = v.values()[0]
             
-            if value == None:
-                value = self.backgroundDoseRate
+            if value == None or value <= 0:
+                value = 0
                 
             elif value != None:
                 value = value * coef
-            
-            if value < self.backgroundDoseRate:
-                value = self.backgroundDoseRate 
             
             estimate = intervalPrev * valuePrev
             intervalPrev = interval  
@@ -372,9 +368,6 @@ class GroundRadiationMonitoringComputation(QThread):
                                                                ls = os.linesep))
         report.write(u'distance between track vertices (m): {dist}{ls}'.format(dist = self.vertexDist,
                                                                                ls = os.linesep))
-        report.write(u'background dose rate (microSv/h): {backRate}{ls}'.format(ls = os.linesep,
-                                                                                backRate = self.backgroundDoseRate))
-
         report.close()
 
     def createShp(self, all, trackLayer):
