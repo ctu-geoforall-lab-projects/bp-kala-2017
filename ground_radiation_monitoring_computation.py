@@ -372,7 +372,8 @@ class GroundRadiationMonitoringComputation(QThread):
                                                                ls = os.linesep))
         report.write(u'distance between track vertices (m): {dist}{ls}'.format(dist = self.vertexDist,
                                                                                ls = os.linesep))
-        report.write(u'background dose rate (microSv/h): {ls}'.format(ls = os.linesep))
+        report.write(u'background dose rate (microSv/h): {backRate}{ls}'.format(ls = os.linesep,
+                                                                                backRate = self.backgroundDoseRate))
 
         report.close()
 
