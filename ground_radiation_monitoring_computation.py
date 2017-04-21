@@ -62,12 +62,12 @@ class GroundRadiationMonitoringComputation(QThread):
         if self.abort == True:
             return
 
-        all, distance, time, maxDose, avgDose, totalDose = self.exportValues(vertexX, vertexY, rasterLayer)
+        all, distance, time, timeOfNoData, distanceOfNoData, maxDose, avgDose, totalDose = self.exportValues(vertexX, vertexY, rasterLayer)
 
         if self.abort == True:
             return
 
-        self.createReport(trackName, time, distance, maxDose, avgDose, totalDose)
+        self.createReport(trackName, time, timeOfNoData, distanceOfNoData, distance, maxDose, avgDose, totalDose)
         
         if self.abort == True:
             return
@@ -216,6 +216,9 @@ class GroundRadiationMonitoringComputation(QThread):
         totalInterval = 0
         intervalPrev = 0
         cycleLength = len(vertexX)-1
+        timeOfNoData = 0
+        distanceOfNoData = 0
+        pointsWithRasterValues = 0
         
         for i in range(0,len(vertexX)):
             
@@ -239,16 +242,16 @@ class GroundRadiationMonitoringComputation(QThread):
             
             if value == None or value <= 0:
                 value = 0
+                timeOfNoData = timeOfNoData + interval
+                distanceOfNoData = distanceOfNoData + dist/1000
                 
             elif value != None:
                 value = value * coef
+                avgDose = avgDose + value
+                pointsWithRasterValues = pointsWithRasterValues + 1
             
             estimate = intervalPrev * valuePrev
-              
-              
-            # add dose rate on point to compute avg dose rate later
-            avgDose = avgDose + value
-                
+               
             # max dose rate
             if value > maxDose:
                 maxDose = value
@@ -270,9 +273,9 @@ class GroundRadiationMonitoringComputation(QThread):
 
             intervalPrev = interval
                     
-        avgDose = avgDose/cycleLength
+        avgDose = avgDose/pointsWithRasterValues
         
-        return all, totalDistance/1000, self.sec2Time(totalInterval), maxDose, avgDose, cumulDose    
+        return all, totalDistance/1000, totalInterval, timeOfNoData, distanceOfNoData, maxDose, avgDose, cumulDose    
 
     def distance(self, point1, point2):
         """Compute length between 2 QgsPoints.
@@ -312,13 +315,15 @@ class GroundRadiationMonitoringComputation(QThread):
             self.computeMessage.emit(u'Error', u'Unable open {} for writing. Reason: {}'.format(self.csvFileName, e),'CRITICAL')
             return
         
-    def createReport(self, trackName, time, distance, maxDose, avgDose, totalDose):
+    def createReport(self, trackName, time, timeOfNoData, distanceOfNoData, distance, maxDose, avgDose, totalDose):
         """Create report file.
         
         Prints error when report txt file cannot be opened for writing.
 
         :trackLayer: name of track layer
         :time: monitoring time
+        :timeOfNoData: time when raster value is <= 0 or NODATA
+        :distanceOfNoData: distance of no data on route
         :distance: length of route
         :maxDose: maximal dose rate on route
         :avgDose: average dose rate on route
@@ -343,10 +348,17 @@ class GroundRadiationMonitoringComputation(QThread):
                                                       ls = os.linesep))
         report.write(u'monitoring speed (km/h): {speed}{ls}'.format(speed = self.speed, 
                                                                     ls = os.linesep))
-        report.write(u'total monitoring time: {time}{ls}'.format(time = time,
+        report.write(u'total monitoring time: {time}{ls}'.format(time = self.sec2Time(time),
                                                                  ls = os.linesep))
         report.write(u'total distance (km): {distance}{ls}{ls}'.format(distance = round(distance,3),
                                                                        ls = os.linesep))
+        
+        report.write(u'No data{ls}'.format(ls = os.linesep))
+        report.write(u'--------------------------------------{ls}'.format(ls = os.linesep))
+        report.write(u'time: {time}{ls}'.format(time = self.sec2Time(timeOfNoData),
+                                                ls = os.linesep))
+        report.write(u'distance (km): {dist}{ls}{ls}'.format(dist = round(distanceOfNoData,3),
+                                                             ls = os.linesep))
         
         report.write(u'Radiation values (estimated){ls}'.format(ls = os.linesep))
         report.write(u'--------------------------------------{ls}'.format(ls = os.linesep))
