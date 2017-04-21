@@ -450,6 +450,6 @@ class GroundRadiationMonitoringComputation(QThread):
         if minutes == 60:
             minutes = 0
             hours = hours + 1
-        return '{}:{}:{}'.format(hours,minutes,seconds)
+        return '%d:%02d:%02d' % (hours, minutes, seconds)
         
         
