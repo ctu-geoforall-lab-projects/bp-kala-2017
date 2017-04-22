@@ -1,0 +1,52 @@
+\chapter{Použité technologie}
+\label{3-technologie}
+
+Tato kapitola rozebírá technologie použité pro tvorbu nástroje.
+\section{QGIS}
+
+\begin{figure}[H]
+    \centering
+      \includegraphics[width=100pt]{./pictures/qgis.png}
+      \caption[QGIS logo]{QGIS logo}(zdroj: %https://commons.wikimedia.org/wiki/File:QGis_Logo.png)
+      \label{fig:qgis}
+  \end{figure}
+ 
+% http://docs.qgis.org/2.14/en/docs/user_manual/preamble/foreword.html
+QGIS je multiplatformní geografický informační systém (\zk{GIS}) vyvíjený jako Open Source šířený pod Obecnou veřejnou licencí GNU (\zk{GNU GPL}). \zk{GNU GPL} zaručuje svobodu jeho sdílení a úprav, které vedou k implementaci nových funkcionalit a k jeho zdokonalení. To z něj činí mocný nástroj používaný ve veřejném i soukromém sektoru. QGIS je psán v programovacím jazyku C++, jeho grafické uživatelské rozhraní je postaveno na knihovně Qt. Projekt QGIS započal v roce 2002, verze 1.0 byla uveřejněna roku 2009. 
+
+QGIS disponuje nepřeberným množstvím zásuvných modulů (pluginů) rozšiřujících funkčnost softwaru. Pluginy jsou programovány v jazyku C++ nebo Python. 
+
+Open source nutně neznmná nepodporovný, právě naopak, velikost on-line komunity zabývající se QGIS a její rychla odezva z toho dělá hustotu.
+
+
+
+\section{Python}
+\begin{figure}[H]
+    \centering
+      \includegraphics[width=100pt]{./pictures/python.png}
+      \caption[Python logo]{Python logo}(zdroj: %???)
+      \label{fig:python}
+  \end{figure}
+  
+Python je objektově orientovaným skriptovacím jazykem zkompilovatelným téměr na každé platformě. Oceňován programátory (především začátečníky) je pro svou jednoduchou a velice schopnou syntax, například také díky dynamickému typování (nepožaduje specifikaci datového typu u proměnných). Dále jeho objektový model podporuje polymorfismus, přetěžování operátorů a vícenásobnou dědičnost. Hlavním důvodem, proč je zařazován mezi skriptovací jazyky je jeho integrace s jazykem C. Díky knihovnám Python/C API lze z programů v Pythonu volat kód psaný v C nebo naopak, pro aplikace psané v C je možné integrovat interpret Pythonu. %naučte se Python knížka
+Python bývá označován jako "spustitelný pseudokód" - syntaxe se snaží vyhnout složitým zápisům a znakům ($\$, <<, \&\&, ?$), inspiruje se v matematice zápisem abstraktních algoritmů.%http://naucse.python.cz/lessons/intro/magic/
+
+Jazyk Python byl navržen koncem 80. let nizozemským počítačovým programátorem Guido van Rossumem. První verzi (0.9.0) uveřejnil začátkem roku 1991. Hlavní principy Pythonu, které zakladatel jazyka prosazuje, byly shrnuty do podoby 20 aforismů (\textit{"Zen of Python, by Tim Peters"}), např.:
+
+\begin{itemize}
+
+	\item
+		\textit{Na čitelnosti záleží. (Readability counts.)} 	
+			
+	\item
+		\textit{Chyby by nikdy neměly projít bez povšimnutí. Jedině pokud nejsou záměrně zamlčeny. (Errors should never pass silently. Unless explicitly silenced.)}
+		
+	\item
+		\textit{Měl by existovat jeden - a pokud možno pouze jeden - zřejmý způsob jak to udělat. (There should be one - and preferably only one - obvious way to do it.)}
+\end{itemize}  
+
+Pro výpis anglického originálu Zenu stačí do konzole Pythonu napsat \\ \texttt{$>>>$~\textbf{import}~this}. Od roku 2008 je vyvíjena řada Pythonu 3, která se snaží naplnit právě poslední ze zmiňovaných aforismů, kdy důraz je kladen na odstranění duplicitních programových konstrukcí a modulů. Python 3 není plně zpětně kompatibilní s řadou 2, softwary napsané a využívající Python 2 postupně přecházejí na jeho novou verzi (i QGIS s připravovanou verzí QGIS 3.0). Pro zajímavost, jazyk byl pojmenován podle britské komediální skupiny Monty Python.  %http://www.python-course.eu/python3_history_and_philosophy.php
+
+
+\section{Qt}
+
