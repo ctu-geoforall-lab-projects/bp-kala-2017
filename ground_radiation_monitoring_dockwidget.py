@@ -216,7 +216,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
                                                                   self.saveCsvName,
                                                                   self.saveShpName,
                                                                   distanceBetweenVertices,
-                                                                  self.speed.text(),
+                                                                  speed,
                                                                   self.unit_box.currentText())
         self.saveShpNameOriginal = self.saveShpName
         self.saveReportNameOriginal = self.saveReportName

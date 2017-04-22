@@ -24,9 +24,9 @@ class GroundRadiationMonitoringComputation(QThread):
     COEFICIENT = 1
     
     # set length measurement
-    length = QgsDistanceArea()
-    length.setEllipsoid('WGS84')
-    length.setEllipsoidalMode(True)
+    lengthMeasure = QgsDistanceArea()
+    lengthMeasure.setEllipsoid('WGS84')
+    lengthMeasure.setEllipsoidalMode(True)
     
     # set signals
     computeEnd = pyqtSignal()
@@ -34,16 +34,16 @@ class GroundRadiationMonitoringComputation(QThread):
     computeProgress = pyqtSignal()
     computeMessage = pyqtSignal(str,str,str)
 
-    def __init__(self,  rasterLayerId, trackLayerId, reportFileName, csvFileName, shpFileName, vertexDist, speed, units):
+    def __init__(self,  rasterLayerId, trackLayerId, reportFileName, csvFileName, shpFileName, userDistanceBetweenVertices, userSpeed, userUnits):
         QThread.__init__(self)
         self.rasterLayerId = rasterLayerId
         self.trackLayerId = trackLayerId
         self.reportFileName = reportFileName
         self.csvFileName = csvFileName
         self.shpFileName = shpFileName
-        self.vertexDist = vertexDist
-        self.speed = speed
-        self.units = units
+        self.userDistanceBetweenVertices = userDistanceBetweenVertices
+        self.userSpeed = userSpeed
+        self.userUnits = userUnits
 
     def run(self):
         """Run compute thread."""
@@ -57,28 +57,28 @@ class GroundRadiationMonitoringComputation(QThread):
         trackName = QgsMapLayerRegistry.instance().mapLayer(self.trackLayerId).name()
 
         # get coordinates of vertices based on user defined sample segment length
-        vertexX, vertexY = self.getCoor(rasterLayer, trackLayer)
+        verticesX, verticesY = self.getTrackVertices(trackLayer)
 
         if self.abort == True:
             return
 
-        all, distance, time, timeOfNoData, distanceOfNoData, maxDose, avgDose, totalDose = self.exportValues(vertexX, vertexY, rasterLayer)
+        atributeTableData, statisticsData = self.exportValues(verticesX, verticesY, rasterLayer)
 
         if self.abort == True:
             return
-
-        self.createReport(trackName, time, timeOfNoData, distanceOfNoData, distance, maxDose, avgDose, totalDose)
+        
+        self.createReport(trackName, statisticsData)
         
         if self.abort == True:
             return
         
         if self.csvFileName != None:
-            self.createCsv(all)
+            self.createCsv(atributeTableData)
 
         if self.abort == True:
             return
         
-        self.createShp(all, trackLayer)
+        self.createShp(atributeTableData, trackLayer)
 
         if self.abort == True:
             return
@@ -88,16 +88,15 @@ class GroundRadiationMonitoringComputation(QThread):
     def abortThread(self):
         self.abort = True
       
-    def getCoor(self, rasterLayer, trackLayer):
+    def getTrackVertices(self, trackLayer):
         """Get coordinates of vertices of sampled track.
 
-        :rasterLayer: input raster layer (QgsRasterLayer)
         :trackLayer: linestring vector layer to be sampled (QgsVectorLayer)
         """
 
         # declare arrays of coordinates of vertices and of distance between them
-        vertexX = array('d',[])
-        vertexY = array('d',[])
+        verticesX = array('d',[])
+        verticesY = array('d',[])
 
         # get coordinates of vertices of uploaded track layer
         for featureIndex, feature in enumerate(trackLayer.getFeatures()):
@@ -107,54 +106,54 @@ class GroundRadiationMonitoringComputation(QThread):
 
 
             polyline = feature.geometry().asPolyline()
-            pointCounter = 0
-            vertexX.append(polyline[0][0])
-            vertexY.append(polyline[0][1])
-            amount = len(polyline)
-            while pointCounter < (amount-1):
+            currentPointIndex = 0
+            verticesX.append(polyline[0][0])
+            verticesY.append(polyline[0][1])
+            polylinePointsCount = len(polyline)
+            while currentPointIndex < (polylinePointsCount-1):
                 
                 if self.abort == True:
                     break
 
-                self.computeStat.emit(float(pointCounter)/amount * 10, u'(1/3) Sampling track...')
+                self.computeStat.emit(float(currentPointIndex)/polylinePointsCount * 10, u'(1/3) Sampling track...')
                 
-                point1 = polyline[pointCounter]
-                point2 = polyline[pointCounter+1]
-                distance = self.distance(point1, point2)
+                point1 = polyline[currentPointIndex]
+                point2 = polyline[currentPointIndex+1]
+                distance = self.getDistance(point1, point2)
                 
                 # check whether the input distance between vertices is longer then the distance between points
-                if distance > self.vertexDist and self.vertexDist != 0:
+                if distance > self.userDistanceBetweenVertices and self.userDistanceBetweenVertices != 0:
                     newX, newY = self.sampleLine(point1,point2, distance)
-                    vertexX.extend(newX)
-                    vertexY.extend(newY)
+                    verticesX.extend(newX)
+                    verticesY.extend(newY)
                 else:
-                    vertexX.append(point2[0])
-                    vertexY.append(point2[1])
-                pointCounter = pointCounter + 1
+                    verticesX.append(point2[0])
+                    verticesY.append(point2[1])
+                currentPointIndex = currentPointIndex + 1
  
         # returns coordinates of all vertices of track   
-        return vertexX, vertexY
+        return verticesX, verticesY
 
-    def sampleLine(self,point1, point2, dist):
+    def sampleLine(self,point1, point2, distanceBetweenPoints):
         """Sample line between two points to segments of user selected length.
 
         Compute coordinates of new vertices.
 
         :point1: first point of line
         :point2: last point of line
-        :dist: length of line in metres
+        :distanceBetweenPoints: length of line between point1 and point2 in metres
         """
 
         # number of vertices, that should be added between 2 points
-        vertexQuantity = ceil(dist / float(self.vertexDist)) - 1
+        verticesQuantity = ceil(distanceBetweenPoints / float(self.userDistanceBetweenVertices)) - 1
 
         # if modulo of division of line length and 1 segment length is not 0,
         # point where last complete segment ends is computed
         lastPointX = lastPointY = None
-        if dist % self.vertexDist != 0:
-            shortestSegmentRel = (dist % self.vertexDist) / dist
-            lastPointX = point2[0] - (point2[0] - point1[0]) * shortestSegmentRel
-            lastPointY = point2[1] - (point2[1] - point1[1]) * shortestSegmentRel
+        if distanceBetweenPoints % self.userDistanceBetweenVertices != 0:
+            shortestSegmentRelative = (distanceBetweenPoints % self.userDistanceBetweenVertices) / distanceBetweenPoints
+            lastPointX = point2[0] - (point2[0] - point1[0]) * shortestSegmentRelative
+            lastPointY = point2[1] - (point2[1] - point1[1]) * shortestSegmentRelative
             vectorX = lastPointX - point1[0]
             vectorY = lastPointY - point1[1] 
         else:
@@ -162,15 +161,15 @@ class GroundRadiationMonitoringComputation(QThread):
             vectorY = point2[1] - point1[1]
 
         # compute addition to coordinates with size of 1 segment    
-        addX = vectorX / vertexQuantity
-        addY = vectorY / vertexQuantity
+        addX = vectorX / verticesQuantity
+        addY = vectorY / verticesQuantity
 
         # declare arrays for newly computed points
         newX = array('d',[])
         newY = array('d',[])
 
         # compute new points
-        for n in range(1,int(vertexQuantity)):
+        for n in range(1,int(verticesQuantity)):
             newX.append((point1[0]+n*addX))
             newY.append((point1[1]+n*addY))
         if lastPointX:
@@ -181,117 +180,115 @@ class GroundRadiationMonitoringComputation(QThread):
 
         return newX, newY
 
-    def exportValues(self, vertexX, vertexY, rasterLayer):
+    def exportValues(self, verticesX, verticesY, rasterLayer):
         """Compute statistics.
             
        
-        :vertexX: X coordinates of points
-        :vertexY: Y coordinates of points
+        :verticesX: X coordinates of points
+        :verticesY: Y coordinates of points
         :rasterLayer: raster layer to get dose rate from
         """
 
         # get raster value multiplicator
-        if str(self.units) == 'nanoSv/h':
+        if str(self.userUnits) == 'nanoSv/h':
             coef = 0.001
 
-        elif str(self.units) == 'nanoGy/h':
+        elif str(self.userUnits) == 'nanoGy/h':
             coef = GroundRadiationMonitoringComputation.COEFICIENT * 0.001
             
-        elif str(self.units) == 'microGy/h':
+        elif str(self.userUnits) == 'microGy/h':
             coef = GroundRadiationMonitoringComputation.COEFICIENT
             
         else:
             coef = 1
         
-        self.speed = float(self.speed.replace(',', '.'))
+        atributeTableData = []
         
-        all = []
+        lengthOfTrack = 0
+        accumulatedDose = 0
+        maxDoseRate = 0
+        avgDoseRate = 0
+        rasterValuePrevious = 0
+        totalTime = 0
+        timeIntervalPrevious = 0
+        verticesCount = len(verticesX)-1
+        noDataTime = 0
+        noDataDistance = 0
+        pointsWithRasterValuesCounter = 0
         
-        i = 0
-        totalDistance = 0
-        cumulDose = 0
-        maxDose = 0
-        avgDose = 0
-        valuePrev = 0
-        totalInterval = 0
-        intervalPrev = 0
-        cycleLength = len(vertexX)-1
-        timeOfNoData = 0
-        distanceOfNoData = 0
-        pointsWithRasterValues = 0
-        
-        for i in range(0,len(vertexX)):
+        for i in range(0,len(verticesX)):
             
             if self.abort == True:
                 break
 
-            self.computeStat.emit(float(i)/cycleLength * 100, u'(2/3) Computing statistics, creating report file...')
+            self.computeStat.emit(float(i)/verticesCount * 100, u'(2/3) Computing statistics, creating report file...')
             
-            if i == cycleLength:
-                dist = 0
+            if i == verticesCount:
+                distance = 0
             else:
-                dist = self.distance([vertexX[i],vertexY[i]],[vertexX[i+1],vertexY[i+1]])
+                distance = self.getDistance([verticesX[i],verticesY[i]],[verticesX[i+1],verticesY[i+1]])
             
-            # time interval in hours dec between points, totalInterval for cumulative time
-            interval = (dist/1000)/self.speed 
-            totalInterval = totalInterval + intervalPrev
+            # time interval in hours decimal between points, totalTime for cumulative time
+            timeInterval = (distance/1000)/self.userSpeed 
+            totalTime = totalTime + timeIntervalPrevious
           
             # raster value
-            v = rasterLayer.dataProvider().identify(QgsPoint(vertexX[i],vertexY[i]),QgsRaster.IdentifyFormatValue).results()
-            value = v.values()[0]
+            v = rasterLayer.dataProvider().identify(QgsPoint(verticesX[i],verticesY[i]),QgsRaster.IdentifyFormatValue).results()
+            rasterValue = v.values()[0]
             
-            if value == None or value <= 0:
-                value = 0
-                timeOfNoData = timeOfNoData + interval
-                distanceOfNoData = distanceOfNoData + dist/1000
+            if rasterValue == None or rasterValue <= 0:
+                rasterValue = 0
+                noDataTime = noDataTime + timeInterval
+                noDataDistance = noDataDistance + distance/1000
                 
-            elif value != None:
-                value = value * coef
-                avgDose = avgDose + value
-                pointsWithRasterValues = pointsWithRasterValues + 1
+            elif rasterValue != None:
+                rasterValue = rasterValue * coef
+                avgDoseRate = avgDoseRate + rasterValue
+                pointsWithRasterValuesCounter = pointsWithRasterValuesCounter + 1
             
-            estimate = intervalPrev * valuePrev
+            estimate = timeIntervalPrevious * rasterValuePrevious
                
             # max dose rate
-            if value > maxDose:
-                maxDose = value
+            if rasterValue > maxDoseRate:
+                maxDoseRate = rasterValue
                  
-            valuePrev = value
+            rasterValuePrevious = rasterValue
 
             # cumulative dose
-            cumulDose = cumulDose + estimate
+            accumulatedDose = accumulatedDose + estimate
             
             # total distance
-            totalDistance = totalDistance + dist
+            lengthOfTrack = lengthOfTrack + distance
             
-            all.append([vertexX[i],
-                        vertexY[i],
-                        value, 
-                        self.sec2Time(totalInterval), 
-                        intervalPrev * 3600,
-                        cumulDose])
+            atributeTableData.append([verticesX[i],
+                                      verticesY[i],
+                                      rasterValue, 
+                                      self.sec2Time(totalTime), 
+                                      timeIntervalPrevious * 3600,
+                                      accumulatedDose])
 
-            intervalPrev = interval
+            timeIntervalPrevious = timeInterval
                     
-        avgDose = avgDose/pointsWithRasterValues
+        avgDoseRate = avgDoseRate/pointsWithRasterValuesCounter
         
-        return all, totalDistance/1000, totalInterval, timeOfNoData, distanceOfNoData, maxDose, avgDose, cumulDose    
+        statisticsData = [lengthOfTrack/1000, totalTime, noDataTime, noDataDistance, maxDoseRate, avgDoseRate, accumulatedDose]
+        
+        return atributeTableData, statisticsData    
 
-    def distance(self, point1, point2):
+    def getDistance(self, point1, point2):
         """Compute length between 2 QgsPoints.
         
         :point1: 1st point
         :point2: 2nd point
         """
-        distance = GroundRadiationMonitoringComputation.length.measureLine(QgsPoint(point1[0],point1[1]), QgsPoint(point2[0],point2[1]))
-        return distance
+        return GroundRadiationMonitoringComputation.lengthMeasure.measureLine(QgsPoint(point1[0],point1[1]), QgsPoint(point2[0],point2[1]))
 
-    def createCsv(self, all):
+    def createCsv(self, atributeTableData):
         """Create csv file.
         
         Print error when csv file cannot be opened for writing.        
         
-        :all: list of lists containing [X, Y, dose rate, accumulative time, time interval, accumulative dose] 
+        :atributeTableData: list of lists containing [X, Y, dose rate, accumulative time, time interval, accumulative dose] 
               of every point
 
         """
@@ -303,31 +300,28 @@ class GroundRadiationMonitoringComputation(QThread):
                 with open(self.csvFileName, "w",newline='') as f:
                     f.write(u'X,Y,dose_rate_microSvh,accum_time,time_interval_sec,accum_dose_microSv{linesep}'.format(linesep = os.linesep))
                     writer = csv.writer(f)
-                    writer.writerows(all)
+                    writer.writerows(atributeTableData)
             # python 2
             except:
                 with open(self.csvFileName, "wb") as f:
                     f.write(u'X,Y,dose_rate_microSvh,accum_time,time_interval_sec,accum_dose_microSv{linesep}'.format(linesep = os.linesep))
                     writer = csv.writer(f)
-                    writer.writerows(all)
+                    writer.writerows(atributeTableData)
                         
         except IOError as e:
             self.computeMessage.emit(u'Error', u'Unable open {} for writing. Reason: {}'.format(self.csvFileName, e),'CRITICAL')
             return
         
-    def createReport(self, trackName, time, timeOfNoData, distanceOfNoData, distance, maxDose, avgDose, totalDose):
+    def createReport(self, trackName, statisticsData):
         """Create report file.
+        
+        lengthOfTrack/1000, totalTime, noDataTime, noDataDistance, maxDoseRate, avgDoseRate, accumulatedDose
         
         Prints error when report txt file cannot be opened for writing.
 
         :trackLayer: name of track layer
-        :time: monitoring time
-        :timeOfNoData: time when raster value is <= 0 or NODATA
-        :distanceOfNoData: distance of no data on route
-        :distance: length of route
-        :maxDose: maximal dose rate on route
-        :avgDose: average dose rate on route
-        :totalDose: total dose rate on route
+        :statisticsData: list of data to be writen to report file, contains lengthOfTrack, totalTime, noDataTime, noDataDistance, 
+                         maxDoseRate, avgDoseRate, accumulatedDose
         """
         try:
             try:
@@ -346,40 +340,40 @@ class GroundRadiationMonitoringComputation(QThread):
         report.write(u'--------------------------------------{ls}'.format(ls = os.linesep))
         report.write(u'route: {trackName}{ls}'.format(trackName = trackName, 
                                                       ls = os.linesep))
-        report.write(u'monitoring speed (km/h): {speed}{ls}'.format(speed = self.speed, 
+        report.write(u'monitoring speed (km/h): {speed}{ls}'.format(speed = self.userSpeed, 
                                                                     ls = os.linesep))
-        report.write(u'total monitoring time: {time}{ls}'.format(time = self.sec2Time(time),
+        report.write(u'total monitoring time: {time}{ls}'.format(time = self.sec2Time(statisticsData[1]),
                                                                  ls = os.linesep))
-        report.write(u'total distance (km): {distance}{ls}{ls}'.format(distance = round(distance,3),
+        report.write(u'total distance (km): {distance}{ls}{ls}'.format(distance = round(statisticsData[0],3),
                                                                        ls = os.linesep))
         
         report.write(u'No data{ls}'.format(ls = os.linesep))
         report.write(u'--------------------------------------{ls}'.format(ls = os.linesep))
-        report.write(u'time: {time}{ls}'.format(time = self.sec2Time(timeOfNoData),
+        report.write(u'time: {time}{ls}'.format(time = self.sec2Time(statisticsData[2]),
                                                 ls = os.linesep))
-        report.write(u'distance (km): {dist}{ls}{ls}'.format(dist = round(distanceOfNoData,3),
+        report.write(u'distance (km): {dist}{ls}{ls}'.format(dist = round(statisticsData[3],3),
                                                              ls = os.linesep))
         
         report.write(u'Radiation values (estimated){ls}'.format(ls = os.linesep))
         report.write(u'--------------------------------------{ls}'.format(ls = os.linesep))
-        report.write(u'maximum dose rate (microSv/h): {maxDose}{ls}'.format(maxDose = round(maxDose,3),
+        report.write(u'maximum dose rate (microSv/h): {maxDoseRate}{ls}'.format(maxDoseRate = round(statisticsData[4],3),
                                                                             ls = os.linesep))
-        report.write(u'average dose rate (microSv/h): {avgDose}{ls}'.format(avgDose = round(avgDose,3),
+        report.write(u'average dose rate (microSv/h): {avgDoseRate}{ls}'.format(avgDoseRate = round(statisticsData[5],3),
                                                                             ls = os.linesep))
-        report.write(u'total dose (microSv): {totalDose}'.format(totalDose = round(totalDose,3)))
+        report.write(u'total dose (microSv): {totalDose}'.format(totalDose = round(statisticsData[6],3)))
         
         report.write(u'{ls}{ls}Plugin settings'.format(ls = os.linesep))
         report.write(u'{ls}--------------------------------------{ls}'.format(ls = os.linesep))
-        report.write(u'input raster units: {units}{ls}'.format(units = self.units, 
+        report.write(u'input raster units: {units}{ls}'.format(units = self.userUnits, 
                                                                ls = os.linesep))
-        report.write(u'distance between track vertices (m): {dist}{ls}'.format(dist = self.vertexDist,
+        report.write(u'distance between track vertices (m): {dist}{ls}'.format(dist = self.userDistanceBetweenVertices,
                                                                                ls = os.linesep))
         report.close()
 
-    def createShp(self, all, trackLayer):
+    def createShp(self, atributeTableData, trackLayer):
         """Create shapefile.
         
-        :all: list of lists containing [X, Y, dose rate, accumulative time, time interval, accumulative dose] 
+        :atributeTableData: list of lists containing [X, Y, dose rate, accumulative time, time interval, accumulative dose] 
               of every point
         :trackLayer: layer of track to get coordinate system from
         """
@@ -406,8 +400,8 @@ class GroundRadiationMonitoringComputation(QThread):
         layer.CreateField(ogr.FieldDefn("accDose", ogr.OFTReal))
         
         i = 0
-        cycleLength = len(all)
-        for values in all:
+        rowsCount = len(atributeTableData)
+        for values in atributeTableData:
             
             if self.abort == True:
                 break
@@ -434,12 +428,13 @@ class GroundRadiationMonitoringComputation(QThread):
             feature = None
             
             i = i + 1
-            self.computeStat.emit(float(i)/cycleLength * 100, u'(3/3) Creating shapefile...')
+            self.computeStat.emit(float(i)/rowsCount * 100, u'(3/3) Creating shapefile...')
             
         # Save and close the data source
         dataSource = None
         
     def sec2Time(self, time):
+        
            
         hours = int(time)
         minutes = int((time-hours)*60)
