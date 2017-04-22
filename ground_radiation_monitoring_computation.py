@@ -134,7 +134,7 @@ class GroundRadiationMonitoringComputation(QThread):
         # returns coordinates of all vertices of track   
         return verticesX, verticesY
 
-    def sampleLine(self,point1, point2, distanceBetweenPoints):
+    def sampleLine(self, point1, point2, distanceBetweenPoints):
         """Sample line between two points to segments of user selected length.
 
         Compute coordinates of new vertices.
@@ -183,7 +183,6 @@ class GroundRadiationMonitoringComputation(QThread):
     def exportValues(self, verticesX, verticesY, rasterLayer):
         """Compute statistics.
             
-       
         :verticesX: X coordinates of points
         :verticesY: Y coordinates of points
         :rasterLayer: raster layer to get dose rate from
@@ -434,8 +433,11 @@ class GroundRadiationMonitoringComputation(QThread):
         dataSource = None
         
     def sec2Time(self, time):
+        """ Transform time from hours in decimal to hours, minutes and seconds.
         
-           
+        :time: time in hours decimal
+        """
+
         hours = int(time)
         minutes = int((time-hours)*60)
         seconds = int(round(((time-hours)*60-minutes)*60))
