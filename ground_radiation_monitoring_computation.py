@@ -110,15 +110,15 @@ class GroundRadiationMonitoringComputation(QThread):
             verticesX.append(polyline[0][0])
             verticesY.append(polyline[0][1])
             polylinePointsCount = len(polyline)
-            while currentPointIndex < (polylinePointsCount-1):
+            for i in range(0, polylinePointsCount-1):
                 
                 if self.abort == True:
                     break
 
-                self.computeStat.emit(float(currentPointIndex)/polylinePointsCount * 10, u'(1/3) Sampling track...')
+                self.computeStat.emit(float(i)/polylinePointsCount * 10, u'(1/3) Sampling track...')
                 
-                point1 = polyline[currentPointIndex]
-                point2 = polyline[currentPointIndex+1]
+                point1 = polyline[i]
+                point2 = polyline[i+1]
                 distance = self.getDistance(point1, point2)
                 
                 # check whether the input distance between vertices is longer then the distance between points
@@ -129,7 +129,6 @@ class GroundRadiationMonitoringComputation(QThread):
                 else:
                     verticesX.append(point2[0])
                     verticesY.append(point2[1])
-                currentPointIndex = currentPointIndex + 1
  
         # returns coordinates of all vertices of track   
         return verticesX, verticesY
