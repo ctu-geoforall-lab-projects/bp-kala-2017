@@ -9,9 +9,9 @@ Zadáním bakalářské práce bylo vytvoření softwarového nástroje, který 
 \subsection{Vstupní data}
 \begin{enumerate}
 	\item \textbf{Interpolovaná mapa dávkového příkonu} \\
-	Je vytvořena v rastrovém formátu, který je podporován knihovnou GDAL. Obsahuje hodnoty dávkového příkonu v daných jednotkách. (Plugin umožňuje volit typ jednotek). Mapa je v souřadnicovém systému WGS84 EPSG:4326.
+	Mapa je v souřadnicovém systému WGS84 EPSG:4326. Je vytvořena v rastrovém formátu, který je podporován knihovnou GDAL. Obsahuje hodnoty dávkového příkonu v daných jednotkách. (Plugin umožňuje volit typ jednotek). 
 	\item \textbf{Trasa monitorování} \\
-	Je vytvořena ve vektorovém formátu, který je podporován knihovnou OGR. Trasy mohou být generované pomocí plánovačů tras, např. společnosti Google, Inc. Trasa monitorování je taktéž v souřadnicovém systému WGS84 EPSG:4326. 
+	Trasa monitorování je taktéž v souřadnicovém systému WGS84 EPSG:4326. Je vytvořena ve vektorovém formátu, který je podporován knihovnou OGR. Trasy mohou být generované pomocí plánovačů tras (např. společnosti Google, Inc.) 
 \end{enumerate}
 
 			\begin{figure}[H]
@@ -22,6 +22,7 @@ Zadáním bakalářské práce bylo vytvoření softwarového nástroje, který 
   			\end{figure}
   			
 \subsection{Výstupní data}
+\label{sec:VystupniData}
 \begin{enumerate}
 	\item \textbf{Soubor se zprávou o výpočtu} \\
 	Soubor se zprávou o výpočtu v textovém formátu (\textit{.txt}) obsahuje následující informace o výpočtu (v anglickém jazyce):
@@ -52,7 +53,7 @@ Zadáním bakalářské práce bylo vytvoření softwarového nástroje, který 
 			\item nastavení (\textit{plugin settings})
 			\begin{itemize}
 				\item jednotky dávkového příkonu vstupní mapy (\textit{input raster units})
-				\item vzdálenost mezi body navzorkované trasy v m (vysvětleno v kapitole NAPSAT KDE JE VYSVĚTLENÝ VZORKOVÁNÍ (\textit{distance between track vertices (m)})
+				\item vzdálenost mezi body navzorkované trasy v m (vysvětleno v kapitole \ref{fig:vzorkovaniLinie} (\textit{distance between track vertices (m)})
 			\end{itemize}
 			
 		\end{itemize}
@@ -65,7 +66,7 @@ Zadáním bakalářské práce bylo vytvoření softwarového nástroje, který 
   			\end{figure}
   			
 	\item \textbf{Soubor trasy} \\
-	Soubor trasy obsahuje bodovou vrstvu ve formátu Esri Shapefile (\textit{.shp}) s body trasy navzorkované dle zadání uživatele (bude vysvětleno v kapitole NAPSAT KDE JE VYSVĚTLENÝ VZORKOVÁNÍ) s následujícími atributy:
+	Soubor trasy obsahuje bodovou vrstvu ve formátu Esri Shapefile (\textit{.shp}) s body trasy navzorkované dle zadání uživatele (bude vysvětleno v kapitole \ref{fig:vzorkovaniLinie}) s následujícími atributy:
 		\begin{itemize}
 			\item dávkový příkon
 			\item kumulativní čas
@@ -89,39 +90,79 @@ Zadáním bakalářské práce bylo vytvoření softwarového nástroje, který 
   			\end{figure}	
 \end{enumerate}
 
-\section{Popis kódu(pracovní název)}
+\section{Popis kostry zásuvného modulu(pracovní název)}
 \subsection[Plugin Builder]{Plugin Builder \includegraphics[scale=0.1]{./pictures/plugin_builder.png}}
-K vytvoření základu softwarového nástroje byl použit zásuvný modul Plugin Builder dostupný z oficiálního QGIS repozitáře.\footnote{Dostupné z \url{https://plugins.qgis.org/plugins/pluginbuilder/}} Tento modul pochází z dílny organizace GeoApt LLC, jež se zabývá volně šiřitelným GIS. Po zadání základních informací (název modulu, základní popis, autor, požadovaná verze QGIS, odkazy a další údaje o repozitáři apod.) Plugin Builder vytvoří kostru nového zásuvného modulu. Tato kostra zajišťuje jeho základní funkcionalitu, tedy zobrazení okna a jeho vypnutí, potažmo tlačítka \texttt{OK | Cancel}, pokud není nastaveno, že okno zásuvného modulu bude "přichycovací". 
+K vytvoření základu softwarového nástroje byl použit zásuvný modul Plugin Builder dostupný z oficiálního QGIS repozitáře.\footnote{Dostupné z \url{https://plugins.qgis.org/plugins/pluginbuilder/}} Tento modul pochází z dílny organizace GeoApt LLC, jež se zabývá volně šiřitelným GIS. Po zadání základních informací (název modulu, základní popis, autor, požadovaná verze QGIS, odkazy a další údaje o repozitáři apod.) vytvoří Plugin Builder kostru nového zásuvného modulu. Tato kostra zajišťuje základní funkcionalitu modulu, tedy zobrazení a vypnutí okna nebo také tlačítka \texttt{OK | Cancel}, pokud okno zásuvného modulu není nastaveno jako "přichycovací". 
 
 \subsection{Popis souborů}
-Celý zásuvný modul \textit{Ground radiation monitoring} tvoří několik souborů dohromady tvořících balíček, který zajišťuje spustitelnost a funkcionalitu modulu. Některé soubory zde budou prezentovány. Funkcionalita zásuvného modulu zajišťující řešení zadání bakalářské práce je uložena v posledních dvou jmenovaných souborech, které obsahují modifikace a bloky kódu zaručující výsledky práce. %tohle napsat nějak lépe kámo
+Celý zásuvný modul \textit{Ground radiation monitoring} se skládá z několika souborů dohromady tvořících balíček, který zajišťuje spustitelnost a funkcionalitu modulu. Některé soubory zde budou dále prezentovány. Funkcionalita zásuvného modulu zajišťující řešení zadání bakalářské práce je uložena v posledních dvou souborech následujícího výčtu. Tyto dva soubory obsahují modifikace a bloky kódu zaručující výsledky práce. %tohle napsat nějak lépe kámo
 
-\begin{itemize} %to mam z Mastering QGIS, ještě že mastruju
+\begin{itemize} %to mam z Mastering QGIS, ještě že mastruju https://books.google.cz/books?id=jYdcDgAAQBAJ&pg=PA388&lpg=PA388&dq=plugin_upload+py&source=bl&ots=FNmxuQgXC7&sig=0vJ0oBv2fzcPrVhi7kzS38trW8U&hl=cs&sa=X&ved=0ahUKEwiA94_kjrnTAhWPKlAKHVU-DgUQ6AEILzAC#v=onepage&q=polyline&f=false
 	\item \textbf{\_\_init\_\_.py} \\ 
-		Tento soubor slouží pro základní inicializaci modulu.
+		Soubor slouží pro základní inicializaci modulu.
 		 
 	\item \textbf{metadata.txt} \\
-		Tento textový soubor obsahuje informace o zásuvném modulu čtené Správcem zásuvných modulů. Vedle údajů jako je jméno autora a název modulu je zde například také údaj o požadované verzi QGIS, pro kterou je modul naprogramován. Správce pak tento údaj porovná s verzí QGIS a pokud dojde ke konffliktu, tak vypíše chybovou hlášku a modul nenaimportuje.
+		Tento textový soubor obsahuje informace o zásuvném modulu čtené Správcem zásuvných modulů. Vedle údajů jako je jméno autora a název modulu je zde například také údaj o požadované verzi QGIS, pro kterou je modul naprogramován. Správce pak tento údaj porovná s verzí QGIS a pokud dojde ke konfliktu, vypíše chybovou hlášku a modul nenaimportuje.
 	
 	\item \textbf{Makefile} \\
-		V tomto souboru se nachází set instrukcí např. pro zkompilování dokumentace nebo souboru \textbf{resources.qrc} (zkompilovaná verze je \textbf{resources.py}), který informuje Qt jak naložit s ikonou modulu.
+		V souboru se nachází set instrukcí např. pro zkompilování dokumentace nebo souboru \textbf{resources.qrc} (zkompilovaná verze je \textbf{resources.py}), který informuje Qt jak naložit s ikonou modulu.
 		
 	\item \textbf{plugin\_upload.py} \\
-		Tento soubor pro nahrání modulu do QGIS repozitáe zásuvných modulů.
+		Tento soubor slouží pro nahrání modulu do QGIS repozitáře zásuvných modulů.
 
 	\item \textbf{ground\_radiation\_monitoring.py} \\
-		Tento soubor slouží pro implementaci zásuvného modulu do prostředí QGIS. Obsahuje třídu \texttt{GroundRadiationMonitoring}, jejíž zásadními metodami jsou \texttt{add\_action} - metoda načítající ikonu modulu (včetně názvu) do nástrojové lišty QGIS a do menu, tedy přidává tlačítko na spuštění. Dále jsou to metody \texttt{onClosePlugin} a \texttt{unload}, které se starají o destrukci modulu.
+		Soubor slouží pro implementaci zásuvného modulu do prostředí QGIS. Obsahuje třídu \texttt{GroundRadiationMonitoring}. Zásadními metodami této třídy jsou \texttt{add\_action} - metoda načítající ikonu modulu (včetně názvu) do nástrojové lišty QGIS a do menu (přidává tedy tlačítko na spuštění) a dále jsou to metody \texttt{onClosePlugin} a \texttt{unload}, které se starají o destrukci modulu.
 
 	\item \textbf{ground\_radiation\_monitoring\_dockwidget.py} \\
-		Tento soubor zajišťuje propojení s grafickým rozhraním, které je vytvořené v souboru \textbf{ground\_radiation\_monitoring\_base.ui} pomocí prostředí QT Designer. Obsahuje třídu \texttt{GroundRadiationDockWidget}, ve které jsou implementovány metody pro načítání vstupních dat, čtení údajů zadaných uživatelem, především také pro spuštění (a případné přerušení) procesu výpočtu a práci s výstupním souborem trasy (pokud si to uživatel přeje, vrstva s trasou může být načtena do QGIS). V případě chyby při zadání vstupních parametrů (např. zadání textu do pole, do kterého má být zadané číslo nebo výběr výstupního souboru, do kterého je zákaz zápisu) je uživatel upozorněn chybovým hlášením.     
+		Soubor zajišťuje propojení s grafickým rozhraním, které je vytvořené v souboru \textbf{ground\_radiation\_monitoring\_base.ui} pomocí prostředí QT Designer. Obsahuje třídu \texttt{GroundRadiationDockWidget} ve které jsou implementovány metody pro načítání vstupních dat, čtení údajů zadaných uživatelem a především také pro spuštění (a případné přerušení) procesu výpočtu a práci s výstupním souborem trasy (pokud si to uživatel přeje, vrstva s trasou může být načtena do QGIS). V případě chyby při zadání vstupních parametrů (např. zadání textu do pole, do kterého má být zadané číslo nebo výběr výstupního souboru, do kterého je zápis zakázán) je uživatel upozorněn chybovým hlášením.     
 	
 	\item \textbf{ground\_radiation\_monitoring\_computation.py} \\
-		V tomto souboru probíhá samotný výpočet dle uživatelsky zadaných dat a vstupních parametrů. Obsahuje třídu \texttt{GroundRadiationMonitoringComputation}, která je implementována jako samostatné výpočetní vlákno. Toto má za výhodu, že výpočet probíhá na pozadí, tedy že s QGIS se dá pracovat dále nezávisle na probíhajícím procesu, což je nezbytné vzhledem k jeho někdy dlouhému trvání (v závislosti na vstupních proměnných). V této třídě jsou vedle výpočetních metod také metody pro vytváření výstupních souborů. Třída během výpočtu komunikuje s hlavním vláknem (s třídou \texttt{GroundRadiationMonitoringDockWidget}) přes signály, pomocí kterých informuje o postupu výpočtu, který je zobrazován v ukazateli průběhu výpočtu.
+		V souboru probíhá samotný výpočet dle uživatelsky zadaných dat a vstupních parametrů. Obsahuje třídu \texttt{GroundRadiationMonitoringComputation}, která je implementována jako samostatné výpočetní vlákno. Výhodou je, že výpočet probíhá na pozadí, tedy že s QGIS se dá pracovat dále nezávisle na probíhajícím procesu, což je nezbytné vzhledem k jeho někdy dlouhému trvání (v závislosti na vstupních proměnných). V této třídě jsou vedle výpočetních metod obsaženy také metody pro vytváření výstupních souborů. Třída během výpočtu komunikuje s hlavním vláknem (s třídou \texttt{GroundRadiationMonitoringDockWidget}). Přes signály informuje o postupu výpočtu, který je zobrazován v ukazateli průběhu výpočtu.
 	
 \end{itemize}
 
-\subsection{Vzorkování linie}
+\section{Algoritmus}
+V této části práce bude popsán algoritmus kódu. Nejprve bude prezentováno jednoduché schéma výpočtu, poté budou jednotlivé části rozebrány více do podrobna.
+\subsection{Schéma výpočtu}
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.5]{./pictures/computation_scheme.png}
+      	\caption[Schéma výpočtu]{Schéma výpočtu}(zdroj: Helebrant)
+    	\label{fig:SchemeOfComputation}
+\end{figure}
 
+Schéma výpočtu je zřejmé z obrázku \ref{fig:SchemeOfComputation}. Z interpolované mapy dávkových příkonů (\textit{dose rate map}) jsou extrahovány rastrové hodnoty (\textit{dose rate value}) v bodech navzorkované trasy (\textit{monitoring route}). Dále jsou provedeny výpočty, tedy dle vzdálenosti (\textit{distance value}) mezi jednotlivými body trasy a zadané rychlosti (\textit{user defined monitoring speed}) je spočtena obdržená dávka záření na daném úseku (\textit{cumullative)}. Tyto hodnoty společně s časy potřebnými na projetí jednotlivých úseků jsou zapsány do atributové tabulky nově vzniklé vrstvy a volitelně do CSV souboru. Statistiky o celé trase, jak již bylo řečeno v kapitole \ref{sec:VystupniData}, jsou uloženy do textového souboru se zprávou o výpočtu.
+
+\subsection{Vzorkování linie}
+\label{subsec:vzorkovaniLinie}
+Vstupní trasa monitorování se skládá z několika přímých linií vzájemně propojených vrcholy. Délka jednotlivých segmentů se odvíjí od přímosti úseků trasy. Např. pokud součástí trasy bude dálnice s přímým úsekem dlouhým 10 km, pak stejně bude dlouhý i segment mezi vrcholy na začátku a konci tohoto úseku. Jelikož snímání hodnot rastru probíhá na daných souřadnicích a jediné známé souřadnice trasy jsou právě ty vrcholové, tak by bez dalších úprav došlo k hrubým chybám ve výpočtech resp. výsledky by byly nesměrodatné. Je jasné, že kdyby uprostřed dlouhého rovného úseku byla oblast se zvýšeným dávkovým příkonem, tak tato skutečnost by do výpočtu nebyla vůbec zahrnuta (hodnoty rastru by byly sejmuté pouze na koncích, tedy v místech, která nenesou žádnou informaci o zbytku segmentu). 
+
+Z tohoto důvodu je třeba trasu tzv. navzorkovat, tzn. rozdělit jednotlivé rovné segmenty na více kratších částí. Takto dojde k získání souřadnic bodů, které mezi sebou budou mít kratší vzdálenosti. Do výpočtu bude tak zahrnuto více informací o dávkových příkonech v průběhu trasy a výsledek bude lépe odpovídat skutečnosti. (Stále se však vzhledem k jednoduchosti výpočtu bude jednat pouze o odhad. O tom více v kapitole V NÁKÝ DALŠÍ). 
+
+Některé segmenty mohou být kratší, než uživatelsky zadaná vzorkovací vzdálenost. Následující pseudokód\footnote{Pseudokód je kompaktní popis počítačového algoritmu, který používá strukturální konvence programovacího jazyka. Vynechává některé detaily, které nejsou důležité pro pochopení algoritmu (deklarace proměnných atd.) Úcelem použití pseudokódu je právě pochopení algoritmu nezávisle na nutnosti znalosti specifické programovacího jazyka.} %https://books.google.cz/books?id=8MQuQwAACAAJ&dq=pseudocode&hl=cs&sa=X&ved=0ahUKEwi8m-ubyLrTAhUKL1AKHUA1CegQ6AEINTAC
+\ref{alg:getTrackVertices}popisuje algoritmus \texttt{Získání souřadnic bodů trasy} (ve třídě \texttt{GroundRadiationMonitoringComputation} jako metoda \texttt{getTrackVertices}), který získává souřadnice vrcholů trasy a na základě výpočtu vzdálenosti rozhoduje, zdali je potřeba trasu v jednotlivých segmentech navzorkovat. Pokud ano, segment je ihned navzorkován zavoláním \texttt{navzorkujLinii} (ve třídě \texttt{GroundRadiationMonitoringComputation} jako metoda \texttt{sampleLine}). Výstupem algoritmu pro získání souřadnic je dvourozměrné pole obsahující souřadnice bodů již navzorkované linie. Vzdálenost mezi body je vypočtena pomocí QGIS třídy \texttt{QgsDistanceArea} a jejích metod, výpočet je proveden na referenčním elipsoidu \textit{WGS84}. Extrahování souřadnic vrcholů trasy z rastru je provedeno pomocí QGIS třídy \texttt{QgsVectorLayer} a její metody \texttt{getFeatures}.
+
+\begin{algorithm}
+\caption{Získání souřadnic bodů trasy}
+\label{alg:getTrackVertices}
+    \begin{algorithmic}[1]
+    	\STATE{extrahuj souřadnice vrcholů trasy do poleSouřadniceVrcholů}
+    	\STATE{přidej poleSouřadniceVrcholů[0] do poleNovéSouřadnice}
+    	\FOR{i = řada od 0 do (délka(poleSouřadnicVrcholů) - 2)}
+    		\STATE{bod1 = poleSouřadniceVrcholů[i]}
+    		\STATE{bod2 = poleSouřadniceVrcholů[i + 1]}
+    		\STATE{vzdálenost = vypočtiVzdálenost[bod1, bod2]}
+    		\IF{vzdálenost > vzorkovacíVzdálenost}
+    			\STATE{novéBody = navzorkujLinii[bod1, bod2]}
+    			\STATE{přidej novéBody kromě bod1 do poleNovéSouřadnice}
+    			\ELSE
+    			\STATE{přidej bod2 do poleNovéSouřadnice}
+    		\ENDIF
+    	\ENDFOR    		 
+    \end{algorithmic}
+\end{algorithm}
+
+Postup výpočtu souřadnic nových bodů trasy je popsán následujícím pseudokódem
 
 \section{Testování}
 Popsat testovací data (použily se tyhle, k tomu obrázky).
