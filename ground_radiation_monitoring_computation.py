@@ -62,7 +62,7 @@ class GroundRadiationMonitoringComputation(QThread):
         if self.abort == True:
             return
 
-        atributeTableData, statisticsData = self.exportValues(verticesX, verticesY, rasterLayer)
+        atributeTableData, statisticsData = self.getStatistics(verticesX, verticesY, rasterLayer)
 
         if self.abort == True:
             return
@@ -179,7 +179,7 @@ class GroundRadiationMonitoringComputation(QThread):
 
         return newX, newY
 
-    def exportValues(self, verticesX, verticesY, rasterLayer):
+    def getStatistics(self, verticesX, verticesY, rasterLayer):
         """Compute statistics.
             
         :verticesX: X coordinates of points
