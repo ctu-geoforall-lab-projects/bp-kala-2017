@@ -289,9 +289,7 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
 
     def progressBar(self):
         """Initializing progress bar.
-        
-        :text: message to indicate what operation is currently on
-        """
+            """
         self.progressMessageBar = iface.messageBar().createMessage(u"Ground Radiation Monitoring:",u" Computing...")
         self.progress = QProgressBar()
         self.progress.setMaximum(100)
@@ -301,7 +299,11 @@ class GroundRadiationMonitoringDockWidget(QtGui.QDockWidget, FORM_CLASS):
         self.cancelButton.setText('Cancel')
         self.progressMessageBar.layout().addWidget(self.cancelButton)
         self.progressMessageBar.layout().addWidget(self.progress)
-        self.iface.messageBar().pushWidget(self.progressMessageBar, iface.messageBar().INFO)
+        
+        msgBar = self.iface.messageBar()
+        msgBar.pushWidget(self.progressMessageBar, iface.messageBar().INFO)
+        #hide x button
+        msgBar.findChildren(QToolButton)[0].setHidden(True)
 
         self.cancelButton.clicked.connect(self.onCancelButton)
 
