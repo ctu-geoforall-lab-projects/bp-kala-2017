@@ -1,17 +1,18 @@
 \chapter[Zásuvný modul]{Zásuvný modul \includegraphics[scale=0.65]{./pictures/ikonka.png}\footnote{Tady ocitovat ikonku, že je od kolegy ze SÚRA}}
 \label{4-plugin}
 
-V následujícím textu bude popsán postup tvorby nového softwarového nástroje \textit{Ground radiation monitoring} a jeho funkcionalita. Při vývoji nástroje bylo čerpáno z doporučené literatury SEM DÁT TY KNÍŽKY ZE ZADÁNÍ. 
+V následujícím textu bude popsán postup tvorby nového softwarového nástroje \textit{Ground radiation monitoring} a jeho funkcionalita. Při vývoji nástroje bylo čerpáno z doporučené literatury \cite{masteringQgis}\cite{diveIntoPython}\cite{rapidPyQt}. 
 
 \section{Zadání}
-Zadáním bakalářské práce bylo vytvoření softwarového nástroje, který ze vstupní interpolované mapy dávkových příkonů extrahuje data do naplánovaných tras monitorování a vypočítá obdrženou dávku záření gama při zadané rychlosti. Nástroj dále vypočte jednoduché statistiky, maximální a průměrný dávkový příkon, délku trasy, čas a~kumulativní dávku v~určitých zadaných intervalech.
+Zadáním bakalářské práce bylo vytvoření softwarového nástroje, který ze vstupní interpolované mapy dávkových příkonů extrahuje data do naplánovaných tras monitorování a vypočítá obdrženou dávku záření gama při zadané rychlosti. Nástroj dále vypočte jednoduché statistiky, maximální a průměrný dávkový příkon, délku trasy, čas a kumulativní dávku v určitých zadaných intervalech.
 
 \subsection{Vstupní data}
+\label{subsec:vstupniData}
 \begin{enumerate}
 	\item \textbf{Interpolovaná mapa dávkového příkonu} \\
-	Mapa je v souřadnicovém systému WGS84 EPSG:4326. Je vytvořena v rastrovém formátu, který je podporován knihovnou GDAL. Obsahuje hodnoty dávkového příkonu v daných jednotkách. (Plugin umožňuje volit typ jednotek). 
+	Mapa je v souřadnicovém systému WGS84 EPSG:4326. Je vytvořena v rastrovém formátu, který je podporován knihovnou GDAL\footnote{http://www.gdal.org/formats\_list.html}. Obsahuje hodnoty dávkového příkonu v daných jednotkách. (Plugin umožňuje volit typ jednotek).  
 	\item \textbf{Trasa monitorování} \\
-	Trasa monitorování je taktéž v souřadnicovém systému WGS84 EPSG:4326. Je vytvořena ve vektorovém formátu, který je podporován knihovnou OGR. Trasy mohou být generované pomocí plánovačů tras (např. společnosti Google, Inc.) 
+	Trasa monitorování je taktéž v souřadnicovém systému WGS84 EPSG:4326. Je vytvořena ve vektorovém formátu, který je podporován knihovnou OGR\footnote{http://www.gdal.org/ogr\_formats.html}. Trasy mohou být generované pomocí plánovačů tras (např. společnosti Google, Inc.\footnote{http://maps.google.com}) 
 \end{enumerate}
 
 			\begin{figure}[H]
@@ -81,7 +82,7 @@ Zadáním bakalářské práce bylo vytvoření softwarového nástroje, který 
   			\end{figure}
   	
   	\item \textbf{Soubor s údaji o trase (volitelné)} \\
-  	V souboru s údaji o trase ve formátu CSV (\textit{.csv}, hodnoty oddělené čárkou) jsou obsaženy stejné hodnoty jako v atributové tabulce navzorkované trasy. Navíc soubor obsahuje souřadnice bodů. Vytvoření souboru je volitelné. 
+  	V souboru s údaji o trase ve formátu \zk{CSV} (\textit{.csv}) jsou obsaženy stejné hodnoty jako v atributové tabulce navzorkované trasy. Navíc soubor obsahuje souřadnice bodů. Vytvoření souboru je volitelné. 
   			\begin{figure}[H]
     			\centering
       			\includegraphics[scale=0.8]{./pictures/csv.png}
@@ -94,10 +95,10 @@ Zadáním bakalářské práce bylo vytvoření softwarového nástroje, který 
 \subsection[Plugin Builder]{Plugin Builder \includegraphics[scale=0.1]{./pictures/plugin_builder.png}}
 K vytvoření základu softwarového nástroje byl použit zásuvný modul Plugin Builder dostupný z oficiálního QGIS repozitáře.\footnote{Dostupné z \url{https://plugins.qgis.org/plugins/pluginbuilder/}} Tento modul pochází z dílny organizace GeoApt LLC, jež se zabývá volně šiřitelným GIS. Po zadání základních informací (název modulu, základní popis, autor, požadovaná verze QGIS, odkazy a další údaje o repozitáři apod.) vytvoří Plugin Builder kostru nového zásuvného modulu. Tato kostra zajišťuje základní funkcionalitu modulu, tedy zobrazení a vypnutí okna nebo také tlačítka \texttt{OK | Cancel}, pokud okno zásuvného modulu není nastaveno jako "přichycovací". 
 
-\subsection{Popis souborů}
-Celý zásuvný modul \textit{Ground radiation monitoring} se skládá z několika souborů dohromady tvořících balíček, který zajišťuje spustitelnost a funkcionalitu modulu. Některé soubory zde budou dále prezentovány. Funkcionalita zásuvného modulu zajišťující řešení zadání bakalářské práce je uložena v posledních dvou souborech následujícího výčtu. Tyto dva soubory obsahují modifikace a bloky kódu zaručující výsledky práce. %tohle napsat nějak lépe kámo
+\subsection{Popis souborů\cite{masteringQgis}}
+Celý zásuvný modul \textit{Ground radiation monitoring} se skládá z několika souborů dohromady tvořících balíček, který zajišťuje spustitelnost a funkcionalitu modulu. Některé soubory zde budou dále prezentovány. Funkcionalita zásuvného modulu zajišťující řešení zadání bakalářské práce je uložena v posledních dvou souborech následujícího výčtu. 
 
-\begin{itemize} %to mam z Mastering QGIS, ještě že mastruju https://books.google.cz/books?id=jYdcDgAAQBAJ&pg=PA388&lpg=PA388&dq=plugin_upload+py&source=bl&ots=FNmxuQgXC7&sig=0vJ0oBv2fzcPrVhi7kzS38trW8U&hl=cs&sa=X&ved=0ahUKEwiA94_kjrnTAhWPKlAKHVU-DgUQ6AEILzAC#v=onepage&q=polyline&f=false
+\begin{itemize} 
 	\item \textbf{\_\_init\_\_.py} \\ 
 		Soubor slouží pro základní inicializaci modulu.
 		 
@@ -121,17 +122,18 @@ Celý zásuvný modul \textit{Ground radiation monitoring} se skládá z několi
 	
 \end{itemize}
 
+\newpage
 \section{Algoritmus}
-V této části práce bude popsán algoritmus kódu. Nejprve bude prezentováno jednoduché schéma výpočtu, poté budou jednotlivé části rozebrány více do podrobna.
+V této části práce bude popsán algoritmus kódu. Nejprve bude prezentováno jednoduché schéma výpočtu, poté budou jednotlivé části rozebrány více dopodrobna.
 \subsection{Schéma výpočtu}
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.5]{./pictures/computation_scheme.png}
+    \includegraphics[scale=0.4]{./pictures/computation_scheme.png}
       	\caption[Schéma výpočtu]{Schéma výpočtu}(zdroj: Helebrant)
     	\label{fig:SchemeOfComputation}
 \end{figure}
 
-Schéma výpočtu je zřejmé z obrázku \ref{fig:SchemeOfComputation}. Z interpolované mapy dávkových příkonů (\textit{dose rate map}) jsou extrahovány rastrové hodnoty (\textit{dose rate value}) v bodech navzorkované trasy (\textit{monitoring route}). Dále jsou provedeny výpočty, tedy dle vzdálenosti (\textit{distance value}) mezi jednotlivými body trasy a zadané rychlosti (\textit{user defined monitoring speed}) je spočtena obdržená dávka záření na daném úseku (\textit{cumullative)}. Tyto hodnoty společně s časy potřebnými na projetí jednotlivých úseků jsou zapsány do atributové tabulky nově vzniklé vrstvy a volitelně do CSV souboru. Statistiky o celé trase, jak již bylo řečeno v kapitole \ref{sec:VystupniData}, jsou uloženy do textového souboru se zprávou o výpočtu.
+Schéma výpočtu je zřejmé z obrázku \ref{fig:SchemeOfComputation}. Z interpolované mapy dávkových příkonů (\textit{dose rate map}) jsou extrahovány rastrové hodnoty (\textit{dose rate value}) v bodech navzorkované trasy (\textit{monitoring route}). Dále jsou provedeny výpočty, tedy dle vzdálenosti (\textit{distance value}) mezi jednotlivými body trasy a zadané rychlosti (\textit{user defined monitoring speed}) je spočtena obdržená dávka záření na daném úseku (\textit{cumullative)}. Rychlost je konstantní pro celou trasu. Tyto hodnoty společně s časy potřebnými na projetí jednotlivých úseků jsou zapsány do atributové tabulky nově vzniklé vrstvy a volitelně do \zk{CSV} souboru. Statistiky o celé trase, jak již bylo řečeno v sekci \ref{sec:VystupniData}, jsou uloženy do textového souboru se zprávou o výpočtu.
 
 \subsection{Vzorkování linie}
 \label{subsec:vzorkovaniLinie}
@@ -139,31 +141,143 @@ Vstupní trasa monitorování se skládá z několika přímých linií vzájemn
 
 Z tohoto důvodu je třeba trasu tzv. navzorkovat, tzn. rozdělit jednotlivé rovné segmenty na více kratších částí. Takto dojde k získání souřadnic bodů, které mezi sebou budou mít kratší vzdálenosti. Do výpočtu bude tak zahrnuto více informací o dávkových příkonech v průběhu trasy a výsledek bude lépe odpovídat skutečnosti. (Stále se však vzhledem k jednoduchosti výpočtu bude jednat pouze o odhad. O tom více v kapitole V NÁKÝ DALŠÍ). 
 
-Některé segmenty mohou být kratší, než uživatelsky zadaná vzorkovací vzdálenost. Následující pseudokód\footnote{Pseudokód je kompaktní popis počítačového algoritmu, který používá strukturální konvence programovacího jazyka. Vynechává některé detaily, které nejsou důležité pro pochopení algoritmu (deklarace proměnných atd.) Úcelem použití pseudokódu je právě pochopení algoritmu nezávisle na nutnosti znalosti specifické programovacího jazyka.} %https://books.google.cz/books?id=8MQuQwAACAAJ&dq=pseudocode&hl=cs&sa=X&ved=0ahUKEwi8m-ubyLrTAhUKL1AKHUA1CegQ6AEINTAC
-\ref{alg:getTrackVertices}popisuje algoritmus \texttt{Získání souřadnic bodů trasy} (ve třídě \texttt{GroundRadiationMonitoringComputation} jako metoda \texttt{getTrackVertices}), který získává souřadnice vrcholů trasy a na základě výpočtu vzdálenosti rozhoduje, zdali je potřeba trasu v jednotlivých segmentech navzorkovat. Pokud ano, segment je ihned navzorkován zavoláním \texttt{navzorkujLinii} (ve třídě \texttt{GroundRadiationMonitoringComputation} jako metoda \texttt{sampleLine}). Výstupem algoritmu pro získání souřadnic je dvourozměrné pole obsahující souřadnice bodů již navzorkované linie. Vzdálenost mezi body je vypočtena pomocí QGIS třídy \texttt{QgsDistanceArea} a jejích metod, výpočet je proveden na referenčním elipsoidu \textit{WGS84}. Extrahování souřadnic vrcholů trasy z rastru je provedeno pomocí QGIS třídy \texttt{QgsVectorLayer} a její metody \texttt{getFeatures}.
+Některé segmenty mohou být kratší, než uživatelsky zadaná vzorkovací vzdálenost. Následující pseudokód\footnote{Pseudokód je kompaktní popis počítačového algoritmu, který používá strukturální konvence programovacího jazyka. Vynechává některé detaily, které nejsou důležité pro pochopení algoritmu (deklarace proměnných atd.) Úcelem použití pseudokódu je právě pochopení algoritmu nezávisle na nutnosti znalosti specifické programovacího jazyka.\cite{pseudocode}} 
+\textbf{TADY HO REFERENCOVAT} popisuje algoritmus \texttt{Získání souřadnic bodů trasy} (ve třídě \texttt{GroundRadiationMonitoringComputation} jako metoda \texttt{getTrackVertices}), který získává souřadnice vrcholů trasy a na základě výpočtu vzdálenosti rozhoduje, zdali je potřeba trasu v jednotlivých segmentech navzorkovat. Pokud ano, segment je ihned navzorkován zavoláním \texttt{navzorkujLinii} (ve třídě \texttt{GroundRadiationMonitoringComputation} jako metoda \texttt{sampleLine}). Výstupem algoritmu pro získání souřadnic je dvourozměrné pole obsahující souřadnice bodů již navzorkované linie. Vzdálenost mezi body je vypočtena pomocí QGIS třídy \texttt{QgsDistanceArea}\footnote{https://qgis.org/api/classQgsDistanceArea.html} a jejích metod, výpočet je proveden na referenčním elipsoidu \textit{WGS84}. Extrahování souřadnic vrcholů trasy je provedeno pomocí QGIS třídy \texttt{QgsVectorLayer}\footnote{https://qgis.org/api/classQgsVectorLayer.html} a její metody \texttt{getFeatures}.
 
-\begin{algorithm}
-\caption{Získání souřadnic bodů trasy}
-\label{alg:getTrackVertices}
-    \begin{algorithmic}[1]
-    	\STATE{extrahuj souřadnice vrcholů trasy do poleSouřadniceVrcholů}
-    	\STATE{přidej poleSouřadniceVrcholů[0] do poleNovéSouřadnice}
-    	\FOR{i = řada od 0 do (délka(poleSouřadnicVrcholů) - 2)}
-    		\STATE{bod1 = poleSouřadniceVrcholů[i]}
-    		\STATE{bod2 = poleSouřadniceVrcholů[i + 1]}
-    		\STATE{vzdálenost = vypočtiVzdálenost[bod1, bod2]}
-    		\IF{vzdálenost > vzorkovacíVzdálenost}
-    			\STATE{novéBody = navzorkujLinii[bod1, bod2]}
-    			\STATE{přidej novéBody kromě bod1 do poleNovéSouřadnice}
-    			\ELSE
-    			\STATE{přidej bod2 do poleNovéSouřadnice}
-    		\ENDIF
-    	\ENDFOR    		 
-    \end{algorithmic}
-\end{algorithm}
+%\begin{algorithm}
+%\caption{Získání souřadnic bodů trasy}
+%\label{alg:getTrackVertices}
+%    \begin{algorithmic}[1]
+%    	\STATE{\textbf{funkce} získejSouřadnice}
+%    	\STATE{extrahuj souřadnice vrcholů trasy do poleSouřadniceVrcholů}
+%    	\STATE{přidej poleSouřadniceVrcholů[0] do poleNovéSouřadnice}
+%    	\FOR{i = řada od 0 do (délka(poleSouřadniceVrcholů) - 2)}
+%    		\STATE{bod1 = poleSouřadniceVrcholů[i]}
+%    		\STATE{bod2 = poleSouřadniceVrcholů[i + 1]}
+%    		\STATE{vzdálenost = vypočtiVzdálenost(bod1, bod2)}
+%    		\IF{vzdálenost > vzorkovacíVzdálenost}
+%    			\STATE{novéBody = navzorkujLinii(bod1, bod2)}
+%    			\STATE{přidej novéBody do poleNovéSouřadnice}
+%    			\ELSE
+%    			\STATE{přidej bod2 do poleNovéSouřadnice}
+%    		\ENDIF
+%    	\ENDFOR
+%    	\STATE{\textbf{return} poleNovéSouřadnice}
+%    \end{algorithmic}
+%\end{algorithm}
 
-Postup výpočtu souřadnic nových bodů trasy je popsán následujícím pseudokódem
+Je zřejmé, že všechny nově vzniklé úseky trasy nemají stejnou délku. Je to dané tím, že délka původních segmentů není většinou dělitelná zadanou vzorkovací vzdáleností bez zbytku. Např. segment o délce 10 m při vzorkovací vzdálenosti 3 m bude rozdělen celkem na čtyři části, z toho tři budou o délce 3 m a jeden o délce 1 m. Následující pseudokód popisující výpočetní funkci souřadnic nových bodů tuto skutečnost zohledňuje a ověřuje. Algoritmus vypočte souřadnice bodu, který zakončuje tu část segmentu, která je dělitelná vzorkovací vzdáleností beze zbytku (pokud nastane případ, že segment je dělitelný beze zbytku, tato část algoritmu není vykonávána). Tento bod je poté považován za konečný bod (v pseudokódu jako \texttt{konečnýBod}) segmentu a nově vzniklý úsek je rozdělen na stejně dlouhé části. 
 
-\section{Testování}
-Popsat testovací data (použily se tyhle, k tomu obrázky).
+%\begin{algorithm}
+%\caption{Výpočet souřadnic bodů}
+%	\begin{algorithmic}[1]
+%		\STATE{\textbf{funkce} navzorkujLinii (bod1, bod2)}
+%		\STATE{početNovéBody = $\lceil$délkaSegment / vzorkovacíVzd$\rceil$} - 1
+%		\IF{délkaSegment \textbf{mod} vzorkovacíVzd $\neq$ 0}
+%			\STATE{nejkratšíSegment\% = (délkaSegment \textbf{mod} vzorkovacíVzd) / délkaSegment}
+%			\STATE{konečnýBod = bod2 - (bod2 - bod1) $\cdot$ nejkratšíSegment\%}
+%			\STATE{vektor = konečnýBod - bod1}
+%			\ELSE
+%			\STATE{vektor = bod2 - bod1}
+%		\ENDIF
+%		\STATE{přírůstek = vektor / početNovéBody}
+%		\FOR{i = řada od 1 do početNovéBody}
+%			\STATE{přidej (bod1 + i $\cdot$ přírůstek) do poleNovéBody}
+%		\ENDFOR
+%		\IF{konečnýBod existuje}
+%			\STATE{přidej (konečnýBod) do poleNovéBody}
+%		\ENDIF
+%		\STATE{přidej bod2 do poleNovéBody}
+%		\STATE{\textbf{return} poleNovéBody}
+%	\end{algorithmic}
+%\end{algorithm}
+
+\subsection{Výpočet statistik}
+\label{subsec:vypocetStatistik}
+Získané souřadnice bodů navzorkované trasy dále vstupují do procesu výpočtu statistik, hlavního výstupu nástroje. Algoritmus výpočtu popisuje následující pseudokód \texttt{Výpočet statistik} (ve třídě \texttt{GroundRadiationMonitoringComputation} jako metoda \texttt{getStatistics}). Výpočtu předchází získání hodnot rastru na bodech. To je provedeno pomocí QGIS třídy \texttt{QgsDataProvider}\footnote{https://qgis.org/api/classQgsDataProvider.html} a jejích metod (v pseudokódu jako \texttt{získejHodnotu}). Pole se souřadnicemi bodů navzorkované trasy je v pseudokódu označeno jako \texttt{poleBody}. Pro výpočet vzdálenosti mezi body je použita stejná metoda jako v REFERENCOVAT 1. PSEUDOKÓD. Do výpočtu dále vstupuje uživatelsky zadaná rychlost pohybu, která je považována za konstantní na celé trase. Výstupem algoritmu jsou celkové statistiky (viz. sekce \ref{sec:VystupniData}): celková délka a čas projetí trasy, délka  a čas projetí trasy mimo mapu dávkových příkonů, maximální a průměrný dávkový příkon na trase a celková dávka. Výstupem jsou dále i dílčí statistiky na jednotlivých bodech trasy, které jsou dále zapsány do atributové tabulky nově vzniklé vrstvy a případně i do \zk{CSV} souboru (viz. sekce \ref{sec:VystupniData}). Data zapisovaná do souborů vypovídající o dávce a dávkovém příkonu jsou přenásobována koeficientem podle zvolených jednotek mapy dávkového příkonu uživatelem. 
+
+
+%\begin{algorithm}
+%\caption{Výpočet statistik}
+%	\begin{algorithmic}[1]
+%		\STATE{\textbf{funkce} vypočtiStatistiky (poleBody)}
+%		\STATE{kumulativníČas = 0}		
+%		\STATE{časSegmentPředchozí = 0}
+%		\STATE{časMimoRastr = 0}
+%		\STATE{délkaMimoRastr = 0}
+%       \STATE{početBodůRastr = 0}
+%		\STATE{kumulativníDávka = 0}
+%		\STATE{hodnotaRastrPředchozí = 0}
+%		\STATE{průměrnýPříkon = 0}
+%		\STATE{délkaTrasy = 0}
+%		\STATE{maximálníPříkon = 0}
+
+
+%		\FOR{i = řada od 0 do délka(poleBody)}
+%			\IF{i < délka(poleBody) - 1}
+%				\STATE{vzdálenost = vypočtiVzdálenost(poleBody[i], poleBody[i+1])}
+%			\ELSE
+%				\STATE{vzdálenost = 0}
+%			\ENDIF
+%			
+%			\STATE{délkaTrasy = délkaTrasy + vzdálenost}
+%
+%			\STATE{časSegment = vzdálenost / rychlost}
+%			\STATE{kumulativníČas = kumulativníČas + časSegmentPředchozí}
+%
+%			\STATE{dávkaSegment = časSegmentPředchozí $\cdot$ hodnotaRastrPředchozí}
+%			\STATE{kumulativníDávka = kumulativníDávka + dávkaSegment}
+
+%			\STATE{hodnotaRastr = získejHodnotu(poleBody[i])}
+%			\IF{bod1 mimo rastr \textbf{or} hodnotaRastr <= 0}
+%				\STATE{hodnotaRastr = 0}
+%				\STATE{časMimoRastr = časMimoRastr + časSegment}
+%				\STATE{délkaMimoRastr = délkaMimoRastr + vzdálenost}			
+%			\ELSE
+%				\STATE{průměrnýPříkon = průměrnýPříkon + hodnotaRastr}
+%				\STATE{početBodůRastr = početBodůRastr + 1}
+%			\ENDIF			
+%			
+%			\IF{hodnotaRastr > maximálníPříkon}
+%				\STATE{maximálníPříkon = hodnotaRastr}
+%			\ENDIF
+%			\STATE{přidej [hodnotaRastr, kumulativníČas, časSegmentPředchozí, kumulativníDávka] do poleAtributů}
+%			\STATE{hodnotaRastrPředchozí = hodnotaRastr}
+%			\STATE{časSegmentPředchozí = časSegment}			
+%		\ENDFOR
+%		
+%		\STATE{průměrnýPříkon = průměrnýPříkon / početBodůRastr}
+%		\STATE{statistiky = [délkaTrasy, kumulativníČas, délkaMimoRastr, časMimoRastr, maximálníPříkon, průměrnýPříkon, kumulativníDávka]}
+%		\STATE{\textbf{return} poleAtributů, statistiky}
+%	\end{algorithmic}
+%\end{algorithm}     
+
+Může se stát, že trasa probíhá mimo mapu dávkových příkonů. Extrakce hodnoty rastru v bodě, který leží mimo něj, vrací hodnotu \texttt{None}, tedy že data nejsou dostupná. Prezentovaný algoritmus v tomto případě místo None zapíše číslo 0. Podobně, pokud je hodnota rastru menší než 0, algoritmus tuto hodnotu přepíše na 0. Do výsledných statistik, jak již bylo zmíněno, jsou počítány délka a čas projetí trasy mimo rastr, tj. když je hodnota rastru 0. Do průměrného dávkového příkonu na trase nejsou tyto hodnoty započítávané. 
+
+
+\section{Testovací data}
+Testování zásuvného modulu při vývoji probíhalo s využitím dat připravených od \zk{SÚRO}.
+
+\subsection{Interpolovaná data dávkových příkonů}
+Pro tvorbu interpolované mapy dávkových příkonů byla využita část reálných měření projektu Safecast(VIZ KAPITOLA ŇÁKÁ Z TEORIE O SAFECASTU)
+v oblasti prefektury Fukushima (Japonsko). Měření prováděly dobrovolnické mobilní skupiny a obsahují informace o času měření, GPS souřadnice a hodnoty dávkového příkonu záření gama v $\mu$Sv/h. Kompletní dataset je dostupný ke stažení ve formátu \zk{CSV} na webových stránkách projektu. Dataset je uvolněn pod licencí CC0 1.0 Universal (CC0 1.0) Public Domain Dedication\footnote{https://creativecommons.org/publicdomain/zero/1.0/}. 
+
+Z balíku dat byla vybrána zájmová oblast kolem jaderné elektrárny Fukushima Daiichi o které bylo psáno v předchozích kapitolách (ODKAZ NA KAPITOLU Z TEORIE ZASE KAMARÁDE). Data byla omezena pouze na měření z roku 2011. V open source programu SAGA-GIS\footnote{http://www.saga-gis.org/en/index.html} byla z dat vytvořena interpolovaná mapa dávkových příkonů metodou Multilevel B-Spline Interpolation\footnote{kerou z těhle, nebo obě?http://www.saga-gis.org/saga\_tool\_doc/2.1.3/grid\_spline\_4.html}\footnote{http://csweb.engr.ccny.cuny.edu/~wolberg/pub/tvcg97.pdf}. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{./pictures/interpolovana_mapa.png}
+      	\caption[Interpolovaná mapa dávkových příkonů gama záření (prefektura Fukushima)]{Interpolovaná mapa dávkových příkonů gama záření (prefektura Fukushima)}(zdroj:??Helebrant? Saga?)
+    	\label{fig:interpolatedMap}
+\end{figure} 
+
+\subsection{Trasa monitorování}
+Trasy monitorování použité pro testování byly naplánovány pomocí běžně používaných webových služeb Mapy.cz\footnote{https://mapy.cz/} a Google (jak již bylo zmíněno v kapitole \ref{subsec:vstupniData}). Trasy byly vyexportovány ve formátech \zk{KML} a \zk{GPX}. Byly voleny tak, aby se jejich průběh co nejvíce přiblížil \zk{JE} Fukushima a aby byla vidět výrazná změna hodnot dávkových příkonů.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.2]{./pictures/trasa_monitorovani.png}
+      	\caption[Trasa monitorování (Futaba-Nawashirogae, prefektura Fukushima)]{Trasa monitorování (Futaba-Nawashirogae, prefektura Fukushima)}(zdroj:gůgl mapy)
+    	\label{fig:interpolatedMap}
+\end{figure}
 
