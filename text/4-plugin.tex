@@ -95,8 +95,8 @@ Zadáním bakalářské práce bylo vytvoření softwarového nástroje, který 
 \subsection[Plugin Builder]{Plugin Builder \includegraphics[scale=0.1]{./pictures/plugin_builder.png}}
 K vytvoření základu softwarového nástroje byl použit zásuvný modul Plugin Builder dostupný z oficiálního QGIS repozitáře.\footnote{Dostupné z \url{https://plugins.qgis.org/plugins/pluginbuilder/}} Tento modul pochází z dílny organizace GeoApt LLC, jež se zabývá volně šiřitelným GIS. Po zadání základních informací (název modulu, základní popis, autor, požadovaná verze QGIS, odkazy a další údaje o repozitáři apod.) vytvoří Plugin Builder kostru nového zásuvného modulu. Tato kostra zajišťuje základní funkcionalitu modulu, tedy zobrazení a vypnutí okna nebo také tlačítka \texttt{OK | Cancel}, pokud okno zásuvného modulu není nastaveno jako "přichycovací". 
 
-\subsection{Popis souborů\cite{masteringQgis}}
-Celý zásuvný modul \textit{Ground radiation monitoring} se skládá z několika souborů dohromady tvořících balíček, který zajišťuje spustitelnost a funkcionalitu modulu. Některé soubory zde budou dále prezentovány. Funkcionalita zásuvného modulu zajišťující řešení zadání bakalářské práce je uložena v posledních dvou souborech následujícího výčtu. 
+\subsection{Popis souborů}
+Celý zásuvný modul \textit{Ground radiation monitoring} se skládá z několika souborů dohromady tvořících balíček, který zajišťuje spustitelnost a funkcionalitu modulu. Některé soubory zde budou dále prezentovány. Funkcionalita zásuvného modulu zajišťující řešení zadání bakalářské práce je uložena v posledních dvou souborech následujícího výčtu. \cite{masteringQgis}
 
 \begin{itemize} 
 	\item \textbf{\_\_init\_\_.py} \\ 
@@ -212,7 +212,6 @@ Získané souřadnice bodů navzorkované trasy dále vstupují do procesu výpo
 		\STATE{délkaTrasy = 0}
 		\STATE{maximálníPříkon = 0}
 
-
 		\FOR{i = řada od 0 do délka(poleBody)}
 			\IF{i < délka(poleBody) - 1}
 				\STATE{vzdálenost = vypočtiVzdálenost(poleBody[i], poleBody[i+1])}
@@ -224,8 +223,15 @@ Získané souřadnice bodů navzorkované trasy dále vstupují do procesu výpo
 
 			\STATE{časSegment = vzdálenost / rychlost}
 			\STATE{kumulativníČas = kumulativníČas + časSegmentPředchozí}
-
 			\STATE{dávkaSegment = časSegmentPředchozí $\cdot$ hodnotaRastrPředchozí}
+
+		\algstore{myalg}
+		\end{algorithmic}
+		\end{algorithm}
+
+		\begin{algorithm}                     
+		\begin{algorithmic} [1]  
+		\algrestore{myalg}
 			\STATE{kumulativníDávka = kumulativníDávka + dávkaSegment}
 
 			\STATE{hodnotaRastr = získejHodnotu(poleBody[i])}
