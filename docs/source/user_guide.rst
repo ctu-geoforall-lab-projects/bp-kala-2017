@@ -56,7 +56,7 @@ The plugin is divided into two tabs. The first of them is ``Main`` tab:
 
 * In main tab, the user may select a raster layer with the interpolated map 
   of dose rate values. He may select a vector layer with a route. Both of those 
-  layer could be selected using combo boxes, which include avaiable layers from
+  layer could be selected using combo boxes, which include available layers from
   the Layer panel. There is a restriction for the track combo box, that only the 
   layer with a linestring type is being shown. 
 
@@ -123,7 +123,7 @@ Ouput data
   * route information - name, monitoring speed, total monitoring time,
     total distance;
 
-  * information about the part of the track, that has no data avaiable 
+  * information about the part of the track, that has no data available 
     (where the track exceeds the raster) - time, distance;
 
   * estimatited radiation values - maximum and average dose rate, total dosage;
