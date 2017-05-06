@@ -28,7 +28,7 @@ next section.)
 
 It is important to mention, that results of the computation,
 especially those, that are dealing with the gamma radiation
-dosage, are estimates. The reason of this is, that the calculations
+dose, are estimates. The reason of this is, that the calculations
 only use few of variables, that are dealing with this problematics. For
 example it does not concern the situation on roads, weather (wind, rain..)
 etc.
@@ -126,7 +126,7 @@ Ouput data
   * information about the part of the track, that has no data available 
     (where the track exceeds the raster) - time, distance;
 
-  * estimatited radiation values - maximum and average dose rate, total dosage;
+  * estimatited radiation values - maximum and average dose rate, total dose;
 
   * plugin settings - input raster units, distance between track vertices.
 
@@ -138,7 +138,7 @@ Ouput data
 
 * A shapefile with point layer containg vertices of a sampled route with following
   atributes - dose rate, cumullated time, time interval from previous point, 
-  cumullated dosage.
+  cumullated dose.
 
 .. figure:: images/shapefile.png
 

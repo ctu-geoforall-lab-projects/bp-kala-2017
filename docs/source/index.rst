@@ -1,7 +1,7 @@
 Ground Radiation Monitoring QGIS Plugin's Documentation
 =======================================================
 
-This plugin computes the gamma radiation dosage of a given route 
+This plugin computes the gamma radiation dose of a given route 
 on an interpolated map of dose rate values. The secondary product
 of the plugin are basic statistics about the given route. Together,
 these output values help the emergency teams to determine which 
