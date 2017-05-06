@@ -364,9 +364,19 @@ class GroundRadiationMonitoringComputation(QThread):
         report.write(u'{ls}--------------------------------------{ls}'.format(ls = os.linesep))
         report.write(u'input raster units: {units}{ls}'.format(units = self.userUnits, 
                                                                ls = os.linesep))
-        report.write(u'distance between track vertices (m): {dist}{ls}'.format(dist = self.userDistanceBetweenVertices,
+        report.write(u'distance between track vertices (m): {dist}{ls}{ls}'.format(dist = self.userDistanceBetweenVertices,
                                                                                ls = os.linesep))
-        report.close()
+	
+	report.write(u'Explanations:{ls}'.format(ls = os.linesep))
+	report.write(u'--------------------------------------{ls}'.format(ls = os.linesep))
+	report.write(u'- monitoring speed is set by user and is constant for whole track{ls}{ls}'.format(ls = os.linesep))
+	report.write(u'- for the calculation of the dose estimate is set that 1 Gy / h is{ls}'.format(ls = os.linesep))
+	report.write(u'  equal to 1 Sv / h as it was not possible to include differences{ls}'.format(ls = os.linesep))
+	report.write(u'  between various measuring devices, sources of radiation etc.{ls}{ls}'.format(ls = os.linesep))
+	report.write(u'- these results are informative only and cannot be used for{ls}'.format(ls = os.linesep))
+	report.write(u'  decision-making in crisis management{ls}'.format(ls = os.linesep))
+       
+	report.close()
 
     def createShp(self, atributeTableData, trackLayer):
         """Create shapefile.
