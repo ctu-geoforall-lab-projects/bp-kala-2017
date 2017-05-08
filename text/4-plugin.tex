@@ -265,15 +265,14 @@ Může se stát, že trasa probíhá mimo mapu dávkových příkonů. Extrakce 
 Testování zásuvného modulu při vývoji probíhalo s využitím dat připravených od \zk{SÚRO}.
 
 \subsection{Interpolovaná data dávkových příkonů}
-Pro tvorbu interpolované mapy dávkových příkonů byla využita část reálných měření projektu Safecast(VIZ KAPITOLA ŇÁKÁ Z TEORIE O SAFECASTU)
-v oblasti prefektury Fukushima (Japonsko). Měření prováděly dobrovolnické mobilní skupiny a obsahují informace o času měření, GPS souřadnice a hodnoty dávkového příkonu záření gama v $\mu$Sv/h. Kompletní dataset je dostupný ke stažení ve formátu \zk{CSV} na webových stránkách projektu. Dataset je uvolněn pod licencí CC0 1.0 Universal (CC0 1.0) Public Domain Dedication\footnote{https://creativecommons.org/publicdomain/zero/1.0/}. 
+Pro tvorbu interpolované mapy dávkových příkonů byla využita část reálných měření projektu Safecast v oblasti prefektury Fukushima (Japonsko). Měření prováděly dobrovolnické mobilní skupiny a obsahují informace o času měření, GPS souřadnice a hodnoty dávkového příkonu záření gama v $\mu$Sv/h. Kompletní dataset je dostupný ke stažení ve formátu \zk{CSV} na webových stránkách projektu. Dataset je uvolněn pod licencí CC0 1.0 Universal (CC0 1.0) Public Domain Dedication\footnote{https://creativecommons.org/publicdomain/zero/1.0/}. 
 
-Z balíku dat byla vybrána zájmová oblast kolem jaderné elektrárny Fukushima Daiichi o které bylo psáno v předchozích kapitolách (ODKAZ NA KAPITOLU Z TEORIE ZASE). Data byla omezena pouze na měření z roku 2011. V open source programu SAGA-GIS\footnote{http://www.saga-gis.org/en/index.html} byla z dat vytvořena interpolovaná mapa dávkových příkonů metodou Multilevel B-Spline Interpolation\footnote{kerou z těhle, nebo obě?http://www.saga-gis.org/saga\_tool\_doc/2.1.3/grid\_spline\_4.html}\footnote{http://csweb.engr.ccny.cuny.edu/~wolberg/pub/tvcg97.pdf}. 
+Z balíku dat byla vybrána zájmová oblast kolem jaderné elektrárny Fukushima Daiichi. Data byla omezena pouze na měření z roku 2011. V open source programu SAGA-GIS\footnote{http://www.saga-gis.org/en/index.html} byla z dat vytvořena interpolovaná mapa dávkových příkonů metodou Multilevel B-Spline Interpolation\footnote{http://www.saga-gis.org/saga\_tool\_doc/2.1.3/grid\_spline\_4.html}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.4]{./pictures/interpolovana_mapa.png}
-      	\caption[Interpolovaná mapa dávkových příkonů gama záření (prefektura Fukushima)]{Interpolovaná mapa dávkových příkonů gama záření (prefektura Fukushima)}(zdroj:??Helebrant? Saga?)
+      	\caption[Interpolovaná mapa dávkových příkonů (prefektura Fukushima)]{Interpolovaná mapa dávkových příkonů gama záření (prefektura Fukushima)}(zdroj:??Helebrant? Saga?)
     	\label{fig:interpolatedMap}
 \end{figure} 
 
