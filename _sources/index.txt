@@ -1,20 +1,19 @@
-.. GroundRadiationMonitoring documentation master file, created by
-   sphinx-quickstart on Sun Feb 12 17:11:03 2012.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Ground Radiation Monitoring QGIS Plugin's Documentation
+=======================================================
 
-Welcome to GroundRadiationMonitoring's documentation!
-============================================
+This plugin computes the gamma radiation dose of a given route 
+on an interpolated map of dose rate values. The secondary product
+of the plugin are basic statistics about the given route. Together,
+these output values help the emergency teams to determine which 
+route will be the best and safest for mobile radiation monitoring
+teams for radiation monitoring during nuclear disaster emergency 
+exercises (or during the nuclear disaster itself).
 
-Contents:
+The plugin was created for National Radiation Protection Institute (`SURO <http://www.suro.cz>`__).
 
 .. toctree::
    :maxdepth: 2
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+   installation
+   user_guide
+   acknowledgement

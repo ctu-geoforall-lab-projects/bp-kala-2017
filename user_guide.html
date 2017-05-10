@@ -1,0 +1,344 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>User Guide &mdash; Ground Radiation Monitoring QGIS Plugin 0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Ground Radiation Monitoring QGIS Plugin 0.1 documentation" href="index.html"/>
+        <link rel="next" title="Acknowledgement" href="acknowledgement.html"/>
+        <link rel="prev" title="Installation" href="installation.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Ground Radiation Monitoring QGIS Plugin
+          
+
+          
+            
+            <img src="_static/icon.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">User Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sampling-the-track">Sampling the track</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gui">GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#input-data">Input data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ouput-data">Ouput data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="acknowledgement.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Ground Radiation Monitoring QGIS Plugin</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>User Guide</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/user_guide.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="user-guide">
+<h1>User Guide<a class="headerlink" href="#user-guide" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>As mentioned in the general description of the plugin,
+this tool helps to determine which routes are the best
+and safest for mobile monitoring teams based on computed
+statistics concerning the gamma radiation dosage.</p>
+<p>Firstly, the plugin extracts dose rate values from a given
+interpolated map on vertices of a given route. Then computations
+are made, briefly it is cumulative dosage on each segment (between
+two neighbor vertices) calculated from the length of the segment
+and the speed, that is given by the user. Then it is the time interval
+on each segment and the cumulative time on every vertex of the route.</p>
+<p>Also new point layer (Shapefile) is created. It contains vertices of
+the given route with data from the computation in the attribute
+table. Same data are added to csv file, that is optionally
+created.</p>
+<p>The most important output of the plugin is the text report file,
+that contains final statistics of the route, such as length,
+travel time, maximal dose rate value etc. (will be described in
+next section.)</p>
+<p>It is important to mention, that results of the computation,
+especially those, that are dealing with the gamma radiation
+dose, are estimates. The reason of this is, that the calculations
+only use few of variables, that are dealing with this problematics. For
+example it does not concern the situation on roads, weather (wind, rain..)
+etc.</p>
+</div>
+<div class="section" id="sampling-the-track">
+<h2>Sampling the track<a class="headerlink" href="#sampling-the-track" title="Permalink to this headline">¶</a></h2>
+<p>The distance between track vertices can be very large, especially
+on sections, that are straight (e.g. highways). If there is any kind
+of peak or any significant change of dose rate value on these long straight
+parts of track, it is not recognized because of the stated reason. Hence
+the plugin samples the track to smaller parts and allows user to choose the
+length of them.</p>
+</div>
+<div class="section" id="gui">
+<h2>GUI<a class="headerlink" href="#gui" title="Permalink to this headline">¶</a></h2>
+<p>The plugin is divided into two tabs. The first of them is <code class="docutils literal"><span class="pre">Main</span></code> tab:</p>
+<div class="figure align-center" id="id1">
+<img alt="_images/gui_main.png" src="_images/gui_main.png" />
+<p class="caption"><span class="caption-text">Figure 1: The main tab of plugin.</span></p>
+</div>
+<ul class="simple">
+<li>In main tab, the user may select a raster layer with the interpolated map
+of dose rate values. He may select a vector layer with a route. Both of those
+layer could be selected using combo boxes, which include available layers from
+the Layer panel. There is a restriction for the track combo box, that only the
+layer with a linestring type is being shown.</li>
+<li>Plugin also allows user to upload files with raster and vector layers
+via buttons <code class="docutils literal"><span class="pre">Load</span> <span class="pre">raster</span></code> and <code class="docutils literal"><span class="pre">Load</span> <span class="pre">track</span></code>. With hiting one of these
+buttons, a file dialog appears. Only GDAL/OGR supported files are shown.</li>
+<li>A tool button <code class="docutils literal"><span class="pre">...</span></code> that follows <code class="docutils literal"><span class="pre">Report</span></code> line lets the user to select
+a destination, where the report file will be saved. Then the blank space
+in the same line is filled with the path to selected destination file with
+<em>.txt</em> suffix. Also the blank space in the <code class="docutils literal"><span class="pre">Shapefile</span></code> is automatically
+filled with the same path with a different suffix (<em>.shp</em> instead of <em>.txt</em>).</li>
+<li>The destination of the created shapefile could be changed with hitting
+a tool button <code class="docutils literal"><span class="pre">...</span></code> on <code class="docutils literal"><span class="pre">Shapefile</span></code> line.</li>
+<li>Finally, <code class="docutils literal"><span class="pre">Save</span></code> button does all the work, it starts the computation
+and saves created files to selected destinations.</li>
+</ul>
+<p>The second tab of the plugin is <code class="docutils literal"><span class="pre">Settings</span></code> tab:</p>
+<div class="figure align-center" id="id2">
+<img alt="_images/gui_settings.png" src="_images/gui_settings.png" />
+<p class="caption"><span class="caption-text">Figure 2: The settings tab.</span></p>
+</div>
+<ul class="simple">
+<li>This tab allows the user to change input variables.<ul>
+<li><code class="docutils literal"><span class="pre">Dose</span> <span class="pre">rate</span> <span class="pre">units</span></code> combo box sets the units of gamma radiation dose rate values
+of the interpolated map.</li>
+<li><code class="docutils literal"><span class="pre">Speed</span></code> value determines what speed the mobile team is driving. This value
+has to be given.</li>
+<li><code class="docutils literal"><span class="pre">Distance</span> <span class="pre">between</span> <span class="pre">track</span> <span class="pre">vertices</span></code> value is used for sampling the track. If this value
+is not given, the track will not be sampled.</li>
+<li><code class="docutils literal"><span class="pre">Create</span> <span class="pre">CSV</span> <span class="pre">file</span></code> checkbox gives the user an option, whether to create csv file
+with the same data, that are writen to created shapefile.</li>
+</ul>
+</li>
+<li>Settings tab is filled with values by default.</li>
+</ul>
+</div>
+<div class="section" id="input-data">
+<h2>Input data<a class="headerlink" href="#input-data" title="Permalink to this headline">¶</a></h2>
+<div class="figure align-center" id="id3">
+<img alt="_images/input.png" src="_images/input.png" />
+<p class="caption"><span class="caption-text">Figure 3: Input files.</span></p>
+</div>
+<ul class="simple">
+<li>An interpolated map of dose rate values with a format supported by
+<a class="reference external" href="http://www.gdal.org/formats_list.html">GDAL library</a>.</li>
+<li>A monitoring linestring route with a format supported by <a class="reference external" href="http://www.gdal.org/ogr_formats.html">OGR library</a>.</li>
+</ul>
+</div>
+<div class="section" id="ouput-data">
+<h2>Ouput data<a class="headerlink" href="#ouput-data" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>A text report file containing fields:<ul>
+<li>time, when was the report created;</li>
+<li>route information - name, monitoring speed, total monitoring time,
+total distance;</li>
+<li>information about the part of the track, that has no data available
+(where the track exceeds the raster) - time, distance;</li>
+<li>estimatited radiation values - maximum and average dose rate, total dose;</li>
+<li>plugin settings - input raster units, distance between track vertices.</li>
+<li>a static text explaining the report</li>
+</ul>
+</li>
+</ul>
+<div class="figure align-center" id="id4">
+<img alt="_images/report.png" src="_images/report.png" />
+<p class="caption"><span class="caption-text">Figure 4: The report file.</span></p>
+</div>
+<ul class="simple">
+<li>A shapefile with point layer containg vertices of a sampled route with following
+atributes - dose rate, cumullated time, time interval from previous point,
+cumullated dose.</li>
+</ul>
+<div class="figure align-center" id="id5">
+<img alt="_images/shapefile.png" src="_images/shapefile.png" />
+<p class="caption"><span class="caption-text">Figure 5: The attribute table.</span></p>
+</div>
+<ul class="simple">
+<li>An optional csv file with same values as in created shapefile.</li>
+</ul>
+<div class="figure align-center" id="id6">
+<img alt="_images/csv.png" src="_images/csv.png" />
+<p class="caption"><span class="caption-text">Figure 6: The csv file.</span></p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="acknowledgement.html" class="btn btn-neutral float-right" title="Acknowledgement" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="installation.html" class="btn btn-neutral" title="Installation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016-2017, Michael Kala (CTU GeoForAll Lab).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
