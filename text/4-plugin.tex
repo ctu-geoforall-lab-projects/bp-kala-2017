@@ -1,4 +1,4 @@
-\chapter[Zásuvný modul]{Zásuvný modul \includegraphics[scale=0.65]{./pictures/ikonka.png}\footnote{Tady ocitovat ikonku, že je od kolegy ze SÚRA}}
+\chapter[Zásuvný modul]{Zásuvný modul \includegraphics[scale=0.65]{./pictures/ikonka.png}\footnote{Zdroj: Helebrant}}
 \label{4-plugin}
 
 V následujícím textu bude popsán postup tvorby nového softwarového nástroje \textit{Ground radiation monitoring} a jeho funkcionalita. Při vývoji nástroje bylo čerpáno z doporučené literatury \cite{masteringQgis}\cite{diveIntoPython}\cite{rapidPyQt}. 
@@ -18,7 +18,7 @@ Zadáním bakalářské práce bylo vytvoření softwarového nástroje, který 
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.6]{./pictures/ukazka_vstupnich_dat.png}
-    \caption[Ukázka vstupních dat]{Ukázka vstupních dat(zdroj: )}
+    \caption[Ukázka vstupních dat]{Ukázka vstupních dat (zdroj: vlastní, data poskytnutá od \zk{SÚRO})}
     \label{fig:vstup}
 \end{figure}
   			
@@ -61,8 +61,8 @@ Zadáním bakalářské práce bylo vytvoření softwarového nástroje, který 
 	
 			\begin{figure}[H]
     			\centering
-      			\includegraphics[scale=0.8]{./pictures/report.png}
-      				\caption[Ukázka zprávy o výpočtu]{Ukázka zprávy o výpočtu}(zdroj: co sem napsat?)
+      			\includegraphics[scale=0.9]{./pictures/report.png}
+      				\caption[Ukázka zprávy o výpočtu]{Ukázka zprávy o výpočtu (zdroj: vlastní)}
      				\label{fig:report}
   			\end{figure}
   			
@@ -76,8 +76,8 @@ Zadáním bakalářské práce bylo vytvoření softwarového nástroje, který 
 		\end{itemize}
 			\begin{figure}[H]
     			\centering
-      			\includegraphics[scale=0.8]{./pictures/atributova_tabulka.png}
-      				\caption[Výřez atributové tabulky]{Výřez atributové tabulky}(zdroj: co sem napsat?)
+      			\includegraphics[scale=1]{./pictures/atributova_tabulka.png}
+      				\caption[Výřez atributové tabulky]{Výřez atributové tabulky (zdroj: vlastní)}
      				\label{fig:atributova_tabulka}
   			\end{figure}
   	
@@ -86,7 +86,7 @@ Zadáním bakalářské práce bylo vytvoření softwarového nástroje, který 
   			\begin{figure}[H]
     			\centering
       			\includegraphics[scale=0.8]{./pictures/csv.png}
-      				\caption[Výřez ze souboru s hodnotami oddělenými čárkou]{Výřez ze souboru s hodnotami oddělenými čárkou}(zdroj: co sem napsat?)
+      				\caption[Výřez ze souboru s hodnotami oddělenými čárkou]{Výřez ze souboru s hodnotami oddělenými čárkou (zdroj: vlastní)}
      				\label{fig:csv}
   			\end{figure}	
 \end{enumerate}
@@ -129,7 +129,7 @@ V této části práce bude popsán algoritmus kódu. Nejprve bude prezentováno
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.4]{./pictures/computation_scheme.png}
-      	\caption[Schéma výpočtu]{Schéma výpočtu}(zdroj: Helebrant)
+      	\caption[Schéma výpočtu]{Schéma výpočtu (zdroj: Helebrant)}
     	\label{fig:SchemeOfComputation}
 \end{figure}
 
@@ -274,7 +274,7 @@ Z balíku dat byla vybrána zájmová oblast kolem jaderné elektrárny Fukushim
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.4]{./pictures/interpolovana_mapa.png}
-      	\caption[Interpolovaná mapa dávkových příkonů (prefektura Fukushima)]{Interpolovaná mapa dávkových příkonů gama záření (prefektura Fukushima)}(zdroj:??Helebrant? Saga?)
+      	\caption[Interpolovaná mapa dávkových příkonů (prefektura Fukushima)]{Interpolovaná mapa dávkových příkonů gama záření (prefektura Fukushima)}(zdroj: vlastní, data poskytnutá od \zk{SÚRO})
     	\label{fig:interpolatedMap}
 \end{figure} 
 
@@ -284,7 +284,9 @@ Trasy monitorování použité pro testování byly naplánovány pomocí běžn
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.2]{./pictures/trasa_monitorovani.png}
-      	\caption[Trasa monitorování (Futaba-Nawashirogae, prefektura Fukushima)]{Trasa monitorování (Futaba-Nawashirogae, prefektura Fukushima)}(zdroj:gůgl mapy)
+      	\caption[Trasa monitorování (Futaba-Nawashirogae, prefektura Fukushima)]{Trasa monitorování (Futaba-Nawashirogae, prefektura Fukushima)}(zdroj: vlastní, data poskytnutá od \zk{SÚRO})
     	\label{fig:interpolatedMap}
 \end{figure}
 
+\section{Licence a dostupnost zásuvného modulu}
+Zásuvný modul je volně dostupný pod licencí \zk{GNU GPL} z oficiálního repositáře ???.
