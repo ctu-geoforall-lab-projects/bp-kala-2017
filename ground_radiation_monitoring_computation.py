@@ -331,51 +331,56 @@ class GroundRadiationMonitoringComputation(QThread):
         except IOError as e:
             self.computeMessage.emit(u'Error', u'Unable open {} for writing. Reason: {}'.format(self.reportFileName, e),'CRITICAL')
             return
-
-        report.write(u'QGIS ground radiation monitoring plugin report{ls}'.format(ls = os.linesep))
-        report.write(u'report created: {}'.format(datetime.now().strftime('%d.%m.%Y %H:%M')))
-        report.write(u'{ls}{ls}Route information{ls}'.format(ls = os.linesep))
-        report.write(u'--------------------------------------{ls}'.format(ls = os.linesep))
-        report.write(u'route: {trackName}{ls}'.format(trackName = trackName, 
-                                                      ls = os.linesep))
-        report.write(u'monitoring speed (km/h): {speed}{ls}'.format(speed = self.userSpeed, 
-                                                                    ls = os.linesep))
-        report.write(u'total monitoring time: {time}{ls}'.format(time = self.sec2Time(statisticsData[1]),
-                                                                 ls = os.linesep))
-        report.write(u'total distance (km): {distance}{ls}{ls}'.format(distance = round(statisticsData[0],3),
-                                                                       ls = os.linesep))
-        
-        report.write(u'No data{ls}'.format(ls = os.linesep))
-        report.write(u'--------------------------------------{ls}'.format(ls = os.linesep))
-        report.write(u'time: {time}{ls}'.format(time = self.sec2Time(statisticsData[2]),
-                                                ls = os.linesep))
-        report.write(u'distance (km): {dist}{ls}{ls}'.format(dist = round(statisticsData[3],3),
-                                                             ls = os.linesep))
-        
-        report.write(u'Radiation values (estimated){ls}'.format(ls = os.linesep))
-        report.write(u'--------------------------------------{ls}'.format(ls = os.linesep))
-        report.write(u'maximum dose rate (microSv/h): {maxDoseRate}{ls}'.format(maxDoseRate = round(statisticsData[4],3),
-                                                                            ls = os.linesep))
-        report.write(u'average dose rate (microSv/h): {avgDoseRate}{ls}'.format(avgDoseRate = round(statisticsData[5],3),
-                                                                            ls = os.linesep))
-        report.write(u'total dose (microSv): {totalDose}'.format(totalDose = round(statisticsData[6],3)))
-        
-        report.write(u'{ls}{ls}Plugin settings'.format(ls = os.linesep))
-        report.write(u'{ls}--------------------------------------{ls}'.format(ls = os.linesep))
-        report.write(u'input raster units: {units}{ls}'.format(units = self.userUnits, 
-                                                               ls = os.linesep))
-        report.write(u'distance between track vertices (m): {dist}{ls}{ls}'.format(dist = self.userDistanceBetweenVertices,
-                                                                               ls = os.linesep))
 	
-	report.write(u'Explanations:{ls}'.format(ls = os.linesep))
-	report.write(u'--------------------------------------{ls}'.format(ls = os.linesep))
-	report.write(u'- monitoring speed is set by user and is constant for whole track{ls}{ls}'.format(ls = os.linesep))
-	report.write(u'- for the calculation of the dose estimate is set that 1 Gy / h is{ls}'.format(ls = os.linesep))
-	report.write(u'  equal to 1 Sv / h as it was not possible to include differences{ls}'.format(ls = os.linesep))
-	report.write(u'  between various measuring devices, sources of radiation etc.{ls}{ls}'.format(ls = os.linesep))
-	report.write(u'- these results are informative only and cannot be used for{ls}'.format(ls = os.linesep))
-	report.write(u'  decision-making in crisis management{ls}'.format(ls = os.linesep))
-       
+	message = (
+        u'QGIS ground radiation monitoring plugin report{ls}'.format(ls = os.linesep),
+        u'report created: {}'.format(datetime.now().strftime('%d.%m.%Y %H:%M')),
+        u'{ls}{ls}Route information{ls}'.format(ls = os.linesep),
+        u'--------------------------------------{ls}'.format(ls = os.linesep),
+        u'route: {trackName}{ls}'.format(trackName = trackName, 
+                                                      ls = os.linesep),
+        u'monitoring speed (km/h): {speed}{ls}'.format(speed = self.userSpeed, 
+                                                                    ls = os.linesep),
+        u'total monitoring time: {time}{ls}'.format(time = self.sec2Time(statisticsData[1]),
+                                                                 ls = os.linesep),
+        u'total distance (km): {distance}{ls}{ls}'.format(distance = round(statisticsData[0],3),
+                                                                       ls = os.linesep),
+        
+        u'No data{ls}'.format(ls = os.linesep),
+        u'--------------------------------------{ls}'.format(ls = os.linesep),
+        u'time: {time}{ls}'.format(time = self.sec2Time(statisticsData[2]),
+                                                ls = os.linesep),
+        u'distance (km): {dist}{ls}{ls}'.format(dist = round(statisticsData[3],3),
+                                                             ls = os.linesep),
+        
+        u'Radiation values (estimated){ls}'.format(ls = os.linesep),
+        u'--------------------------------------{ls}'.format(ls = os.linesep),
+        u'maximum dose rate (microSv/h): {maxDoseRate}{ls}'.format(maxDoseRate = round(statisticsData[4],3),
+                                                                            ls = os.linesep),
+        u'average dose rate (microSv/h): {avgDoseRate}{ls}'.format(avgDoseRate = round(statisticsData[5],3),
+                                                                            ls = os.linesep),
+        u'total dose (microSv): {totalDose}'.format(totalDose = round(statisticsData[6],3)),
+        
+        u'{ls}{ls}Plugin settings'.format(ls = os.linesep),
+        u'{ls}--------------------------------------{ls}'.format(ls = os.linesep),
+        u'input raster units: {units}{ls}'.format(units = self.userUnits, 
+                                                               ls = os.linesep),
+        u'distance between track vertices (m): {dist}{ls}{ls}'.format(dist = self.userDistanceBetweenVertices,
+                                                                               ls = os.linesep),
+	
+	u'Explanations:{ls}'.format(ls = os.linesep),
+	u'--------------------------------------{ls}'.format(ls = os.linesep),
+	u'- monitoring speed is set by user and is constant for whole track{ls}{ls}'.format(ls = os.linesep),
+	u'- for the calculation of the dose estimate is set that 1 Gy / h is{ls}'.format(ls = os.linesep),
+	u'  equal to 1 Sv / h as it was not possible to include differences{ls}'.format(ls = os.linesep),
+	u'  between various measuring devices, sources of radiation etc.{ls}{ls}'.format(ls = os.linesep),
+	u'- these results are informative only and cannot be used for{ls}'.format(ls = os.linesep),
+	u'  decision-making in crisis management{ls}'.format(ls = os.linesep)
+        )
+
+	for line in message:
+	    report.write(line)
+
 	report.close()
 
     def createShp(self, atributeTableData, trackLayer):
