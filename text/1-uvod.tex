@@ -1,12 +1,12 @@
 \chapter{Úvod}
 \label{1-uvod}
-Měření veličin charakterizujících ionizující záření a studium jeho negativních dopadů, jakožto jedna z náplní práce Státního ústavu radiační ochrany, v.v.i. (\zk{SÚRO}), probíhá za účelem ochrany osob a~životního prostředí. %https://www.suro.cz/cz/rms
-Hlavní systém zjišťující radiační situaci na území České republiky se nazývá Radiační monitorovací síť (RMS). Vedle Sítě včasného zjištění (SVZ), teritoriální sítě TLD apod. jsou jednou z jejích hlavní složek také mobilní skupiny (MS).
+Měření veličin charakterizujících ionizující záření a studium jeho negativních dopadů, jakožto jedna z náplní práce Státního ústavu radiační ochrany, v.v.i. (\zk{SÚRO}), probíhá za účelem ochrany osob a~životního prostředí. 
+Hlavní systém zjišťující radiační situaci na území České republiky se nazývá Radiační monitorovací síť (RMS). Vedle Sítě včasného zjištění (SVZ), teritoriální sítě TLD apod. jsou jednou z jejích hlavních složek také mobilní skupiny (MS) provádející pozemní monitorování radiace. \cite{suroRMS}
 
 Cílem této bakalářské práce je implementace softwarového nástroje umožňujícího plánování optimálních tras pozemního monitorování radiace. Při únicích radioaktivních látek do ovzduší je specializovanými softwary spočtena prognóza šíření radioaktivního mraku. Jedním z produktů je také mapa dávkových příkonů záření gama pro zasaženou oblast. Vytvářený softwarový nástroj určí přibližný odhad dávky záření, kterou obdrží mobilní skupina provádějící měření na dané trase v~postiženém území. V případě překročení hraničních hodnot nástroj pomůže v~přeplánování trasy přes jiné komunikace příp. změny rychlosti jízdy vozidla tak, aby mobilní skupina nebyla vystavována nebezpečným dávkám. 
 Nástroj může být hypoteticky využit také například pro havarijní plánování při navrhování tras evakuace obyvatelstva. V rámci práce je tvořena offline varianta nástroje nezbytná v případě mimořádných událostí (typu havárie jaderných elektráren), kdy nemusí být k dispozici připojení k internetu. Nicméně v budoucnu by do nástroje mohl také být implementován vlastní online plánovač tras. 
 
-Mimo popisu vývoje nástroje se tato práce bude věnovat teoretickému základu měření ionizujícího záření, především metodám využívaných mobilními skupinami a~dále fyzikálním jednotkám, ve kterých je záření měřeno a počítáno. Práce se  dotkne tématu ochrany před hrozbou úniku radioaktivních látek a také působení záření na lidský organismus a životní prostředí.
+Mimo popisu vývoje nástroje se tato práce bude věnovat teoretickému základu ionizujícího záření, fyzikálním jednotkám, ve kterých je záření měřeno a počítáno, jeho biologickým účinkům na lidský organismus a metodám využívaných mobilními skupinami při pozemním monitorování. 
 
 Nástroj je vytvářen pro \zk{SÚRO}, jako platforma pro vývoj je použit open source geografický informační systém QGIS umožňující implementaci nové funkcionality jako tzv. zásuvný modul (plugin). Nástroj je vyvíjen v programovacím jazyku Python s využitím grafického frameworku PyQt a QGIS API (rozhraní pro programování aplikací).    
 
