@@ -10,7 +10,7 @@ literatury \cite{masteringQgis}\cite{diveIntoPython}\cite{rapidPyQt}.
 
 \section{Zadání} Zadáním bakalářské práce bylo vytvoření softwarového
 nástroje, který ze vstupní interpolované mapy dávkových příkonů
-extrahuje data do naplánovaných tras monitorování a vypočítá obdrženou
+extrahuje data do naplánovaných tras moni\-torování a vypočítá obdrženou
 dávku záření gama při zadané rychlosti. Nástroj dále vypočte
 jednoduché statistiky, maximální a průměrný dávkový příkon, délku
 trasy, čas a kumulativní dávku v~určitých zadaných intervalech.
@@ -21,13 +21,13 @@ trasy, čas a kumulativní dávku v~určitých zadaných intervalech.
 	\item \textbf{Interpolovaná mapa dávkového příkonu} \\ Mapa je
 v~souřadnicovém systému WGS84 EPSG:4326. Je vytvořena v~rastrovém
 formátu, který je podporován knihovnou
-GDAL\footnote{http://www.gdal.org/formats\_list.html}. Obsahuje
+GDAL\footnote{\url{http://www.gdal.org/formats\_list.html}}. Obsahuje
 hodnoty dávkového příkonu v~daných jednotkách. (Plugin umožňuje volit
 typ jednotek).
 	\item \textbf{Trasa monitorování} \\ Trasa monitorování je
 taktéž v~souřadnicovém systému WGS84 EPSG:4326. Je vytvořena ve
 vektorovém formátu, který je podporován knihovnou
-OGR\footnote{http://www.gdal.org/ogr\_formats.html}. Trasy mohou být
+OGR\footnote{\url{http://www.gdal.org/ogr\_formats.html}}. Trasy mohou být
 generované pomocí plánovačů tras (např. společnosti Google, Inc.)
 \end{enumerate}
 
@@ -148,7 +148,7 @@ není nastaveno jako "přichycovací".
 monitoring} se skládá z~několika souborů dohromady tvořících balíček,
 který zajišťuje spustitelnost a funkcionalitu modulu. Některé soubory
 zde budou dále prezentovány. Funkcionalita zásuvného modulu
-zajišťující řešení zadání bakalářské práce je uložena v~posledních
+zajišťující řešení zadání bakalářské práce je implementována v~posledních
 dvou souborech následujícího výčtu.
 
 \begin{itemize}
@@ -182,7 +182,7 @@ tlačítko na spuštění) a dále jsou to metody \texttt{onClosePlugin} a
 Soubor zajišťuje propojení s~grafickým rozhraním, které je vytvořené
 v~souboru \textbf{ground\_radiation\_monitoring\_base.ui} pomocí
 prostředí QT Designer. Obsahuje třídu
-\texttt{GroundRadiationDockWidget} ve které jsou implementovány metody
+\texttt{GroundRadiationDockWidget}, ve které jsou implementovány metody
 pro načítání vstupních dat, čtení údajů zadaných uživatelem a
 především také pro spuštění (a případné přerušení) procesu výpočtu a
 práci s~výstupním souborem trasy (pokud si to uživatel přeje, vrstva
@@ -267,16 +267,16 @@ souřadnic bodů trasy} (ve třídě
 \texttt{getTrackVertices}), který získává souřadnice vrcholů trasy a
 na základě výpočtu vzdálenosti rozhoduje, zdali je potřeba trasu
 v~jednotlivých segmentech navzorkovat. Pokud ano, segment je ihned
-navzorkován zavoláním \texttt{navzorkujLinii} (ve třídě
+navzorkován zavoláním \texttt{navzorkujLinii} (ve třídě \\
 \texttt{GroundRadiationMonitoringComputation} jako metoda
 \texttt{sampleLine}). Výstupem algoritmu pro získání souřadnic je
 dvourozměrné pole obsahující souřadnice bodů již navzorkované
 linie. Vzdálenost mezi body je vypočtena pomocí QGIS třídy
-\texttt{QgsDistanceArea}\footnote{https://qgis.org/api/classQgsDistanceArea.html}
+\texttt{QgsDistanceArea}\footnote{\url{https://qgis.org/api/classQgsDistanceArea.html}}
 a jejích metod, výpočet je proveden na referenčním elipsoidu
 \textit{WGS84}. Extrahování souřadnic vrcholů trasy je provedeno
 pomocí QGIS třídy
-\texttt{QgsVectorLayer}\footnote{https://qgis.org/api/classQgsVectorLayer.html}
+\texttt{QgsVectorLayer}\footnote{\url{https://qgis.org/api/classQgsVectorLayer.html}}
 a její metody \texttt{getFeatures}.
 
 \begin{algorithm}
@@ -299,8 +299,8 @@ do poleNovéSouřadnice}
 Je zřejmé, že všechny nově vzniklé úseky trasy nemají stejnou
 délku. Je to dané tím, že délka původních segmentů není většinou
 dělitelná zadanou vzorkovací vzdáleností bez zbytku. Např. segment
-o~délce 10 m při vzorkovací vzdálenosti 3 m bude rozdělen celkem na
-čtyři části, z~toho tři budou o~délce 3 m a jeden o~délce 1
+o~délce 10 m při vzorkovací vzdálenosti 3~m bude rozdělen celkem na
+čtyři části, z~toho tři budou o~délce 3~m a jeden o~délce 1
 m. Následující pseudokód \ref{alg:sampleLine} popisující výpočetní
 funkci souřadnic nových bodů tuto skutečnost zohledňuje a
 ověřuje. Algoritmus vypočte souřadnice bodu, který zakončuje tu část
@@ -338,7 +338,7 @@ nástroje. Algoritmus výpočtu popisuje následující pseudokód
 \texttt{GroundRadiationMonitoringComputation} jako metoda
 \texttt{getStatistics}). Výpočtu předchází získání hodnot rastru na
 bodech. To je provedeno pomocí QGIS třídy
-\texttt{QgsDataProvider}\footnote{https://qgis.org/api/classQgsDataProvider.html}
+\texttt{QgsDataProvider}\footnote{\url{https://qgis.org/api/classQgsDataProvider.html}}
 a jejích metod (v~pseudokódu jako \texttt{získejHodnotu}). Pole se
 souřadnicemi bodů navzorkované trasy je v~pseudokódu označeno jako
 \texttt{poleBody}. Pro výpočet vzdálenosti mezi body je použita stejná
@@ -419,6 +419,10 @@ výsledných statistik, jak již bylo zmíněno, jsou počítány délka a čas
 projetí trasy mimo rastr, tj. když je hodnota rastru 0. Do průměrného
 dávkového příkonu na trase nejsou tyto hodnoty započítávané.
 
+%%% ML: pridal jsem tak, aby testovaci data zacinala az pod
+%%% pseudokodem. Pseudokod je sam o sobe hodne dlouhy, skoro by patril
+%%% do prilohy
+\clearpage
 
 \section{Testovací data} Testování zásuvného modulu při vývoji
 probíhalo s~využitím dat připravených od \zk{SÚRO}.
@@ -431,14 +435,15 @@ měření, GPS souřadnice a hodnoty dávkového příkonu záření gama
 v~$\mu$Sv/h. Kompletní dataset je dostupný ke stažení ve formátu
 \zk{CSV} na webových stránkách projektu. Dataset je uvolněn pod
 licencí CC0 1.0 Universal (CC0 1.0) Public Domain
-Dedication\footnote{https://creativecommons.org/publicdomain/zero/1.0/}.
+Dedication\footnote{\url{https://creativecommons.org/publicdomain/zero/1.0/}}.
 
 Z~balíku dat byla vybrána zájmová oblast kolem jaderné elektrárny
 Fukushima Daiichi. Data byla omezena pouze na měření z~roku
 2011. V~open source programu
-SAGA-GIS\footnote{http://www.saga-gis.org/en/index.html} byla z~dat
+SAGA-GIS\footnote{\url{http://www.saga-gis.org}} byla z~dat
 vytvořena interpolovaná mapa dávkových příkonů metodou Multilevel
 B-Spline
+%%% ML: tento odkaz bych uz neuvadel. I tak je poznamek pod caru v textu uz prilis
 Interpolation\footnote{http://www.saga-gis.org/saga\_tool\_doc/2.1.3/grid\_spline\_4.html}.
 
 \begin{figure}[H] \centering
@@ -466,3 +471,5 @@ Fukushima)}(zdroj: vlastní, data poskytnutá od SÚRO, v.v.i.)
     	\label{fig:interpolatedMap}
 \end{figure}
 
+%%% ML: Chybi mi tu ukazky vystupu a zminka, ze vlastni navod na
+%%% pouzit modulu je v priloze
