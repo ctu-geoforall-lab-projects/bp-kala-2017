@@ -1,7 +1,7 @@
 Installation
 ************
 
-Best way to install new QGIS is via QGIS plugin repository.
+Best way to install the plugin is via QGIS plugin repository.
  
 Follow these instructions:
 
@@ -21,9 +21,10 @@ http://geo.fsv.cvut.cz/geoforall/qgis-plugins.xml to ``URL`` slot.
 
    Add home repository of the plugin.
 
-.. note:: It is also required to tick ``Show also experimental plugins`` since 
-	  this plugin is distributed as experimental. In future, the plugin will 
-	  be published in the official QGIS repository.
+.. note:: It is also required to tick ``Show also experimental
+	  plugins`` since this plugin is distributed as
+	  experimental. In future, the plugin will be published in the
+	  official QGIS repository.
           
 
 3. Search for ``Ground Radiation Monitoring`` plugin on the ``All`` or 
