@@ -30,6 +30,9 @@
   
 
   
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="Ground Radiation Monitoring QGIS Plugin 0.1 documentation" href="index.html"/>
         <link rel="next" title="Acknowledgement" href="acknowledgement.html"/>
         <link rel="prev" title="Installation" href="installation.html"/> 
@@ -86,12 +89,12 @@
             
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">User Guide</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">User Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#sampling-the-track">Sampling the track</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#gui">GUI</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#input-data">Input data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#ouput-data">Ouput data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#output-data">Output data</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="acknowledgement.html">Acknowledgement</a></li>
@@ -129,7 +132,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/user_guide.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/user_guide.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -155,7 +158,7 @@ and the speed, that is given by the user. Then it is the time interval
 on each segment and the cumulative time on every vertex of the route.</p>
 <p>Also new point layer (Shapefile) is created. It contains vertices of
 the given route with data from the computation in the attribute
-table. Same data are added to csv file, that is optionally
+table. Same data are added to CSV file, that is optionally
 created.</p>
 <p>The most important output of the plugin is the text report file,
 that contains final statistics of the route, such as length,
@@ -185,13 +188,14 @@ length of them.</p>
 <p class="caption"><span class="caption-text">Figure 1: The main tab of plugin.</span></p>
 </div>
 <ul class="simple">
-<li>In main tab, the user may select a raster layer with the interpolated map
-of dose rate values. He may select a vector layer with a route. Both of those
-layer could be selected using combo boxes, which include available layers from
-the Layer panel. There is a restriction for the track combo box, that only the
-layer with a linestring type is being shown.</li>
+<li>In main tab, the user may select a raster layer with the
+interpolated map of dose rate values. He may select a vector layer
+with a route. Both of those layer could be selected using combo
+boxes, which include available layers from the Layer panel. There is
+a restriction for the track combo box, that only the layer with a
+linestring type is being shown.</li>
 <li>Plugin also allows user to upload files with raster and vector layers
-via buttons <code class="docutils literal"><span class="pre">Load</span> <span class="pre">raster</span></code> and <code class="docutils literal"><span class="pre">Load</span> <span class="pre">track</span></code>. With hiting one of these
+via buttons <code class="docutils literal"><span class="pre">Load</span> <span class="pre">raster</span></code> and <code class="docutils literal"><span class="pre">Load</span> <span class="pre">track</span></code>. With hitting one of these
 buttons, a file dialog appears. Only GDAL/OGR supported files are shown.</li>
 <li>A tool button <code class="docutils literal"><span class="pre">...</span></code> that follows <code class="docutils literal"><span class="pre">Report</span></code> line lets the user to select
 a destination, where the report file will be saved. Then the blank space
@@ -214,10 +218,11 @@ and saves created files to selected destinations.</li>
 of the interpolated map.</li>
 <li><code class="docutils literal"><span class="pre">Speed</span></code> value determines what speed the mobile team is driving. This value
 has to be given.</li>
-<li><code class="docutils literal"><span class="pre">Distance</span> <span class="pre">between</span> <span class="pre">track</span> <span class="pre">vertices</span></code> value is used for sampling the track. If this value
-is not given, the track will not be sampled.</li>
-<li><code class="docutils literal"><span class="pre">Create</span> <span class="pre">CSV</span> <span class="pre">file</span></code> checkbox gives the user an option, whether to create csv file
-with the same data, that are writen to created shapefile.</li>
+<li><code class="docutils literal"><span class="pre">Distance</span> <span class="pre">between</span> <span class="pre">track</span> <span class="pre">vertices</span></code> value is used for sampling the
+track. If this value is not given, the track will not be sampled.</li>
+<li><code class="docutils literal"><span class="pre">Create</span> <span class="pre">CSV</span> <span class="pre">file</span></code> checkbox gives the user an option, whether to
+create CSV file with the same data, that are written to created
+shapefile.</li>
 </ul>
 </li>
 <li>Settings tab is filled with values by default.</li>
@@ -235,8 +240,8 @@ with the same data, that are writen to created shapefile.</li>
 <li>A monitoring linestring route with a format supported by <a class="reference external" href="http://www.gdal.org/ogr_formats.html">OGR library</a>.</li>
 </ul>
 </div>
-<div class="section" id="ouput-data">
-<h2>Ouput data<a class="headerlink" href="#ouput-data" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="output-data">
+<h2>Output data<a class="headerlink" href="#output-data" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>A text report file containing fields:<ul>
 <li>time, when was the report created;</li>
@@ -244,7 +249,7 @@ with the same data, that are writen to created shapefile.</li>
 total distance;</li>
 <li>information about the part of the track, that has no data available
 (where the track exceeds the raster) - time, distance;</li>
-<li>estimatited radiation values - maximum and average dose rate, total dose;</li>
+<li>estimated radiation values - maximum and average dose rate, total dose;</li>
 <li>plugin settings - input raster units, distance between track vertices.</li>
 <li>a static text explaining the report</li>
 </ul>
@@ -255,20 +260,20 @@ total distance;</li>
 <p class="caption"><span class="caption-text">Figure 4: The report file.</span></p>
 </div>
 <ul class="simple">
-<li>A shapefile with point layer containg vertices of a sampled route with following
-atributes - dose rate, cumullated time, time interval from previous point,
-cumullated dose.</li>
+<li>A shapefile with point layer counting vertices of a sampled route
+with following attributes - dose rate, cumulated time, time interval
+from previous point, cumulated dose.</li>
 </ul>
 <div class="figure align-center" id="id5">
 <img alt="_images/shapefile.png" src="_images/shapefile.png" />
 <p class="caption"><span class="caption-text">Figure 5: The attribute table.</span></p>
 </div>
 <ul class="simple">
-<li>An optional csv file with same values as in created shapefile.</li>
+<li>An optional CSV file with same values as in created shapefile.</li>
 </ul>
 <div class="figure align-center" id="id6">
 <img alt="_images/csv.png" src="_images/csv.png" />
-<p class="caption"><span class="caption-text">Figure 6: The csv file.</span></p>
+<p class="caption"><span class="caption-text">Figure 6: The CSV file.</span></p>
 </div>
 </div>
 </div>

@@ -9,7 +9,8 @@ route will be the best and safest for mobile radiation monitoring
 teams for radiation monitoring during nuclear disaster emergency 
 exercises (or during the nuclear disaster itself).
 
-The plugin was created for National Radiation Protection Institute (`SURO <http://www.suro.cz>`__).
+The plugin was created for National Radiation Protection Institute
+(`SURO <http://www.suro.cz>`__).
 
 .. toctree::
    :maxdepth: 2

@@ -18,7 +18,7 @@ on each segment and the cumulative time on every vertex of the route.
 
 Also new point layer (Shapefile) is created. It contains vertices of 
 the given route with data from the computation in the attribute 
-table. Same data are added to csv file, that is optionally 
+table. Same data are added to CSV file, that is optionally 
 created.
 
 The most important output of the plugin is the text report file,
@@ -54,14 +54,15 @@ The plugin is divided into two tabs. The first of them is ``Main`` tab:
 
    The main tab of plugin.
 
-* In main tab, the user may select a raster layer with the interpolated map 
-  of dose rate values. He may select a vector layer with a route. Both of those 
-  layer could be selected using combo boxes, which include available layers from
-  the Layer panel. There is a restriction for the track combo box, that only the 
-  layer with a linestring type is being shown. 
+* In main tab, the user may select a raster layer with the
+  interpolated map of dose rate values. He may select a vector layer
+  with a route. Both of those layer could be selected using combo
+  boxes, which include available layers from the Layer panel. There is
+  a restriction for the track combo box, that only the layer with a
+  linestring type is being shown.
 
 * Plugin also allows user to upload files with raster and vector layers
-  via buttons ``Load raster`` and ``Load track``. With hiting one of these 
+  via buttons ``Load raster`` and ``Load track``. With hitting one of these 
   buttons, a file dialog appears. Only GDAL/OGR supported files are shown.
 
 * A tool button ``...`` that follows ``Report`` line lets the user to select 
@@ -90,11 +91,12 @@ The second tab of the plugin is ``Settings`` tab:
   * ``Speed`` value determines what speed the mobile team is driving. This value
     has to be given.
 
-  * ``Distance between track vertices`` value is used for sampling the track. If this value 
-    is not given, the track will not be sampled.
+  * ``Distance between track vertices`` value is used for sampling the
+    track. If this value is not given, the track will not be sampled.
 
-  * ``Create CSV file`` checkbox gives the user an option, whether to create csv file
-    with the same data, that are writen to created shapefile.
+  * ``Create CSV file`` checkbox gives the user an option, whether to
+    create CSV file with the same data, that are written to created
+    shapefile.
 
 * Settings tab is filled with values by default.
 
@@ -113,8 +115,8 @@ Input data
   <http://www.gdal.org/ogr_formats.html>`__. 
 
 
-Ouput data
-----------
+Output data
+-----------
 
 * A text report file containing fields:
 
@@ -126,7 +128,7 @@ Ouput data
   * information about the part of the track, that has no data available 
     (where the track exceeds the raster) - time, distance;
 
-  * estimatited radiation values - maximum and average dose rate, total dose;
+  * estimated radiation values - maximum and average dose rate, total dose;
 
   * plugin settings - input raster units, distance between track vertices.
 
@@ -136,17 +138,17 @@ Ouput data
 
    The report file.
 
-* A shapefile with point layer containg vertices of a sampled route with following
-  atributes - dose rate, cumullated time, time interval from previous point, 
-  cumullated dose.
+* A shapefile with point layer counting vertices of a sampled route
+  with following attributes - dose rate, cumulated time, time interval
+  from previous point, cumulated dose.
 
 .. figure:: images/shapefile.png
 
    The attribute table.
 
-* An optional csv file with same values as in created shapefile. 
+* An optional CSV file with same values as in created shapefile. 
 
 .. figure:: images/csv.png
 
-   The csv file.     
+   The CSV file.
 

@@ -30,6 +30,9 @@
   
 
   
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="Ground Radiation Monitoring QGIS Plugin 0.1 documentation" href="index.html"/>
         <link rel="next" title="User Guide" href="user_guide.html"/>
         <link rel="prev" title="Ground Radiation Monitoring QGIS Plugin’s Documentation" href="index.html"/> 
@@ -85,7 +88,7 @@
             
             
                 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user_guide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="acknowledgement.html">Acknowledgement</a></li>
 </ul>
@@ -122,7 +125,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/installation.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -134,25 +137,43 @@
             
   <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<p>Best way to install new QGIS is via QGIS plugin repository.</p>
-<p>Follow these instructions:
-1. Go to Plugins drop down menu and select Manage and Install Plugins...:</p>
+<p>Best way to install the plugin is via QGIS plugin repository.</p>
+<p>Follow these instructions:</p>
+<ol class="arabic simple">
+<li>Go to <code class="docutils literal"><span class="pre">Plugins</span></code> drop down menu and select <code class="docutils literal"><span class="pre">Manage</span> <span class="pre">and</span> <span class="pre">Install</span> <span class="pre">Plugins...</span></code>:</li>
+</ol>
 <div class="figure align-center" id="id1">
 <img alt="_images/install_plugin_dropdown.png" src="_images/install_plugin_dropdown.png" />
 <p class="caption"><span class="caption-text">Figure 1: Plugins menu.</span></p>
 </div>
-<p>2. Search for <code class="docutils literal"><span class="pre">Ground</span> <span class="pre">Radiation</span> <span class="pre">Monitoring</span></code> plugin on the <code class="docutils literal"><span class="pre">All</span></code> or
+<p>2. At this time, this plugin is not registered in the official QGIS repository,
+therefore it is required to add its home repository CTU GeoForAll Lab for it
+to be visible in the list of plugins. In order to this to be done,
+in <code class="docutils literal"><span class="pre">Settings</span></code> tab hit <code class="docutils literal"><span class="pre">Add...</span></code> button and type
+<a class="reference external" href="http://geo.fsv.cvut.cz/geoforall/qgis-plugins.xml">http://geo.fsv.cvut.cz/geoforall/qgis-plugins.xml</a> to <code class="docutils literal"><span class="pre">URL</span></code> slot.</p>
+<div class="figure align-center" id="id2">
+<img alt="_images/settings.png" src="_images/settings.png" />
+<p class="caption"><span class="caption-text">Figure 2: Add home repository of the plugin.</span></p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">It is also required to tick <code class="docutils literal"><span class="pre">Show</span> <span class="pre">also</span> <span class="pre">experimental</span>
+<span class="pre">plugins</span></code> since this plugin is distributed as
+experimental. In future, the plugin will be published in the
+official QGIS repository.</p>
+</div>
+<p>3. Search for <code class="docutils literal"><span class="pre">Ground</span> <span class="pre">Radiation</span> <span class="pre">Monitoring</span></code> plugin on the <code class="docutils literal"><span class="pre">All</span></code> or
 <code class="docutils literal"><span class="pre">Not</span> <span class="pre">installed</span></code> tab. After selecting the plugin, hit <code class="docutils literal"><span class="pre">Install</span> <span class="pre">plugin</span></code>
 button:</p>
-<div class="figure align-center" id="id2">
-<img alt="_images/install_search_plugin.png" src="_images/install_search_plugin.png" />
-<p class="caption"><span class="caption-text">Figure 2: Search and install the plugin.</span></p>
-</div>
-<p>3. The Ground Radiation Monitoring Plugin is ready to use with the icon
-appearance in the QGIS toolbar:</p>
 <div class="figure align-center" id="id3">
+<img alt="_images/install_search_plugin.png" src="_images/install_search_plugin.png" />
+<p class="caption"><span class="caption-text">Figure 3: Search and install the plugin.</span></p>
+</div>
+<p>4. The Ground Radiation Monitoring Plugin is ready to use with the icon
+appearance in the QGIS toolbar:</p>
+<div class="figure align-center" id="id4">
 <img alt="_images/install_toolbar.png" src="_images/install_toolbar.png" />
-<p class="caption"><span class="caption-text">Figure 3: Ground Radiation Monitoring Plugin on the QGIS toolbar.</span></p>
+<p class="caption"><span class="caption-text">Figure 4: Ground Radiation Monitoring Plugin on the QGIS toolbar.</span></p>
 </div>
 </div>
 
