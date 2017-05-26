@@ -7,23 +7,34 @@ ochranu v.v.i. (i~jiných institucí). Nástroj poslouží jako další
 prostředek k~zrychlení reakční doby při cvičeních radiačních havárií
 příp. při samotných radiačních haváriích a především k~zvýšení
 bezpečnosti mobilních skupin pracujících přímo v~terénu. Dále si práce
-kladla za cíl seznámit čtenáře s~dopady ionizujícího záření na lidský
+kladla za~cíl seznámit čtenáře s~dopady ionizujícího záření na lidský
 organismus a s~metodou pozemního snímání radiace.
 
-Vytvářený nástroj ze vstupní interpolované mapy dávkových příkonů gama
-záření vyextrahuje data na dané trase a spočte několik základních
-statistik. Zejména se jedná o~celkovou dávku gama záření, kterou
-mobilní skupina na trase obdrží. V~případě překročení mezních hodnot
-obdržené dávky, které již ohrožují na zdraví, je možné pomocí dalších
-výsledků výpočtu vytipovat místa na trase, kterým se vyhnout a tedy
-trasu monitorování modifikovat.
+Během pozemního monitorování dochází
+k~absorbaci škodlivých látek pracovníky \zk{MS}. Legislativou jsou
+stanoveny hodnoty, které množství absorbované dávky nesmí
+překročit. V~závislosti na bezpečnosti práce je tedy třeba plánovat
+trasy monitorování tak, aby pracovníci \zk{MS} nebyli vystaveni zdraví
+ohrožujícím dávkám.
 
-Nástroj byl s~pomocí návrhů a požadavků na úpravy od pracovníků
-\zk{SÚRO} vytvořen na míru tak, aby splnil očekávání a byl zároveň co
-nejvíce intuitivní. Nástroj byl vytvořen v~anglickém jazyce s~vidinou
-jeho využití i v~jiných než českých institucích. Zároveň byl
-v~angličtině vytvořen návod na jeho používání.
+Vytvářený softwarový nástroj má sloužit jako pomůcka k~plánování bezpečných tras
+monitorování. Dle výsledků výpočtu nástroje, tedy mimo jiné
+nakumulovaných dávek v~jednotlivých bodech trasy, může krizový štáb
+upravit trasu, případně mo\-difikovat doporučenou rychlost vozidla tak,
+aby se dlouho nezdržovalo v~simulaci vytipovaných \uv{horkých}
+místech. Jelikož hodnoty vstupující do výpočtu jsou interpolované a
+nejsou tedy exaktní, nástroj také neposkytuje exaktní výsledky a~není
+možné ho použít pro důležitá rozhodování, např. o~evakuaci
+obyvatelstva atp. Dalším využitím nástroje může být například
+plánování tras evakuace obyvatel z~vybraných oblastí při havarijním
+plánování nebo cvičení. Nástroj byl vytvořen na objednávku Státního
+ústavu radiační ochrany, v.v.i.
 
+Nástroj byl s~pomocí návrhů a~požadavků na~úpravy od~pracovníků
+\zk{SÚRO} vytvořen na~míru tak, aby splnil očekávání a~byl zároveň 
+co~nejvíce intuitivní. Nástroj byl vytvořen v~anglickém jazyce s~vidinou
+jeho využití i~v~jiných než českých institucích. Zároveň byl
+v~angličtině vytvořen návod na~jeho používání.
 
 \section{Licence a dostupnost zásuvného modulu} Zásuvný modul byl
 vytvořen pod licencí \zk{GNU GPL}, kterou podědil po QGIS knihovnách,
@@ -31,7 +42,7 @@ jež byly k~implementaci využity. Zásuvný modul je volně dostupný z~CTU
 GeoForAll Lab QGIS
 %%% ML: tady mate odkaz na online manual
 %%% ML: mluvite o Git anebo QGIS repozitari (zde by mel byt odkaz na git)
-repozitáře\footnote{\texttt{https://ctu-geoforall-lab-projects.github.io/bp-kala-2017/}}. V~budoucnu
+repozitáře\footnote{\texttt{https://github.com/ctu-geoforall-lab-projects/bp-kala-2017}}. V~budoucnu
 je dále v~plánu začlenění zásuvného modulu do oficiálního QGIS
 repozitáře.
 
