@@ -138,7 +138,7 @@ Output data
 
    The report file.
 
-* A shapefile with point layer counting vertices of a sampled route
+* A shapefile with point layer containing vertices of a sampled route
   with following attributes - dose rate, cumulated time, time interval
   from previous point, cumulated dose.
 
