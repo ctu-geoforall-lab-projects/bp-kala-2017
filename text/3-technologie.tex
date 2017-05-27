@@ -3,7 +3,7 @@
 
 V~této kapitole budou popsány technologie použité pro tvorbu
 softwarového nástroje, jež je předmětem této bakalářské
-práce. Implementace byla provedena v~programo\-vacím jazyce Python
+práce. Implementace byla provedena v~programo\-vacím jazyku Python
 s~využitím grafického frameworku PyQt a QGIS API (rozhraní pro
 programování aplikací).
 
@@ -16,7 +16,7 @@ programování aplikací).
   
 Python je objektově orientovaným skriptovacím jazykem provozovatelným
 téměř na každé platformě. Oceňován programátory (především
-začátečníky) je pro svou jednoduchou a velice efektivní syntaxi,
+začátečníky) je pro svou jednoduchou a velice efektivní syntax,
 například také díky dynamickému typování (nepožaduje specifikaci
 datového typu u~proměnných). Dále jeho objektový model podporuje
 polymorfismus, přetěžování operátorů a vícenásobnou dědičnost. 
@@ -24,16 +24,10 @@ polymorfismus, přetěžování operátorů a vícenásobnou dědičnost.
 %%% MK: radši jsem to smazal
 Díky knihovnám Python/C API lze z~programů v~Pythonu
 volat kód psaný v~C nebo naopak, pro aplikace psané v~C je možné
-integrovat interpret Pythonu.  Python bývá označován jako \uv{spustitelný
-pseudokód\footnote{Pseudokód je kompaktní
-popis počítačového algoritmu, který používá strukturální konvence
-programovacího jazyka. Vynechává některé detaily, které nejsou
-důležité pro pochopení algoritmu (deklarace proměnných atd.) Úcelem
-použití pseudokódu je právě pochopení algoritmu nezávisle na nutnosti
-znalosti specifické programovacího jazyka. \cite{pseudocode}}}
- - syntaxe se snaží vyhnout složitým zápisům a znakům ($\$,
-<<, \&\&, ?$), inspiruje se způsobem zápisu abstraktních
-algoritmů v~matematice. \cite{learningPython}
+integrovat interpret Pythonu.  Python bývá označován jako "spustitelný
+pseudokód" - syntaxe se snaží vyhnout složitým zápisům a znakům ($\$,
+<<, \&\&, ?$), inspiruje se v~matematice zápisem abstraktních
+algoritmů.\cite{learningPython}
 
 Jazyk Python byl navržen koncem 80. let nizozemským počítačovým
 programátorem Guido van Rossumem. První verzi (0.9.0) uveřejnil
@@ -46,7 +40,7 @@ by Tim Peters"}), např.:
 	\item \textit{Na čitelnosti záleží. (Readability counts.)}
 			
 	\item \textit{Chyby by nikdy neměly projít bez
-povšimnutí. Jedině pokud nejsou záměrně za\-mlčeny. (Errors should never
+povšimnutí. Jedině pokud nejsou záměrně zamlčeny. (Errors should never
 pass silently. Unless explicitly silenced.)}
 		
 	\item \textit{Měl by existovat jeden - a pokud možno pouze
@@ -54,10 +48,8 @@ jeden - zřejmý způsob jak to udělat. (There should be one - and
 preferably only one - obvious way to do it.)}
 \end{itemize}
 
-(Pro výpis anglického originálu Zenu stačí do konzole Pythonu napsat \\
-\texttt{$>>>$~\textbf{import}~this}).
-
- Od roku 2008 je vyvíjena řada
+Pro výpis anglického originálu Zenu stačí do konzole Pythonu napsat \\
+\texttt{$>>>$~\textbf{import}~this}. Od roku 2008 je vyvíjena řada
 Pythonu 3, která se snaží naplnit právě poslední ze zmiňovaných
 aforismů, kdy důraz je kladen na odstranění duplicitních programových
 konstrukcí a modulů. Python 3 není plně zpětně kompatibilní s~řadou 2,
@@ -105,8 +97,8 @@ vyvíjený jako Open Source šířený pod Obecnou veřejnou licencí GNU
 svobodu jeho sdílení a úprav, které vedou k~implementaci nových
 funkcionalit a k~jeho zdokonalení. To z~něj činí mocný nástroj
 používaný ve veřejném i soukromém sektoru. QGIS je psán
-v~programovacím jazyce C++, jeho grafické uživatelské rozhraní je
+v~programovacím jazyku C++, jeho grafické uživatelské rozhraní je
 postaveno na knihovně Qt. Projekt QGIS započal v~roce 2002, verze 1.0
 byla uveřejněna roku 2009. QGIS disponuje nepřeberným množstvím
 zásuvných modulů (pluginů) rozšiřujících funkčnost softwaru. Pluginy
-jsou programovány v~jazyce C++ nebo Python. \cite{masteringQgis}
+jsou programovány v~jazyku C++ nebo Python. \cite{masteringQgis}
