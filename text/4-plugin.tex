@@ -1,12 +1,12 @@
 \chapter[Zásuvný modul]{Zásuvný
 modul \includegraphics[scale=0.65]{./pictures/ikonka.png}\footnote{Zdroj:
-Helebrant}}
+SÚRO, v.v.i.}}
 \label{4-plugin}
 
 V~následujícím textu bude popsán postup tvorby nového softwarového
 nástroje \textit{Ground radiation monitoring} a jeho
 funkcionalita. Při vývoji nástroje bylo čerpáno z~doporučené
-literatury \cite{masteringQgis}\cite{diveIntoPython}\cite{rapidPyQt}.
+literatury \cite{masteringQgis} \cite{diveIntoPython} \cite{rapidPyQt}.
 
 \section{Zadání} Zadáním bakalářské práce bylo vytvoření softwarového
 nástroje, který ze vstupní interpolované mapy dávkových příkonů
@@ -91,7 +91,7 @@ navzorkované trasy v~m (vysvětleno v~kapitole
 			\end{itemize}
 			
 		\end{itemize}
-	
+Ukázku zprávy o výpočtu lze nalézt v obrázku \ref{fig:report}.	
 			\begin{figure}[H] \centering
       			\includegraphics[scale=0.9]{./pictures/report.png}
       				\caption[Ukázka zprávy
@@ -102,12 +102,12 @@ o~výpočtu]{Ukázka zprávy o~výpočtu (zdroj: vlastní)}
 	\item \textbf{Soubor trasy} \\ Soubor trasy obsahuje bodovou
 vrstvu ve formátu Esri Shapefile (\textit{.shp}) s~body trasy
 navzorkované dle zadání uživatele (vysvětleno v~kapitole
-\ref{subsec:vzorkovaniLinie}) s~následujícími atributy:
+\ref{subsec:vzorkovaniLinie}) s~následujícími atributy (obr. \ref{fig:atributova_tabulka})
 		\begin{itemize}
-			\item dávkový příkon
-			\item kumulativní čas
-			\item časový interval mezi body
-			\item kumulativní dávka
+			\item dávkový příkon (\textit{rate uSvh})
+			\item kumulativní čas (\textit{accTime})
+			\item časový interval mezi body (\textit{interval s})
+			\item kumulativní dávka (\textit{accDose})
 		\end{itemize}
 			\begin{figure}[H] \centering
       			\includegraphics[scale=1]{./pictures/atributova_tabulka.png}
@@ -117,7 +117,7 @@ tabulky]{Výřez atributové tabulky (zdroj: vlastní)}
   			\end{figure}
   	
   	\item \textbf{Soubor s~údaji o~trase (volitelné)} \\ V~souboru
-s~údaji o~trase ve formátu \zk{CSV} (\textit{.csv}) jsou obsaženy
+s~údaji o~trase ve formátu \zk{CSV} (\textit{.csv}) (obr. \ref{fig:csv}) jsou obsaženy
 stejné hodnoty jako v~atributové tabulce navzorkované trasy. Navíc
 soubor obsahuje souřadnice bodů. Vytvoření souboru je volitelné.
   			\begin{figure}[H] \centering
@@ -136,7 +136,7 @@ K~vytvoření základu softwarového nástroje byl použit zásuvný modul
 Plugin Builder dostupný z~oficiálního QGIS
 repozitáře.\footnote{Dostupné
 z~\url{https://plugins.qgis.org/plugins/pluginbuilder/}} Tento modul
-pochází z~dílny organizace GeoApt LLC, jež se zabývá volně šiřitelným
+pochází z~dílny organizace GeoApt LLC, jež se zabývá volně šiřitelnými
 GIS. Po zadání základních informací (název modulu, základní popis,
 autor, požadovaná verze QGIS, odkazy a další údaje o~repozitáři apod.)
 vytvoří Plugin Builder kostru nového zásuvného modulu. Tato kostra
@@ -157,7 +157,7 @@ inicializaci modulu.
 		 
 	\item \textbf{metadata.txt} \\ Tento textový soubor obsahuje
 informace o~zásuvném modulu čtené Správcem zásuvných modulů. Vedle
-údajů jako je jméno autora a název modulu je zde například také údaj
+údajů jako je jméno autora a název modulu je zde napří\-klad také údaj
 o~požadované verzi QGIS, pro kterou je modul naprogramován. Správce
 pak tento údaj porovná s~verzí QGIS a pokud dojde ke konfliktu, vypíše
 chybovou hlášku a modul nenaimportuje.
@@ -174,7 +174,7 @@ nahrání modulu do QGIS repozitáře zásuvných modulů.
 slouží pro implementaci zásuvného modulu do prostředí QGIS. Obsahuje
 třídu \texttt{GroundRadiationMonitoring}. Zásadními metodami této
 třídy jsou \texttt{add\_action} - metoda načítající ikonu modulu
-(včetně názvu) do nástrojové lišty QGIS a do menu (přidává tedy
+(včetně názvu) do nástrojové lišty QGIS a~do~menu (přidává tedy
 tlačítko na spuštění) a dále jsou to metody \texttt{onClosePlugin} a
 \texttt{unload}, které se starají o~destrukci modulu.
 
@@ -255,12 +255,7 @@ skutečnosti. (Stále se však vzhledem k~jednoduchosti výpočtu bude
 jednat pouze o~odhad).
 
 Některé segmenty mohou být kratší, než uživatelsky zadaná vzorkovací
-vzdálenost. Následující pseudokód\footnote{Pseudokód je kompaktní
-popis počítačového algoritmu, který používá strukturální konvence
-programovacího jazyka. Vynechává některé detaily, které nejsou
-důležité pro pochopení algoritmu (deklarace proměnných atd.) Úcelem
-použití pseudokódu je právě pochopení algoritmu nezávisle na nutnosti
-znalosti specifické programovacího jazyka.\cite{pseudocode}}
+vzdálenost. Následující pseudokód
 \ref{alg:getTrackVertices} popisuje algoritmus \texttt{Získání
 souřadnic bodů trasy} (ve třídě
 \texttt{GroundRadiationMonitoringComputation} jako metoda
@@ -389,8 +384,8 @@ Z~balíku dat byla vybrána zájmová oblast kolem jaderné elektrárny
 Fukushima Daiichi. Data byla omezena pouze na měření z~roku
 2011. V~open source programu
 SAGA-GIS\footnote{\url{http://www.saga-gis.org}} byla z~dat
-vytvořena interpolovaná mapa dávkových příkonů metodou Multilevel
-B-Spline
+vytvořena interpolovaná mapa dávkových příkonů (obr. \ref{fig:interpolatedMap}) 
+metodou Multilevel B-Spline
 %%% ML: tento odkaz bych uz neuvadel. I tak je poznamek pod caru v textu uz prilis
 %%% MK: smazáno
 Interpolation.
@@ -410,14 +405,14 @@ Mapy.cz a Google (jak již bylo zmíněno v~kapitole
 \ref{subsec:vstupniData}). Trasy byly vyexportovány ve formátech
 \zk{KML} a \zk{GPX}. Byly voleny tak, aby se jejich průběh co nejvíce
 přiblížil \zk{JE} Fukushima a aby byla vidět výrazná změna hodnot
-dávkových příkonů.
+dávkových příkonů. Ukázku trasy monitorování lze nalézt v obr. \ref{fig:trasa}.
 \newpage
 \begin{figure}[H] \centering
     \includegraphics[scale=0.3]{./pictures/trasa_monitorovani.png}
       	\caption[Trasa monitorování (Futaba-Nawashirogae, prefektura
 Fukushima)]{Trasa monitorování (Futaba-Nawashirogae, prefektura
 Fukushima)}(zdroj: vlastní, data poskytnutá od SÚRO, v.v.i.)
-    	\label{fig:interpolatedMap}
+    	\label{fig:trasa}
 \end{figure}
 
 %%% ML: Chybi mi tu ukazky vystupu a zminka, ze vlastni navod na
@@ -426,5 +421,5 @@ Fukushima)}(zdroj: vlastní, data poskytnutá od SÚRO, v.v.i.)
 %%% MK: Ukázky výstupu mám v podkapitole Výstupní data 
 
 \section{Návod na použití}
-K zásuvnému modulu byl vytvořen návod na použití v anglickém jazyku. 
+K zásuvnému modulu byl vytvořen návod na použití v anglickém jazyce. 
 Návod je uveden v příloze \textbf{B}. 
