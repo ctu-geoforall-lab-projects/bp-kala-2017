@@ -22,7 +22,7 @@ TODO
 
 ## Text
 
-TODO
+[michael-kala-bp-2017.pdf](https://github.com/ctu-geoforall-lab-projects/bp-kala-2017/raw/master/text/michael-kala-bp-2017.pdf)
 
 ## Testovací data
 
