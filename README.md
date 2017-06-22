@@ -14,7 +14,7 @@ Ing. Martin Landa, Ph.D.
 
 ## Oponent
 
-TODO
+Ing. Irena Češpírová
 
 ## Obhajoba
 
