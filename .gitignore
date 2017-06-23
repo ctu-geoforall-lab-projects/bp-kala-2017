@@ -106,3 +106,5 @@ ENV/
 *.loa
 *~
 *.lot
+*.nav
+prezentace/bp-kala-2017.snm
