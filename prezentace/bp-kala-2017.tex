@@ -132,7 +132,7 @@
 
 \begin{columns}
 
-\column{0.5\textwidth}
+\column{0.45\textwidth}
 	Soubor trasy (\textit{.shp}):
 	\begin{itemize}
 		\item Dávkový příkon
@@ -141,7 +141,7 @@
 		\item Kumulativní dávka
 
 	\end{itemize}
-\column{0.5\textwidth}
+\column{0.55\textwidth}
 	\begin{figure}[H] \centering
 		\includegraphics[scale=0.5]{./pictures/shapefile.png}
 	\end{figure}
@@ -181,15 +181,15 @@ Soubor s údaji o trase (volitelné, \textit{.csv}):
 \begin{figure}[H] \centering
 		\includegraphics[scale=0.55]{./pictures/gui_settings.png}
 \end{figure}
-
-
-	
 \end{columns}
+
+
 \end{frame}
 
 \begin{frame}
 \frametitle{Zásuvný modul: Řešení}
-
+\begin{columns}
+\column{0.45\textwidth}
 \begin{itemize}
 	\item Vzorkování trasy
 	\item Extrakce hodnot rastru
@@ -197,7 +197,11 @@ Soubor s údaji o trase (volitelné, \textit{.csv}):
 	\item Zápis do souborů
 	\item Testování, připomínky
 \end{itemize}
-
+\column{0.55\textwidth}
+\begin{figure}[H] \centering
+		\includegraphics[scale=0.22]{./pictures/computation.png}
+\end{figure}
+\end{columns}
 
 
 \end{frame}
@@ -210,11 +214,7 @@ Soubor s údaji o trase (volitelné, \textit{.csv}):
 	\item Zdrojový kód: \texttt{https://github.com/ ctu-geoforall-lab-projects/bp-kala-2017}
 	\item Dokumentace 
 	\item Licence GNU GPL
-	\item Plán do budoucna
-	
-
-
-	%Shrnutí (rekapitulace - co vzniklo, co je můj přínos, vznikl tento program, který se může používat takto a takto) Plán do budoucna - rozšíření o vlastní plánování trasy, v čem by se dal modul ještě použít, osobní závěr (poděkování za vstřícnost ústavu, za vedení atd.), co mi to dalo odborně 
+	\item Budoucnost - vlastní plánovač tras 
 \end{itemize}
 \end{frame}
 
@@ -224,23 +224,20 @@ Soubor s údaji o trase (volitelné, \textit{.csv}):
 
 \end{frame}
 
-\begin{frame}
-\frametitle{Otázky a odpovědi}
-Plugin je pouze v angličtině - je v plánu i překlad do češtiny?
-\begin{itemize}
-\end{itemize}
-	% Angličtina byla volena zejména kvůli možnosti využití nástroje i jinými - i zahraničními - institucemi nebo uživateli. Překlad do češtiny zatím plánovaný není, ale pokud by byl na vznešen požadavek na jazykovou lokalizaci, myslím, že by překlad zabral jeden večer.
+%\begin{frame}
+%\frametitle{Otázky a odpovědi}
+%Plugin je pouze v angličtině - je v plánu i překlad do češtiny?
+	% Angličtina byla volena zejména kvůli možnosti využití nástroje i jinými - i zahraničními - institucemi nebo uživateli. Překlad do češtiny zatím plánovaný není, ale pokud by byl na vznesen požadavek na jazykovou lokalizaci, není problém překlad vytvořit.
 
-\end{frame}
 
-\begin{frame}
-\frametitle{Otázky a odpovědi}
-Je plugin omezen na konkrétní verze QGISu?
-\end{frame}
+%\begin{frame}
+%\frametitle{Otázky a odpovědi}
+%Je plugin omezen na konkrétní verze QGISu?
+%\end{frame}
 
-\begin{frame}
-\frametitle{Otázky a odpovědi}
-Aktuálně vyžaduje plugin rastrová data ve stejném souřadnicovém systému jako plánovanou trasu (tj. WGS84 - EPSG:4326). Bylo by technicky realizovatelné přidat v případné budoucí verzi podporu i pro rastry v jiném souřadnicovém systému - např. UTM?
-\end{frame}
+%\begin{frame}
+%\frametitle{Otázky a odpovědi}
+%Aktuálně vyžaduje plugin rastrová data ve stejném souřadnicovém systému jako plánovanou trasu (tj. WGS84 - EPSG:4326). Bylo by technicky realizovatelné přidat v případné budoucí verzi podporu i pro rastry v jiném souřadnicovém systému - např. UTM?
+%\end{frame}
 
 \end{document}
