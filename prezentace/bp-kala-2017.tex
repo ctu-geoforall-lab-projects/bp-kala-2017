@@ -23,7 +23,7 @@
 \begin{itemize}
 
 	 
-	%Předmětem této bakalářské práce je implementace softwarového nástroje umožňujícího plánování optimálních tras pozemního monitorování radiace. Při únicích radioaktivních látek do ovzduší je specializovanými softwary spočtena prognóza šíření radioaktivního mraku s využitím dat změřených složkami Radiační monitorovací sítě, zejména sítí včasného zjištění nebo teritoriálními sítěmi. Jedním z produktů je také mapa dávkových příkonů záření gama pro zasaženou oblast. Vytvořený softwarový nástroj určí přibližný odhad dávky záření, kterou obrdží mobilní skupina provádějící měření na dané trase v postiženém území. V případě překročení hraničních hodnot nástroj pomůže přeplánovat trasu přes jiné komunikace příp. změnit rychlost jízdy vozidla tak, aby mobilní skupina nebyla vystavována nebezpečným dávkám. Nástroj byl vytvářen přímo pro Státní ústav radiační ochrany, který se zabývá odbornou činností v oblasti ochrany obyvatelstva před ionizujícím zářením. 
+
 	\item Softwarový nástroj
 	\item Odhad obdržené dávky gama záření na dané trase
 	\item Státní ústav radiační ochrany, v.v.i.
@@ -39,7 +39,9 @@
 	\item Použití v praxi
 	\item Předchozí spolupráce se SÚRO (Map corners coordinates)
 	\item Programování
-	%Proč jsem si to vybral (má to praktický výstup použitelný v praxi) atd., spolupráce se SÚRO (již jeden zásuvný modul předtím, map corners coordinates, s kolegyní Kulovanou)
+	
+	
+	
 \end{itemize}
 \end{frame}
 
@@ -48,78 +50,197 @@
 \section{Pozemní monitorování radiace}
 \frametitle{Pozemní monitorování radiace}
 \begin{itemize}
-	\item Dávkový příkon
+	\item Ekvivalentní dávka a dávkový příkon (\textit{[Sv], [Sv/s]})
+	\item Mobilní skupiny
 	\item Radiační havárie
-		\begin{itemize}
-			\item Časná fáze: Mapování postiženého území
-			\item Střední a pozdní fáze: Sběr vzorků
-		\end{itemize}
-	\item Havarijní připravenost
-		\begin{itemize}
-			\item Připravené trasy
-			\item Cvičení
-			\item Bezpečnost práce
-		\end{itemize}
+	\item Softwarový nástroj
+		
 
-%přeříkat nějak zkráceně, jak se monitoruje, říct o vytipovaných trasách
 \end{itemize}
 \end{frame}
 
 \begin{frame}
 \section{Technologie}
 \frametitle{Technologie}
-\begin{itemize}
-	\item QGIS
-	\item Python + PyQt
-\end{itemize}
+
+
+	
+	\begin{columns}
+		\column{0.5\textwidth}
+			\begin{figure}[H] \centering
+				\includegraphics[scale=0.12]{./pictures/qgis.png}
+			\end{figure}
+		\column{0.5\textwidth}
+			\begin{figure}[H] \centering
+				\includegraphics[scale=0.3]{./pictures/python.png}
+
+			\end{figure}
+	\end{columns}
+\begin{figure}[H] \centering	
+	\includegraphics[scale=0.035]{./pictures/pyqt.png}
+\end{figure}
+	
+
+
 \end{frame}
 
 \begin{frame}
 \section{Zásuvný modul}
 \frametitle{Zásuvný modul: Vstupní data}
+\begin{columns}
+	\column{0.5\textwidth} \centering
+		\begin{itemize}
+			\item Mapa dávkových příkonů
+		\end{itemize}
+	\column{0.5\textwidth} \centering
+		\begin{itemize}
+			\item Trasa monitorování
+		\end{itemize}
+\end{columns}
+\begin{figure}[H] \centering	
+	\includegraphics[scale=0.67]{./pictures/input.png}
+\end{figure}
 
-	 %Obrázky
-
-	 
-% Návrh, implementace, testování, Vstup (+ ukázky), výstup (+ ukázky, říct, že výstupy jsou přibližné hodnoty z důvodů zjednoduešení výpočtu, slouží informativně), práce s modulem, vzorkovaní, dokumentace, během implementace probíhalo testování na úřadě, byly zapracovány připomínky
 \end{frame}
 
 \begin{frame}
 \frametitle{Zásuvný modul: Výstupní data}
-%obrázky
+\begin{columns}
+
+\column{0.5\textwidth}
+	Zpráva o výpočtu (\textit{.txt}):
+	\begin{itemize}
+		\item Čas vytvoření zprávy
+		\item Informace o trase
+		\item Informace o části trasy bez dostupných dat
+		\item Statistické hodnoty
+		\item Nastavení
+		\item Statický text
+	\end{itemize}
+\column{0.5\textwidth}
+	\begin{figure}[H] \centering
+		\includegraphics[scale=0.35]{./pictures/report.png}
+	\end{figure}
+\end{columns}
+
+
+	
+\end{frame}
+
+\begin{frame}
+\frametitle{Zásuvný modul: Výstupní data}
+
+\begin{columns}
+
+\column{0.5\textwidth}
+	Soubor trasy (\textit{.shp}):
+	\begin{itemize}
+		\item Dávkový příkon
+		\item Kumulativní čas
+		\item Časový interval mezi body
+		\item Kumulativní dávka
+
+	\end{itemize}
+\column{0.5\textwidth}
+	\begin{figure}[H] \centering
+		\includegraphics[scale=0.5]{./pictures/shapefile.png}
+	\end{figure}
+\end{columns}
+
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Zásuvný modul: Výstupní data}
+
+Soubor s údaji o trase (volitelné, \textit{.csv}):
+
+	\begin{figure}[H] \centering
+		\includegraphics[scale=0.5]{./pictures/csv.png}
+	\end{figure}
+
+
+
 \end{frame}
 
 \begin{frame}
 \frametitle{Zásuvný modul: GUI}
+\begin{columns}
+	\column{0.5\textwidth}
+	\begin{itemize}
+		\item Hlavní okno
+	\end{itemize}
+\begin{figure}[H] \centering
+		\includegraphics[scale=0.55]{./pictures/gui_main.png}
+\end{figure}
 
+	\column{0.5\textwidth}
+	\begin{itemize}
+		\item Nastavení
+	\end{itemize}
+\begin{figure}[H] \centering
+		\includegraphics[scale=0.55]{./pictures/gui_settings.png}
+\end{figure}
+
+
+	
+\end{columns}
 \end{frame}
 
 \begin{frame}
-\frametitle{Zásuvný modul: Schéma výpočtu}
-%ten obrázek se schématem
+\frametitle{Zásuvný modul: Řešení}
 
-\end{frame}
-
-\begin{frame}
-\frametitle{Zásuvný modul: Další informace}
 \begin{itemize}
 	\item Vzorkování trasy
-	\item Dokumentace
+	\item Extrakce hodnot rastru
+	\item Výpočet
+	\item Zápis do souborů
 	\item Testování, připomínky
 \end{itemize}
-\end{frame}
 
+
+
+\end{frame}
 
 \begin{frame}
 \section{Závěr}
 \frametitle{Závěr}
 \begin{itemize}
-	\item %Shrnutí (rekapitulace - co vzniklo, co je můj přínos, vznikl tento program, který se může používat takto a takto) Plán do budoucna - rozšíření o vlastní plánování trasy, v čem by se dal modul ještě použít, osobní závěr (poděkování za vstřícnost ústavu, za vedení atd.), co mi to dalo odborně 
+	\item Rozšíření nástrojové sady SÚRO
+	\item Zdrojový kód: \texttt{https://github.com/ ctu-geoforall-lab-projects/bp-kala-2017}
+	\item Dokumentace 
+	\item Licence GNU GPL
+	\item Plán do budoucna
+	
+
+
+	%Shrnutí (rekapitulace - co vzniklo, co je můj přínos, vznikl tento program, který se může používat takto a takto) Plán do budoucna - rozšíření o vlastní plánování trasy, v čem by se dal modul ještě použít, osobní závěr (poděkování za vstřícnost ústavu, za vedení atd.), co mi to dalo odborně 
 \end{itemize}
 \end{frame}
 
 \begin{frame}
-\frametitle{Otázky oponent}
+\Huge{\centerline{Děkuji za pozornost.}}
+
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Otázky a odpovědi}
+Plugin je pouze v angličtině - je v plánu i překlad do češtiny?
+\begin{itemize}
+\end{itemize}
+	% Angličtina byla volena zejména kvůli možnosti využití nástroje i jinými - i zahraničními - institucemi nebo uživateli. Překlad do češtiny zatím plánovaný není, ale pokud by byl na vznešen požadavek na jazykovou lokalizaci, myslím, že by překlad zabral jeden večer.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Otázky a odpovědi}
+Je plugin omezen na konkrétní verze QGISu?
+\end{frame}
+
+\begin{frame}
+\frametitle{Otázky a odpovědi}
+Aktuálně vyžaduje plugin rastrová data ve stejném souřadnicovém systému jako plánovanou trasu (tj. WGS84 - EPSG:4326). Bylo by technicky realizovatelné přidat v případné budoucí verzi podporu i pro rastry v jiném souřadnicovém systému - např. UTM?
 \end{frame}
 
 \end{document}
